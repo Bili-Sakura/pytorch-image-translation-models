@@ -22,7 +22,7 @@ Issues = "https://github.com/Bili-Sakura/pytorch-image-translation-models/issues
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src"]
+include = ["src", "src.*"]
 
 [tool.setuptools.dynamic]
 version = { attr = "src.__version__" }
