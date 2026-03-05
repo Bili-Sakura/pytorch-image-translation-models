@@ -13,7 +13,7 @@ authors = [
     { name = "EarthBridge Team" },
 ]
 requires-python = ">=3.10"
-dynamic = ["dependencies"]
+dynamic = ["version", "dependencies"]
 keywords = [
     "pytorch",
     "image-translation",
@@ -67,13 +67,11 @@ Changelog = "https://github.com/Bili-Sakura/pytorch-image-translation-models/blo
 
 [tool.setuptools.dynamic]
 version = { attr = "src.__version__" }
+dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src", "src.*", "examples", "examples.*"]
-
-[tool.setuptools.dynamic.dependencies]
-file = ["requirements.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
