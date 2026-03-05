@@ -4,12 +4,17 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: publish
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +39,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: pypi
+    timeout-minutes: 15
     permissions:
       id-token: write  # trusted publishing via OIDC
     steps:
