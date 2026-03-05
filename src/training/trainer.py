@@ -182,6 +182,10 @@ class Pix2PixTrainer:
             fake = self.generator(source)
 
             loss_d = self._train_discriminator(source, target, fake)
+
+            # Recompute fake after discriminator update so the generator
+            # sees the current discriminator weights.
+            fake = self.generator(source)
             losses_g = self._train_generator(source, target, fake)
 
             # Accumulate

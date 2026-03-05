@@ -39,7 +39,7 @@ class ImageTranslator:
         self.generator = generator.to(self.device).eval()
         self.normalize = normalize
 
-        xforms: list[transforms.transforms.Transform] = [
+        transform_list: list[transforms.transforms.Transform] = [
             transforms.Resize(
                 (image_size, image_size),
                 transforms.InterpolationMode.BICUBIC,
@@ -47,8 +47,8 @@ class ImageTranslator:
             transforms.ToTensor(),
         ]
         if normalize:
-            xforms.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
-        self.transform = transforms.Compose(xforms)
+            transform_list.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+        self.transform = transforms.Compose(transform_list)
 
     # ------------------------------------------------------------------
     # Public API
