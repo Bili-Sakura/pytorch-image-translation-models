@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 class TaskConfig:
     """Configuration for an I2SB image-translation task.
 
-    Default values match the competition baseline and can be overridden
+    Default values provide a reasonable baseline and can be overridden
     by the per-task builder functions below.
     """
 
