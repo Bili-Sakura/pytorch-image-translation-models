@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pytorch-image-translation-models"
+version = "0.1.0"
 description = "PyTorch image translation models"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Bili-Sakura" }]
 requires-python = ">=3.10"
-dynamic = ["version", "dependencies"]
+dynamic = ["dependencies"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
@@ -25,5 +26,4 @@ where = ["."]
 include = ["src", "src.*"]
 
 [tool.setuptools.dynamic]
-version = { attr = "src.__version__" }
 dependencies = { file = ["requirements.txt"] }
