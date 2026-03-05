@@ -4,26 +4,80 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pytorch-image-translation-models"
-version = "0.1.0"
-description = "PyTorch image translation models"
+description = "A PyTorch library for multi-modal image translation with diffusion bridges, GANs, and transformer backbones."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "Bili-Sakura" }]
+authors = [
+    { name = "Bili-Sakura" },
+    { name = "EarthBridge Team" },
+]
 requires-python = ">=3.10"
 dynamic = ["dependencies"]
+keywords = [
+    "pytorch",
+    "image-translation",
+    "diffusion",
+    "bridge-models",
+    "remote-sensing",
+    "SAR",
+    "aerial-imagery",
+    "GAN",
+]
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+[project.optional-dependencies]
+training = [
+    "accelerate>=0.25.0",
+    "peft>=0.7.0",
+    "datasets>=2.14.0",
+    "tensorboard>=2.14.0",
+]
+metrics = [
+    "torchmetrics>=1.0.0",
+    "lpips>=0.1.4",
+    "torch-fidelity>=0.3.0",
+    "scipy>=1.10.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "ruff>=0.1.0",
+    "build",
+    "twine",
+]
+all = [
+    "pytorch-image-translation-models[training,metrics,dev]",
 ]
 
 [project.urls]
 Repository = "https://github.com/Bili-Sakura/pytorch-image-translation-models"
 Issues = "https://github.com/Bili-Sakura/pytorch-image-translation-models/issues"
+Changelog = "https://github.com/Bili-Sakura/pytorch-image-translation-models/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = { attr = "src.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src", "src.*"]
+include = ["src", "src.*", "examples", "examples.*"]
 
-[tool.setuptools.dynamic]
-dependencies = { file = ["requirements.txt"] }
+[tool.setuptools.dynamic.dependencies]
+file = ["requirements.txt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
