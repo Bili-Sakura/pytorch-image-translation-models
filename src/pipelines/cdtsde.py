@@ -185,7 +185,7 @@ class CDTSDEPipeline(DiffusionPipeline):
             images = self._convert_to_numpy(images)
 
         if not return_dict:
-            return images, nfe
+            return (images, nfe)
         return CDTSDEPipelineOutput(images=images, nfe=nfe)
 
     @staticmethod

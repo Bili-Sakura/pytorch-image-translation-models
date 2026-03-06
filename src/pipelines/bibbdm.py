@@ -105,8 +105,8 @@ class BiBBDMPipeline(DiffusionPipeline):
     def _sample_b2a(self, source, steps, clip_denoised, output_type, generator):
         """Source → Target (reverse Brownian Bridge)."""
         img = source.clone()
-        model_device = next(self.unet.parameters()).device
-        model_dtype = next(self.unet.parameters()).dtype
+        p = next(self.unet.parameters())
+        model_device, model_dtype = p.device, p.dtype
         for i in tqdm(range(len(steps)), desc="B2A sampling", total=len(steps)):
             t = torch.full(
                 (img.shape[0],), steps[i].item(), device=img.device, dtype=torch.long,
@@ -127,8 +127,8 @@ class BiBBDMPipeline(DiffusionPipeline):
     def _sample_a2b(self, target, steps, clip_denoised, output_type, generator):
         """Target → Source (forward Brownian Bridge)."""
         img = target.clone()
-        model_device = next(self.unet.parameters()).device
-        model_dtype = next(self.unet.parameters()).dtype
+        p = next(self.unet.parameters())
+        model_device, model_dtype = p.device, p.dtype
         for i in tqdm(reversed(range(len(steps))), desc="A2B sampling", total=len(steps)):
             t = torch.full(
                 (img.shape[0],), steps[i].item(), device=img.device, dtype=torch.long,
