@@ -7,6 +7,12 @@ A PyTorch library for multi-modal image translation with diffusion bridges, GANs
 
 ## Installation
 
+### Install from PyPI
+
+```bash
+pip install pytorch-image-translation-models
+```
+
 ### Install from source
 
 ```bash
