@@ -11,8 +11,7 @@ to detect and mitigate semantic misalignment between unpaired domains.
 from __future__ import annotations
 
 import itertools
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 import torch
 import torch.nn as nn

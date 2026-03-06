@@ -41,6 +41,7 @@ pip install -e ".[all]"
 
 - **GAN generators** — `UNetGenerator` (encoder-decoder with skip connections), `ResNetGenerator` (residual blocks)
 - **GAN discriminators** — `PatchGANDiscriminator` (Markovian patch-level classifier)
+- **StegoGAN** — `ResnetMaskV1Generator`, `ResnetMaskV3Generator`, `NetMatchability` (steganographic masking for non-bijective translation, CVPR 2024)
 - **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net for Image-to-Image Schrödinger Bridge)
 - **DiT backbone** — `SiTBackbone` (Scalable Interpolant Transformer for diffusion bridges)
 
@@ -83,6 +84,7 @@ All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 ### Training
 
 - `Pix2PixTrainer` — Paired GAN training with checkpoint save/load
+- `StegoGANTrainer` — StegoGAN unpaired training with steganographic masking and consistency losses
 - `I2SBTrainer` — I2SB bridge model training (in `examples/i2sb/`)
 
 ### Metrics
@@ -207,6 +209,22 @@ loss = I2SBTrainer.compute_training_loss(model, scheduler, source_batch, target_
 loss.backward()
 ```
 
+### StegoGAN non-bijective translation
+
+```python
+from src.training import StegoGANTrainer, StegoGANConfig
+
+cfg = StegoGANConfig(
+    input_nc=3, output_nc=3, ngf=64,
+    lambda_reg=0.3, lambda_consistency=1.0,
+    resnet_layer=8, fusionblock=True,
+    device="cuda",
+)
+trainer = StegoGANTrainer(cfg)
+# Run a single training step with unpaired data
+losses = trainer.train_step(real_A_batch, real_B_batch)
+```
+
 ## Package Structure
 
 ```
@@ -218,8 +236,11 @@ src/
 │   ├── unet/                # ADM-style U-Net for I2SB
 │   │   ├── i2sb_unet.py     # I2SBUNet
 │   │   └── unet_2d.py       # create_model factory
-│   └── dit/                 # DiT (Diffusion Transformer) backbones
-│       └── sit.py           # SiTBackbone
+│   ├── dit/                 # DiT (Diffusion Transformer) backbones
+│   │   └── sit.py           # SiTBackbone
+│   └── stegogan/            # StegoGAN (CVPR 2024) architectures
+│       ├── generators.py    # ResnetMaskV1Generator, ResnetMaskV3Generator
+│       └── networks.py      # NetMatchability, mask_generate, ResnetBlock
 ├── schedulers/
 │   ├── i2sb.py              # I2SBScheduler
 │   ├── ddbm.py              # DDBMScheduler
@@ -245,7 +266,8 @@ src/
 │   ├── adversarial.py       # GANLoss
 │   └── perceptual.py        # PerceptualLoss
 ├── training/
-│   └── trainer.py           # Pix2PixTrainer, TrainingConfig
+│   ├── trainer.py           # Pix2PixTrainer, TrainingConfig
+│   └── stegogan_trainer.py  # StegoGANTrainer, StegoGANConfig
 ├── inference/
 │   └── predictor.py         # ImageTranslator
 └── metrics/
@@ -271,6 +293,7 @@ examples/
 - [DBIM: Diffusion Bridge Implicit Models (2024)](https://arxiv.org/abs/2405.15885)
 - [LBM: Latent Bridge Matching for Fast Image-to-Image Translation (2025)](https://arxiv.org/abs/2503.07535)
 - [SiT: Exploring Flow and Diffusion-based Generative Models with Scalable Interpolant Transformers (2024)](https://arxiv.org/abs/2401.08740)
+- [StegoGAN: Leveraging Steganography for Non-Bijective Image-to-Image Translation (CVPR 2024)](https://openaccess.thecvf.com/content/CVPR2024/papers/Wu_StegoGAN_Leveraging_Steganography_for_Non-Bijective_Image-to-Image_Translation_CVPR_2024_paper.pdf)
 - [CUT: Contrastive Unpaired Translation (ECCV 2020)](https://link.springer.com/chapter/10.1007/978-3-030-58545-7_19)
 - [CycleGAN (ICCV 2017)](https://openaccess.thecvf.com/content_iccv_2017/html/Zhu_Unpaired_Image-To-Image_Translation_ICCV_2017_paper.html)
 - [img2img-turbo (2024)](https://doi.org/10.48550/arXiv.2403.12036)

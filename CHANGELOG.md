@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-03-06
+
+### Added
+
+- **StegoGAN integration** (Wu et al., CVPR 2024): non-bijective image-to-image translation with steganographic masking.
+  - `ResnetMaskV1Generator` (`G_A`): ResNet generator with optional steganographic feature injection.
+  - `ResnetMaskV3Generator` (`G_B`): ResNet generator with per-pixel matchability masking via `NetMatchability`.
+  - Helper modules: `NetMatchability`, `mask_generate`, `ResnetBlock`, `SoftClamp`.
+  - `StegoGANTrainer` and `StegoGANConfig` for end-to-end training with cycle, identity, consistency, and mask regularisation losses.
+  - Tests for all new StegoGAN components (19 test cases).
+
+### Changed
+
+- **Refactored I2SB code duplication**: the standalone `examples/pipelines/i2sb/pipeline.py` now imports the core `I2SBScheduler` from `src.schedulers.i2sb` instead of re-implementing ~120 lines of scheduler math.
+- Added `clip_denoise` parameter to `I2SBScheduler.compute_pred_x0()`.
+- Updated package exports to include StegoGAN models and trainer.
+
 ## [0.1.1] - 2026-03-06
 
 ### Changed
@@ -32,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.2
 [0.1.1]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.1
 [0.1.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.0
