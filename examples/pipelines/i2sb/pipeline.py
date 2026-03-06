@@ -4,7 +4,8 @@
 # Copyright 2024 The I2SB Authors and The Hugging Face Team.
 # Licensed under the Apache License, Version 2.0.
 #
-# Self-contained I2SB pipeline for production inference - no external project code.
+# Diffusers-compatible I2SB pipeline for production inference.
+# Core scheduler logic is imported from src.schedulers.i2sb to avoid duplication.
 
 from __future__ import annotations
 
@@ -19,11 +20,13 @@ from tqdm.auto import tqdm
 from diffusers import DiffusionPipeline, ModelMixin, UNet2DModel
 from diffusers.configuration_utils import ConfigMixin, register_to_config
 from diffusers.utils import BaseOutput
-from diffusers.schedulers.scheduling_utils import SchedulerMixin
+
+# Re-use the core I2SBScheduler to avoid code duplication.
+from src.schedulers.i2sb import I2SBScheduler  # noqa: F401
 
 
 # ---------------------------------------------------------------------------
-# I2SBUNet
+# I2SBUNet  (diffusers-compatible wrapper – unique to this module)
 # ---------------------------------------------------------------------------
 
 
@@ -111,113 +114,6 @@ class I2SBUNet(ModelMixin, ConfigMixin):
 
 
 # ---------------------------------------------------------------------------
-# I2SBScheduler
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class I2SBSchedulerOutput(BaseOutput):
-    prev_sample: torch.Tensor
-    pred_original_sample: Optional[torch.Tensor] = None
-
-
-def _make_beta_schedule(n_timestep: int, linear_start: float = 1e-4, linear_end: float = 2e-2) -> np.ndarray:
-    betas = np.linspace(linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=np.float64) ** 2
-    return betas
-
-
-class I2SBScheduler(SchedulerMixin, ConfigMixin):
-    """Scheduler for Image-to-Image Schrödinger Bridge (I2SB)."""
-
-    _compatibles = []
-    order = 1
-
-    @register_to_config
-    def __init__(
-        self,
-        interval: int = 1000,
-        beta_max: float = 0.3,
-        t0: float = 1e-4,
-        T: float = 1.0,
-    ):
-        self.interval = interval
-        linear_end = beta_max / interval
-        betas = _make_beta_schedule(interval, linear_start=1e-4, linear_end=linear_end)
-        half = interval // 2
-        betas = np.concatenate([betas[:half], betas[:half][::-1]])
-        std_fwd = np.sqrt(np.cumsum(betas))
-        std_bwd = np.sqrt(np.flip(np.cumsum(np.flip(betas))))
-        denom = std_fwd ** 2 + std_bwd ** 2
-        mu_x0 = std_bwd ** 2 / denom
-        mu_x1 = std_fwd ** 2 / denom
-        var = (std_fwd ** 2 * std_bwd ** 2) / denom
-        std_sb = np.sqrt(var)
-        self.betas = torch.from_numpy(betas).float()
-        self.std_fwd = torch.from_numpy(std_fwd).float()
-        self.std_bwd = torch.from_numpy(std_bwd).float()
-        self.mu_x0 = torch.from_numpy(mu_x0).float()
-        self.mu_x1 = torch.from_numpy(mu_x1).float()
-        self.std_sb = torch.from_numpy(std_sb).float()
-        self.timesteps: Optional[torch.Tensor] = None
-        self.num_inference_steps: Optional[int] = None
-
-    def compute_pred_x0(
-        self,
-        step,
-        xt: torch.Tensor,
-        net_out: torch.Tensor,
-        clip_denoise: bool = False,
-    ) -> torch.Tensor:
-        device = xt.device
-        batch_size = xt.shape[0]
-        if not isinstance(step, torch.Tensor):
-            step = torch.full((batch_size,), step, device=device, dtype=torch.long)
-        std_fwd_t = self.std_fwd.to(device)[step].view(batch_size, 1, 1, 1)
-        pred_x0 = xt - std_fwd_t * net_out
-        if clip_denoise:
-            pred_x0 = pred_x0.clamp(-1, 1)
-        return pred_x0
-
-    def p_posterior(
-        self,
-        nprev,
-        n,
-        x_n: torch.Tensor,
-        x0: torch.Tensor,
-        ot_ode: bool = False,
-    ) -> torch.Tensor:
-        device = x_n.device
-        batch_size = x_n.shape[0]
-        if not isinstance(n, torch.Tensor):
-            n = torch.full((batch_size,), n, device=device, dtype=torch.long)
-        if not isinstance(nprev, torch.Tensor):
-            nprev = torch.full((batch_size,), nprev, device=device, dtype=torch.long)
-        n = n.reshape(-1)
-        nprev = nprev.reshape(-1)
-        if n.numel() == 1:
-            n = n.expand(batch_size)
-        if nprev.numel() == 1:
-            nprev = nprev.expand(batch_size)
-        std_fwd_n = self.std_fwd.to(device)[n].view(batch_size, 1, 1, 1)
-        std_fwd_nprev = self.std_fwd.to(device)[nprev].view(batch_size, 1, 1, 1)
-        std_delta = (std_fwd_n ** 2 - std_fwd_nprev ** 2).sqrt()
-        mu = (std_fwd_nprev ** 2) / (std_fwd_n ** 2) * x_n + (std_delta ** 2) / (std_fwd_n ** 2) * x0
-        if ot_ode:
-            return mu
-        var = (std_fwd_nprev ** 2 * std_delta ** 2) / (std_fwd_n ** 2)
-        noise = torch.randn_like(x_n)
-        return mu + var.sqrt() * noise
-
-    def set_timesteps(self, nfe: int, device=None):
-        self.num_inference_steps = nfe
-        steps = torch.linspace(0, self.interval - 1, nfe + 1, device=device).long()
-        self.timesteps = steps
-
-    def scale_model_input(self, sample: torch.Tensor, timestep: Optional[int] = None) -> torch.Tensor:
-        return sample
-
-
-# ---------------------------------------------------------------------------
 # I2SBPipeline
 # ---------------------------------------------------------------------------
 
@@ -229,13 +125,21 @@ class I2SBPipelineOutput(BaseOutput):
 
 
 class I2SBPipeline(DiffusionPipeline):
-    """Pipeline for image-to-image generation using Image-to-Image Schrödinger Bridge."""
+    """Pipeline for image-to-image generation using Image-to-Image Schrödinger Bridge.
+
+    Uses the core ``I2SBScheduler`` from ``src.schedulers.i2sb`` to avoid
+    duplicating scheduler logic.
+    """
 
     model_cpu_offload_seq = "unet"
 
     def __init__(self, unet: I2SBUNet, scheduler: I2SBScheduler):
         super().__init__()
-        self.register_modules(unet=unet, scheduler=scheduler)
+        # Only register the diffusers-compatible UNet module.  The core
+        # I2SBScheduler is stored as a plain attribute because it does not
+        # inherit from diffusers SchedulerMixin.
+        self.register_modules(unet=unet)
+        self.scheduler = scheduler
 
     @property
     def device(self) -> torch.device:
@@ -289,13 +193,14 @@ class I2SBPipeline(DiffusionPipeline):
         dtype = self.dtype
         x1 = self.prepare_inputs(source_image, device, dtype)
         batch_size = x1.shape[0]
-        self.scheduler.set_timesteps(nfe, device=device)
-        steps = self.scheduler.timesteps
+
+        self.scheduler.set_timesteps(nfe)
+        # Core scheduler returns descending timesteps: [interval-1 … 0]
+        steps = self.scheduler.timesteps.to(device)
+
         xt = x1.clone()
-        interval = self.scheduler.config.interval
-        t0_val = self.scheduler.config.t0
-        T_val = self.scheduler.config.T
-        noise_levels = torch.linspace(t0_val, T_val, interval, device=device, dtype=dtype)
+        interval = self.scheduler.interval
+        noise_levels = torch.linspace(1e-4, 1.0, interval, device=device, dtype=dtype)
         has_condition = hasattr(self.unet, "condition_mode") and self.unet.condition_mode == "concat"
         cond = x1 if has_condition else None
         num_steps = len(steps) - 1
@@ -303,15 +208,15 @@ class I2SBPipeline(DiffusionPipeline):
         nfe_count = 0
 
         for i in progress_bar:
-            step = steps[num_steps - i]
-            prev_step = steps[num_steps - i - 1]
-            step_int = step.item() if isinstance(step, torch.Tensor) else step
+            step = steps[i]
+            prev_step = steps[i + 1]
+            step_int = step.item()
             t_emb = noise_levels[step_int] * interval
             t_batch = torch.full((batch_size,), t_emb, device=device, dtype=dtype)
             pred = self.unet(xt, t_batch, cond=cond)
             nfe_count += 1
             pred_x0 = self.scheduler.compute_pred_x0(step_int, xt, pred, clip_denoise=clip_denoise)
-            xt = self.scheduler.p_posterior(prev_step, step, xt, pred_x0, ot_ode=ot_ode)
+            xt = self.scheduler.p_posterior(prev_step.item(), step_int, xt, pred_x0, ot_ode=ot_ode)
             if callback is not None and i % callback_steps == 0:
                 callback(i, num_steps, xt)
 

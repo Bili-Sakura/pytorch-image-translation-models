@@ -3,6 +3,7 @@
 
 """I2SB (Image-to-Image Schrödinger Bridge) self-contained pipeline."""
 
-from .pipeline import I2SBPipeline, I2SBPipelineOutput, I2SBUNet, I2SBScheduler
+from .pipeline import I2SBPipeline, I2SBPipelineOutput, I2SBUNet
+from src.schedulers.i2sb import I2SBScheduler  # re-export core scheduler
 
 __all__ = ["I2SBPipeline", "I2SBPipelineOutput", "I2SBUNet", "I2SBScheduler"]

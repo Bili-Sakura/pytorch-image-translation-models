@@ -114,16 +114,25 @@ class I2SBScheduler:
         step: torch.Tensor | int,
         xt: torch.Tensor,
         net_out: torch.Tensor,
+        clip_denoise: bool = False,
     ) -> torch.Tensor:
         """Convert the network noise prediction back to an ``x_0`` estimate.
 
         Returns ``x_t − σ_fwd(t) · net_out``.
+
+        Parameters
+        ----------
+        clip_denoise : bool
+            If ``True``, clamp the prediction to ``[-1, 1]``.
         """
         if isinstance(step, int):
             step = torch.tensor([step])
         dims = [step.shape[0]] + [1] * (xt.dim() - 1)
         std_t = self.std_fwd[step].view(*dims).to(xt.device)
-        return xt - std_t * net_out
+        pred_x0 = xt - std_t * net_out
+        if clip_denoise:
+            pred_x0 = pred_x0.clamp(-1, 1)
+        return pred_x0
 
     # ------------------------------------------------------------------
     # Reverse (inference) helpers
