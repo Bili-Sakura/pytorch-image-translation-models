@@ -11,6 +11,7 @@ from src.inference import ImageTranslator
 from src.losses import GANLoss, PerceptualLoss
 from src.metrics import compute_fid, compute_lpips, compute_psnr, compute_ssim
 from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
+from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchability
 from src.pipelines import (
     BDBMPipeline,
     BDBMPipelineOutput,
@@ -47,7 +48,7 @@ from src.schedulers import (
     LBMScheduler,
     LBMSchedulerOutput,
 )
-from src.training import Pix2PixTrainer
+from src.training import Pix2PixTrainer, StegoGANTrainer, StegoGANConfig
 
 __all__ = [
     # Models
@@ -57,6 +58,9 @@ __all__ = [
     "I2SBUNet",
     "SiTBackbone",
     "SIT_CONFIGS",
+    "ResnetMaskV1Generator",
+    "ResnetMaskV3Generator",
+    "NetMatchability",
     # Schedulers
     "BDBMScheduler",
     "BDBMSchedulerOutput",
@@ -101,6 +105,8 @@ __all__ = [
     "PerceptualLoss",
     # Training
     "Pix2PixTrainer",
+    "StegoGANTrainer",
+    "StegoGANConfig",
     # Inference
     "ImageTranslator",
     # Metrics
