@@ -1,6 +1,6 @@
 # pytorch-image-translation-models
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) ![PyPI version](https://img.shields.io/pypi/v/pytorch-image-translation-models.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![PyPI version](https://img.shields.io/pypi/v/pytorch-image-translation-models.svg)](https://pypi.org/project/pytorch-image-translation-models/)
 
 A PyTorch library for multi-modal image translation with diffusion bridges, GANs, and transformer backbones.
 
