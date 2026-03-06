@@ -225,6 +225,7 @@ class DDBMScheduler(SchedulerMixin, ConfigMixin):
         timestep: int,
         sample: torch.Tensor,
         x_T: torch.Tensor,
+        guidance: float = 1.0,
         return_dict: bool = True,
     ) -> Union[DDBMSchedulerOutput, Tuple]:
         """Perform a single Euler step of the bridge probability-flow ODE.
@@ -239,6 +240,8 @@ class DDBMScheduler(SchedulerMixin, ConfigMixin):
             Current noisy sample ``x_t``.
         x_T : torch.Tensor
             Source (endpoint) sample that anchors the bridge.
+        guidance : float
+            Scale factor for the ODE derivative (default 1.0).
         return_dict : bool
             If ``True``, return a :class:`DDBMSchedulerOutput`.
 
@@ -257,7 +260,7 @@ class DDBMScheduler(SchedulerMixin, ConfigMixin):
             d = self._ve_ode_derivative(sample, denoised, sigma_cur, x_T)
 
         dt = sigma_next - sigma_cur
-        prev_sample = sample + d * dt
+        prev_sample = sample + guidance * d * dt
 
         if not return_dict:
             return (prev_sample, denoised)
@@ -273,6 +276,7 @@ class DDBMScheduler(SchedulerMixin, ConfigMixin):
         timestep: int,
         sample: torch.Tensor,
         x_T: torch.Tensor,
+        guidance: float = 1.0,
         return_dict: bool = True,
     ) -> Union[DDBMSchedulerOutput, Tuple]:
         """Perform a full Heun (improved Euler) step with two evaluations.
@@ -292,6 +296,8 @@ class DDBMScheduler(SchedulerMixin, ConfigMixin):
             Current noisy sample ``x_t``.
         x_T : torch.Tensor
             Source (endpoint) sample that anchors the bridge.
+        guidance : float
+            Scale factor for the ODE derivative (default 1.0).
         return_dict : bool
             If ``True``, return a :class:`DDBMSchedulerOutput`.
 
@@ -308,7 +314,7 @@ class DDBMScheduler(SchedulerMixin, ConfigMixin):
             d1 = self._ve_ode_derivative(sample, denoised_1, sigma_cur, x_T)
 
         dt = sigma_next - sigma_cur
-        x_euler = sample + d1 * dt
+        x_euler = sample + guidance * d1 * dt
 
         if sigma_next.item() == 0:
             prev_sample = x_euler
@@ -319,7 +325,7 @@ class DDBMScheduler(SchedulerMixin, ConfigMixin):
                 d2 = self._ve_ode_derivative(x_euler, denoised_2, sigma_next, x_T)
 
             d_avg = (d1 + d2) / 2.0
-            prev_sample = sample + d_avg * dt
+            prev_sample = sample + guidance * d_avg * dt
 
         if not return_dict:
             return (prev_sample, denoised_1)

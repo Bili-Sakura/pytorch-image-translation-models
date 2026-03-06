@@ -2,7 +2,9 @@
 # Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 
 """Tests for DiT backbone (SiTBackbone), LBM scheduler, LBM pipeline,
-and the new self-contained example pipelines (BDBM, DBIM, CDTSDE, LBM).
+and diffusers UNet wrappers (BDBM, DBIM, CDTSDE, LBM).
+
+All components are imported from ``src/`` (no duplicate code in examples/).
 """
 
 import pytest
@@ -158,14 +160,16 @@ class TestLBMPipelineImports:
 
 
 # ---------------------------------------------------------------------------
-# Self-contained example pipeline tests: BDBM
+# UNet wrapper + pipeline tests: BDBM
 # ---------------------------------------------------------------------------
 
 
-class TestBDBMExamplePipeline:
+class TestBDBMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from examples.pipelines.bdbm.pipeline import BDBMPipeline, BDBMUNet, BDBMScheduler
+        from src.models.unet.diffusers_wrappers import BDBMUNet
+        from src.schedulers.bdbm import BDBMScheduler
+        from src.pipelines.bdbm import BDBMPipeline
 
         unet = BDBMUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -175,7 +179,7 @@ class TestBDBMExamplePipeline:
         return BDBMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from examples.pipelines.bdbm.pipeline import BDBMUNet
+        from src.models.unet.diffusers_wrappers import BDBMUNet
 
         unet = BDBMUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -210,14 +214,16 @@ class TestBDBMExamplePipeline:
 
 
 # ---------------------------------------------------------------------------
-# Self-contained example pipeline tests: DBIM
+# UNet wrapper + pipeline tests: DBIM
 # ---------------------------------------------------------------------------
 
 
-class TestDBIMExamplePipeline:
+class TestDBIMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from examples.pipelines.dbim.pipeline import DBIMPipeline, DBIMUNet, DBIMScheduler
+        from src.models.unet.diffusers_wrappers import DBIMUNet
+        from src.schedulers.dbim import DBIMScheduler
+        from src.pipelines.dbim import DBIMPipeline
 
         unet = DBIMUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -227,7 +233,7 @@ class TestDBIMExamplePipeline:
         return DBIMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from examples.pipelines.dbim.pipeline import DBIMUNet
+        from src.models.unet.diffusers_wrappers import DBIMUNet
 
         unet = DBIMUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -253,14 +259,16 @@ class TestDBIMExamplePipeline:
 
 
 # ---------------------------------------------------------------------------
-# Self-contained example pipeline tests: CDTSDE
+# UNet wrapper + pipeline tests: CDTSDE
 # ---------------------------------------------------------------------------
 
 
-class TestCDTSDEExamplePipeline:
+class TestCDTSDEPipeline:
     @pytest.fixture
     def pipeline(self):
-        from examples.pipelines.cdtsde.pipeline import CDTSDEPipeline, CDTSDEUNet, CDTSDEScheduler
+        from src.models.unet.diffusers_wrappers import CDTSDEUNet
+        from src.schedulers.cdtsde import CDTSDEScheduler
+        from src.pipelines.cdtsde import CDTSDEPipeline
 
         unet = CDTSDEUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -270,7 +278,7 @@ class TestCDTSDEExamplePipeline:
         return CDTSDEPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from examples.pipelines.cdtsde.pipeline import CDTSDEUNet
+        from src.models.unet.diffusers_wrappers import CDTSDEUNet
 
         unet = CDTSDEUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -296,14 +304,16 @@ class TestCDTSDEExamplePipeline:
 
 
 # ---------------------------------------------------------------------------
-# Self-contained example pipeline tests: LBM
+# UNet wrapper + pipeline tests: LBM
 # ---------------------------------------------------------------------------
 
 
-class TestLBMExamplePipeline:
+class TestLBMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from examples.pipelines.lbm.pipeline import LBMPipeline, LBMUNet, LBMScheduler
+        from src.models.unet.diffusers_wrappers import LBMUNet
+        from src.schedulers.lbm import LBMScheduler
+        from src.pipelines.lbm import LBMPipeline
 
         unet = LBMUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -313,7 +323,7 @@ class TestLBMExamplePipeline:
         return LBMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from examples.pipelines.lbm.pipeline import LBMUNet
+        from src.models.unet.diffusers_wrappers import LBMUNet
 
         unet = LBMUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -326,7 +336,7 @@ class TestLBMExamplePipeline:
         assert out.shape == (2, 3, 32, 32)
 
     def test_scheduler_set_timesteps(self):
-        from examples.pipelines.lbm.pipeline import LBMScheduler
+        from src.schedulers.lbm import LBMScheduler
 
         scheduler = LBMScheduler()
         scheduler.set_timesteps(5)

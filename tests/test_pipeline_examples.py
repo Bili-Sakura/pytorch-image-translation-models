@@ -1,10 +1,12 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 
-"""Tests for the self-contained pipeline examples.
+"""Tests for the pipeline components (models, schedulers, pipelines).
 
-Validates that each pipeline (DDBM, DDIB, BiBBDM, I2SB) can be instantiated
+Validates that each method (DDBM, DDIB, BiBBDM, I2SB) can be instantiated
 and run end-to-end with synthetic tensors — no real checkpoints needed.
+
+All components are imported from ``src/`` (no duplicate code in examples/).
 """
 
 import pytest
@@ -20,11 +22,9 @@ import numpy as np
 class TestDDBMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from examples.pipelines.ddbm.pipeline import (
-            DDBMPipeline,
-            DDBMUNet,
-            DDBMScheduler,
-        )
+        from src.models.unet.diffusers_wrappers import DDBMUNet
+        from src.schedulers.ddbm import DDBMScheduler
+        from src.pipelines.ddbm import DDBMPipeline
 
         unet = DDBMUNet(
             image_size=32,
@@ -38,7 +38,7 @@ class TestDDBMPipeline:
         return DDBMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from examples.pipelines.ddbm.pipeline import DDBMUNet
+        from src.models.unet.diffusers_wrappers import DDBMUNet
 
         unet = DDBMUNet(
             image_size=32,
@@ -55,7 +55,7 @@ class TestDDBMPipeline:
         assert out.shape == (2, 3, 32, 32)
 
     def test_scheduler_set_timesteps(self):
-        from examples.pipelines.ddbm.pipeline import DDBMScheduler
+        from src.schedulers.ddbm import DDBMScheduler
 
         scheduler = DDBMScheduler(num_train_timesteps=40)
         scheduler.set_timesteps(10)
@@ -63,7 +63,7 @@ class TestDDBMPipeline:
         assert len(scheduler.sigmas) == 11  # steps + 1 (appended zero)
 
     def test_pipeline_pt_output(self, pipeline):
-        from examples.pipelines.ddbm.pipeline import DDBMPipelineOutput
+        from src.pipelines.ddbm import DDBMPipelineOutput
 
         source = torch.randn(1, 3, 32, 32)
         result = pipeline(source, num_inference_steps=3, output_type="pt")
@@ -92,11 +92,9 @@ class TestDDBMPipeline:
 class TestDDIBPipeline:
     @pytest.fixture
     def pipeline(self):
-        from examples.pipelines.ddib.pipeline import (
-            DDIBPipeline,
-            DDIBUNet,
-            DDIBScheduler,
-        )
+        from src.models.unet.diffusers_wrappers import DDIBUNet
+        from src.schedulers.ddib import DDIBScheduler
+        from src.pipelines.ddib import DDIBPipeline
 
         source_unet = DDIBUNet(
             image_size=32,
@@ -120,7 +118,7 @@ class TestDDIBPipeline:
         )
 
     def test_unet_forward(self):
-        from examples.pipelines.ddib.pipeline import DDIBUNet
+        from src.models.unet.diffusers_wrappers import DDIBUNet
 
         unet = DDIBUNet(
             image_size=32,
@@ -135,7 +133,7 @@ class TestDDIBPipeline:
         assert out.shape == (2, 3, 32, 32)
 
     def test_scheduler_set_timesteps(self):
-        from examples.pipelines.ddib.pipeline import DDIBScheduler
+        from src.schedulers.ddib import DDIBScheduler
 
         scheduler = DDIBScheduler(num_train_timesteps=100)
         scheduler.set_timesteps(10)
@@ -143,7 +141,7 @@ class TestDDIBPipeline:
         assert len(scheduler.timesteps) == 10
 
     def test_scheduler_ddim_step(self):
-        from examples.pipelines.ddib.pipeline import DDIBScheduler
+        from src.schedulers.ddib import DDIBScheduler
 
         scheduler = DDIBScheduler(num_train_timesteps=100)
         scheduler.set_timesteps(10)
@@ -155,7 +153,7 @@ class TestDDIBPipeline:
         assert result.prev_sample.shape == sample.shape
 
     def test_pipeline_pt_output(self, pipeline):
-        from examples.pipelines.ddib.pipeline import DDIBPipelineOutput
+        from src.pipelines.ddib import DDIBPipelineOutput
 
         source = torch.randn(1, 3, 32, 32)
         result = pipeline(source, num_inference_steps=5, output_type="pt")
@@ -182,11 +180,9 @@ class TestDDIBPipeline:
 class TestBiBBDMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from examples.pipelines.bibbdm.pipeline import (
-            BiBBDMPipeline,
-            BiBBDMUNet,
-            BiBBDMScheduler,
-        )
+        from src.models.unet.diffusers_wrappers import BiBBDMUNet
+        from src.schedulers.bibbdm import BiBBDMScheduler
+        from src.pipelines.bibbdm import BiBBDMPipeline
 
         unet = BiBBDMUNet(
             image_size=32,
@@ -202,7 +198,7 @@ class TestBiBBDMPipeline:
         return BiBBDMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from examples.pipelines.bibbdm.pipeline import BiBBDMUNet
+        from src.models.unet.diffusers_wrappers import BiBBDMUNet
 
         unet = BiBBDMUNet(
             image_size=32,
@@ -219,7 +215,7 @@ class TestBiBBDMPipeline:
         assert out.shape == (2, 3, 32, 32)
 
     def test_scheduler_register_schedule(self):
-        from examples.pipelines.bibbdm.pipeline import BiBBDMScheduler
+        from src.schedulers.bibbdm import BiBBDMScheduler
 
         scheduler = BiBBDMScheduler(num_timesteps=100)
         assert scheduler.m_t is not None
@@ -227,14 +223,14 @@ class TestBiBBDMPipeline:
         assert len(scheduler.m_t) == 100
 
     def test_scheduler_set_timesteps(self):
-        from examples.pipelines.bibbdm.pipeline import BiBBDMScheduler
+        from src.schedulers.bibbdm import BiBBDMScheduler
 
         scheduler = BiBBDMScheduler(num_timesteps=100, sample_step=10)
         scheduler.set_timesteps(20)
         assert scheduler.steps is not None
 
     def test_pipeline_b2a(self, pipeline):
-        from examples.pipelines.bibbdm.pipeline import BiBBDMPipelineOutput
+        from src.pipelines.bibbdm import BiBBDMPipelineOutput
 
         source = torch.randn(1, 3, 32, 32)
         result = pipeline(source, direction="b2a", output_type="pt")
@@ -259,20 +255,18 @@ class TestBiBBDMPipeline:
 
 
 # ---------------------------------------------------------------------------
-# I2SB self-contained pipeline tests
+# I2SB pipeline tests
 # ---------------------------------------------------------------------------
 
 
-class TestI2SBSelfContainedPipeline:
+class TestI2SBPipeline:
     @pytest.fixture
     def pipeline(self):
-        from examples.pipelines.i2sb.pipeline import (
-            I2SBPipeline,
-            I2SBUNet,
-            I2SBScheduler,
-        )
+        from src.models.unet.diffusers_wrappers import I2SBDiffusersUNet
+        from src.schedulers.i2sb import I2SBScheduler
+        from src.pipelines.i2sb import I2SBPipeline
 
-        unet = I2SBUNet(
+        unet = I2SBDiffusersUNet(
             image_size=32,
             in_channels=3,
             model_channels=32,
@@ -284,9 +278,9 @@ class TestI2SBSelfContainedPipeline:
         return I2SBPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from examples.pipelines.i2sb.pipeline import I2SBUNet
+        from src.models.unet.diffusers_wrappers import I2SBDiffusersUNet
 
-        unet = I2SBUNet(
+        unet = I2SBDiffusersUNet(
             image_size=32,
             in_channels=3,
             model_channels=32,
@@ -301,7 +295,7 @@ class TestI2SBSelfContainedPipeline:
         assert out.shape == (2, 3, 32, 32)
 
     def test_scheduler_symmetric_betas(self):
-        from examples.pipelines.i2sb.pipeline import I2SBScheduler
+        from src.schedulers.i2sb import I2SBScheduler
 
         scheduler = I2SBScheduler(interval=100, beta_max=0.3)
         half = scheduler.interval // 2
@@ -309,7 +303,7 @@ class TestI2SBSelfContainedPipeline:
         assert list(betas[:half]) == pytest.approx(list(betas[half:][::-1]), abs=1e-8)
 
     def test_scheduler_set_timesteps(self):
-        from examples.pipelines.i2sb.pipeline import I2SBScheduler
+        from src.schedulers.i2sb import I2SBScheduler
 
         scheduler = I2SBScheduler(interval=100, beta_max=0.3)
         scheduler.set_timesteps(nfe=10)
@@ -317,7 +311,7 @@ class TestI2SBSelfContainedPipeline:
         assert len(scheduler.timesteps) == 11  # nfe + 1
 
     def test_pipeline_pt_output(self, pipeline):
-        from examples.pipelines.i2sb.pipeline import I2SBPipelineOutput
+        from src.pipelines.i2sb import I2SBPipelineOutput
 
         source = torch.randn(1, 3, 32, 32)
         result = pipeline(source, nfe=3, output_type="pt")

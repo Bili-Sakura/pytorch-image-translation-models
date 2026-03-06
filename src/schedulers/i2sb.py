@@ -188,6 +188,7 @@ class I2SBScheduler:
         timestep: int,
         prev_timestep: int,
         sample: torch.Tensor,
+        ot_ode: bool = False,
     ) -> I2SBSchedulerOutput:
         """Perform one denoising step.
 
@@ -201,7 +202,9 @@ class I2SBScheduler:
             Target (earlier) timestep index.
         sample : Tensor
             Current noisy sample ``x_t``.
+        ot_ode : bool
+            If *True*, use the deterministic OT-ODE sampler.
         """
         pred_x0 = self.compute_pred_x0(torch.tensor([timestep]), sample, model_output)
-        prev_sample = self.p_posterior(prev_timestep, timestep, sample, pred_x0)
+        prev_sample = self.p_posterior(prev_timestep, timestep, sample, pred_x0, ot_ode=ot_ode)
         return I2SBSchedulerOutput(prev_sample=prev_sample)
