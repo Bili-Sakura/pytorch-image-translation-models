@@ -1,13 +1,12 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=64,<77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pytorch-image-translation-models"
 description = "A PyTorch library for multi-modal image translation with diffusion bridges, GANs, and transformer backbones."
 readme = "README.md"
-license = "MIT"
-license-files = ["LICENSE"]
+license = { text = "MIT" }
 authors = [
     { name = "Bili-Sakura" },
     { name = "EarthBridge Team" },
