@@ -23,7 +23,7 @@ from diffusers.configuration_utils import ConfigMixin, register_to_config
 __all__ = [
     "DDBMUNet",
     "DDIBUNet",
-    "I2SBUNet",
+    "I2SBDiffusersUNet",
     "BiBBDMUNet",
     "BDBMUNet",
     "DBIMUNet",
@@ -190,7 +190,7 @@ class DDIBUNet(ModelMixin, ConfigMixin):
 # ---------------------------------------------------------------------------
 
 
-class I2SBUNet(ModelMixin, ConfigMixin):
+class I2SBDiffusersUNet(ModelMixin, ConfigMixin):
     """Wrapper around :class:`UNet2DModel` that accepts the I2SB calling convention ``(x, timestep, cond=…)``."""
 
     @register_to_config
