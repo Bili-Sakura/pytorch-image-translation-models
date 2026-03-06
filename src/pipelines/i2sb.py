@@ -52,6 +52,7 @@ class I2SBPipeline:
         self,
         source: torch.Tensor,
         nfe: int = 20,
+        ot_ode: bool = False,
         output_type: str = "pt",
     ) -> I2SBPipelineOutput:
         """Run the I2SB reverse bridge starting from *source*.
@@ -62,6 +63,9 @@ class I2SBPipeline:
             Source images.
         nfe : int
             Number of function evaluations (denoising steps).
+        ot_ode : bool
+            If *True*, use the deterministic OT-ODE sampler (no noise
+            injected during reverse steps).
         output_type : ``"pt"`` | ``"pil"`` | ``"np"``
             Desired output format.
         """
@@ -85,7 +89,7 @@ class I2SBPipeline:
             else:
                 model_output = self.unet(x, t_batch)
 
-            result = self.scheduler.step(model_output, t, t_prev, x)
+            result = self.scheduler.step(model_output, t, t_prev, x, ot_ode=ot_ode)
             x = result.prev_sample
 
         return self._format_output(x, nfe, output_type)

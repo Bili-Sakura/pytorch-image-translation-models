@@ -3,13 +3,39 @@
 from src.models.discriminators import PatchGANDiscriminator
 from src.models.generators import ResNetGenerator, UNetGenerator
 from src.models.unet import I2SBUNet
+from src.models.unet.diffusers_wrappers import (
+    BDBMUNet,
+    BiBBDMUNet,
+    CDTSDEUNet,
+    DBIMUNet,
+    DDBMUNet,
+    DDIBUNet,
+    I2SBDiffusersUNet,
+    LBMUNet,
+)
 from src.models.dit import SiTBackbone, SIT_CONFIGS
+from src.models.stegogan import (
+    ResnetMaskV1Generator,
+    ResnetMaskV3Generator,
+    NetMatchability,
+)
 
 __all__ = [
     "UNetGenerator",
     "ResNetGenerator",
     "PatchGANDiscriminator",
     "I2SBUNet",
+    "BDBMUNet",
+    "BiBBDMUNet",
+    "CDTSDEUNet",
+    "DBIMUNet",
+    "DDBMUNet",
+    "DDIBUNet",
+    "I2SBDiffusersUNet",
+    "LBMUNet",
     "SiTBackbone",
     "SIT_CONFIGS",
+    "ResnetMaskV1Generator",
+    "ResnetMaskV3Generator",
+    "NetMatchability",
 ]

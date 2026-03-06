@@ -114,16 +114,25 @@ class I2SBScheduler:
         step: torch.Tensor | int,
         xt: torch.Tensor,
         net_out: torch.Tensor,
+        clip_denoise: bool = False,
     ) -> torch.Tensor:
         """Convert the network noise prediction back to an ``x_0`` estimate.
 
         Returns ``x_t − σ_fwd(t) · net_out``.
+
+        Parameters
+        ----------
+        clip_denoise : bool
+            If ``True``, clamp the prediction to ``[-1, 1]``.
         """
         if isinstance(step, int):
             step = torch.tensor([step])
         dims = [step.shape[0]] + [1] * (xt.dim() - 1)
         std_t = self.std_fwd[step].view(*dims).to(xt.device)
-        return xt - std_t * net_out
+        pred_x0 = xt - std_t * net_out
+        if clip_denoise:
+            pred_x0 = pred_x0.clamp(-1, 1)
+        return pred_x0
 
     # ------------------------------------------------------------------
     # Reverse (inference) helpers
@@ -179,6 +188,7 @@ class I2SBScheduler:
         timestep: int,
         prev_timestep: int,
         sample: torch.Tensor,
+        ot_ode: bool = False,
     ) -> I2SBSchedulerOutput:
         """Perform one denoising step.
 
@@ -192,7 +202,9 @@ class I2SBScheduler:
             Target (earlier) timestep index.
         sample : Tensor
             Current noisy sample ``x_t``.
+        ot_ode : bool
+            If *True*, use the deterministic OT-ODE sampler.
         """
         pred_x0 = self.compute_pred_x0(torch.tensor([timestep]), sample, model_output)
-        prev_sample = self.p_posterior(prev_timestep, timestep, sample, pred_x0)
+        prev_sample = self.p_posterior(prev_timestep, timestep, sample, pred_x0, ot_ode=ot_ode)
         return I2SBSchedulerOutput(prev_sample=prev_sample)

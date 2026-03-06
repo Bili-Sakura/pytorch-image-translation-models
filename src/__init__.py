@@ -4,13 +4,15 @@ A library for multi-modal image translation with diffusion bridges,
 GANs, and transformer backbones.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 from src.data import PairedImageDataset, UnpairedImageDataset, default_transforms, get_transforms
 from src.inference import ImageTranslator
 from src.losses import GANLoss, PerceptualLoss
 from src.metrics import compute_fid, compute_lpips, compute_psnr, compute_ssim
 from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
+from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchability
+from src.models import BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
 from src.pipelines import (
     BDBMPipeline,
     BDBMPipelineOutput,
@@ -47,16 +49,28 @@ from src.schedulers import (
     LBMScheduler,
     LBMSchedulerOutput,
 )
-from src.training import Pix2PixTrainer
+from src.training import Pix2PixTrainer, StegoGANTrainer, StegoGANConfig
 
 __all__ = [
-    # Models
+    # Models — native
     "UNetGenerator",
     "ResNetGenerator",
     "PatchGANDiscriminator",
     "I2SBUNet",
     "SiTBackbone",
     "SIT_CONFIGS",
+    "ResnetMaskV1Generator",
+    "ResnetMaskV3Generator",
+    "NetMatchability",
+    # Models — diffusers UNet wrappers
+    "BDBMUNet",
+    "BiBBDMUNet",
+    "CDTSDEUNet",
+    "DBIMUNet",
+    "DDBMUNet",
+    "DDIBUNet",
+    "I2SBDiffusersUNet",
+    "LBMUNet",
     # Schedulers
     "BDBMScheduler",
     "BDBMSchedulerOutput",
@@ -101,6 +115,8 @@ __all__ = [
     "PerceptualLoss",
     # Training
     "Pix2PixTrainer",
+    "StegoGANTrainer",
+    "StegoGANConfig",
     # Inference
     "ImageTranslator",
     # Metrics
