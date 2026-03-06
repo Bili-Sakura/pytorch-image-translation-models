@@ -10,6 +10,10 @@ Self-contained diffusion pipelines for image translation models. **No external p
 | DDIB | `DDIBPipeline` | `DDIBUNet` | `DDIBScheduler` |
 | I2SB | `I2SBPipeline` | `I2SBUNet` | `I2SBScheduler` |
 | BiBBDM | `BiBBDMPipeline` | `BiBBDMUNet` | `BiBBDMScheduler` |
+| BDBM | `BDBMPipeline` | `BDBMUNet` | `BDBMScheduler` |
+| DBIM | `DBIMPipeline` | `DBIMUNet` | `DBIMScheduler` |
+| CDTSDE | `CDTSDEPipeline` | `CDTSDEUNet` | `CDTSDEScheduler` |
+| LBM | `LBMPipeline` | `LBMUNet` | `LBMScheduler` |
 
 ## Usage
 

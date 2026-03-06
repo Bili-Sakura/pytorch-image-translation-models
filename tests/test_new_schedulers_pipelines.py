@@ -266,6 +266,11 @@ class TestPipelineImports:
         assert I2SBPipeline is not None
         assert I2SBPipelineOutput is not None
 
+    def test_import_lbm_pipeline(self):
+        from src.pipelines import LBMPipeline, LBMPipelineOutput
+        assert LBMPipeline is not None
+        assert LBMPipelineOutput is not None
+
 
 # ---------------------------------------------------------------------------
 # Top-level src import tests
@@ -280,6 +285,7 @@ class TestTopLevelExports:
         for name in [
             "BDBMScheduler", "BiBBDMScheduler", "CDTSDEScheduler",
             "DBIMScheduler", "DDBMScheduler", "DDIBScheduler", "I2SBScheduler",
+            "LBMScheduler",
         ]:
             assert hasattr(src, name), f"src.{name} not found"
 
@@ -288,5 +294,11 @@ class TestTopLevelExports:
         for name in [
             "BDBMPipeline", "BiBBDMPipeline", "CDTSDEPipeline",
             "DBIMPipeline", "DDBMPipeline", "DDIBPipeline", "I2SBPipeline",
+            "LBMPipeline",
         ]:
+            assert hasattr(src, name), f"src.{name} not found"
+
+    def test_all_models_in_src(self):
+        import src
+        for name in ["SiTBackbone", "SIT_CONFIGS"]:
             assert hasattr(src, name), f"src.{name} not found"

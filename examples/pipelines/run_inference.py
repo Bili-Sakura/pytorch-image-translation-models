@@ -95,15 +95,63 @@ def load_bibbdm_pipeline(checkpoint: str, device: str = "cuda", use_ema: bool = 
     return pipeline.to(device)
 
 
+def load_bdbm_pipeline(checkpoint: str, device: str = "cuda", use_ema: bool = True):
+    """Load BDBM pipeline from checkpoint."""
+    from examples.pipelines.bdbm.pipeline import BDBMPipeline, BDBMUNet, BDBMScheduler
+
+    ckpt = Path(checkpoint)
+    unet_subfolder = "ema_unet" if use_ema and (ckpt / "ema_unet").is_dir() else "unet"
+    unet = BDBMUNet.from_pretrained(str(ckpt), subfolder=unet_subfolder)
+    scheduler = BDBMScheduler.from_pretrained(str(ckpt), subfolder="scheduler")
+    pipeline = BDBMPipeline(unet=unet, scheduler=scheduler)
+    return pipeline.to(device)
+
+
+def load_dbim_pipeline(checkpoint: str, device: str = "cuda", use_ema: bool = True):
+    """Load DBIM pipeline from checkpoint."""
+    from examples.pipelines.dbim.pipeline import DBIMPipeline, DBIMUNet, DBIMScheduler
+
+    ckpt = Path(checkpoint)
+    unet_subfolder = "ema_unet" if use_ema and (ckpt / "ema_unet").is_dir() else "unet"
+    unet = DBIMUNet.from_pretrained(str(ckpt), subfolder=unet_subfolder)
+    scheduler = DBIMScheduler.from_pretrained(str(ckpt), subfolder="scheduler")
+    pipeline = DBIMPipeline(unet=unet, scheduler=scheduler)
+    return pipeline.to(device)
+
+
+def load_cdtsde_pipeline(checkpoint: str, device: str = "cuda", use_ema: bool = True):
+    """Load CDTSDE pipeline from checkpoint."""
+    from examples.pipelines.cdtsde.pipeline import CDTSDEPipeline, CDTSDEUNet, CDTSDEScheduler
+
+    ckpt = Path(checkpoint)
+    unet_subfolder = "ema_unet" if use_ema and (ckpt / "ema_unet").is_dir() else "unet"
+    unet = CDTSDEUNet.from_pretrained(str(ckpt), subfolder=unet_subfolder)
+    scheduler = CDTSDEScheduler.from_pretrained(str(ckpt), subfolder="scheduler")
+    pipeline = CDTSDEPipeline(unet=unet, scheduler=scheduler)
+    return pipeline.to(device)
+
+
+def load_lbm_pipeline(checkpoint: str, device: str = "cuda", use_ema: bool = True):
+    """Load LBM pipeline from checkpoint."""
+    from examples.pipelines.lbm.pipeline import LBMPipeline, LBMUNet, LBMScheduler
+
+    ckpt = Path(checkpoint)
+    unet_subfolder = "ema_unet" if use_ema and (ckpt / "ema_unet").is_dir() else "unet"
+    unet = LBMUNet.from_pretrained(str(ckpt), subfolder=unet_subfolder)
+    scheduler = LBMScheduler.from_pretrained(str(ckpt), subfolder="scheduler")
+    pipeline = LBMPipeline(unet=unet, scheduler=scheduler)
+    return pipeline.to(device)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run inference with self-contained pipelines.")
-    parser.add_argument("--model", choices=["ddbm", "ddib", "i2sb", "bibbdm"], required=True)
+    parser.add_argument("--model", choices=["ddbm", "ddib", "i2sb", "bibbdm", "bdbm", "dbim", "cdtsde", "lbm"], required=True)
     parser.add_argument("--checkpoint", required=True, help="Path to checkpoint directory")
     parser.add_argument("--input_dir", default=None, help="Directory of input images")
     parser.add_argument("--input_image", default=None, help="Single input image path")
     parser.add_argument("--output_dir", default="./outputs")
     parser.add_argument("--num_steps", type=int, default=1000, help="Inference steps")
-    parser.add_argument("--direction", default="b2a", choices=["b2a", "a2b"], help="BiBBDM only")
+    parser.add_argument("--direction", default="b2a", choices=["b2a", "a2b"], help="BiBBDM/BDBM only")
     parser.add_argument(
         "--deterministic",
         action="store_true",
@@ -122,6 +170,14 @@ def main():
         pipe = load_i2sb_pipeline(args.checkpoint, args.device)
     elif args.model == "bibbdm":
         pipe = load_bibbdm_pipeline(args.checkpoint, args.device)
+    elif args.model == "bdbm":
+        pipe = load_bdbm_pipeline(args.checkpoint, args.device)
+    elif args.model == "dbim":
+        pipe = load_dbim_pipeline(args.checkpoint, args.device)
+    elif args.model == "cdtsde":
+        pipe = load_cdtsde_pipeline(args.checkpoint, args.device)
+    elif args.model == "lbm":
+        pipe = load_lbm_pipeline(args.checkpoint, args.device)
     else:
         raise ValueError(f"Unknown model: {args.model}")
 
@@ -189,6 +245,33 @@ def main():
                 direction=args.direction,
                 num_inference_steps=args.num_steps,
                 clip_denoised=False,
+                output_type=args.output_type,
+            )
+        elif args.model == "bdbm":
+            out = pipe(
+                source_image=tensor,
+                direction=args.direction,
+                num_inference_steps=args.num_steps,
+                clip_denoised=False,
+                output_type=args.output_type,
+            )
+        elif args.model == "dbim":
+            out = pipe(
+                source_image=tensor,
+                num_inference_steps=args.num_steps,
+                output_type=args.output_type,
+            )
+        elif args.model == "cdtsde":
+            out = pipe(
+                source_image=tensor,
+                num_inference_steps=args.num_steps,
+                stochastic=not args.deterministic,
+                output_type=args.output_type,
+            )
+        elif args.model == "lbm":
+            out = pipe(
+                source_image=tensor,
+                num_inference_steps=args.num_steps,
                 output_type=args.output_type,
             )
 
