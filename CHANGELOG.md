@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-03-06
+
+### Added
+
+- **Community pipelines** (`examples/community/`): a new contribution model inspired by [Hugging Face diffusers community pipelines](https://github.com/huggingface/diffusers/tree/main/examples/community). Each community pipeline is a self-contained, single-file module that bundles all model, loss, and utility code.
+  - `examples/community/README.md` with contribution guidelines and pipeline catalog.
+  - `examples/community/__init__.py` module docstring documenting the pattern.
+- **Parallel-GAN community pipeline** (Wang et al., IEEE TGRS 2022): SAR-to-optical translation with hierarchical latent features.
+  - `examples/community/parallel_gan.py`: self-contained module with `ParaGAN` (translation generator), `Resrecon` (reconstruction network), `VGGLoss`, `ParallelGANTrainer`, and `ParallelGANConfig`.
+  - Two-stage training: Stage 1 (reconstruction) and Stage 2 (translation with frozen recon-net feature supervision).
+  - Tests for all Parallel-GAN components (15 test cases).
+
 ## [0.1.2] - 2026-03-06
 
 ### Added
@@ -49,7 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.3
 [0.1.2]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.2
 [0.1.1]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.1
 [0.1.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.0

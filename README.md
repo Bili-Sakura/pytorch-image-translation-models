@@ -91,6 +91,14 @@ All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 
 - `compute_psnr`, `compute_ssim`, `compute_lpips`, `compute_fid`
 
+### Community Pipelines
+
+Self-contained, single-file modules contributed by the community (inspired by [diffusers community pipelines](https://github.com/huggingface/diffusers/tree/main/examples/community)):
+
+| Pipeline | Paper | Description |
+|----------|-------|-------------|
+| [`parallel_gan.py`](examples/community/parallel_gan.py) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical with hierarchical latent features |
+
 ## Quick Start
 
 ### GAN-based translation (Pix2Pix)
@@ -273,6 +281,8 @@ src/
 └── metrics/
     └── image_quality.py     # PSNR, SSIM, LPIPS, FID
 examples/
+├── community/               # Community-contributed pipelines (single-file)
+│   └── parallel_gan.py      # Parallel-GAN (Wang et al., TGRS 2022)
 ├── i2sb/
 │   ├── config.py            # TaskConfig, sar2eo_config, etc.
 │   └── trainer.py           # I2SBTrainer
@@ -294,6 +304,7 @@ examples/
 - [LBM: Latent Bridge Matching for Fast Image-to-Image Translation (2025)](https://arxiv.org/abs/2503.07535)
 - [SiT: Exploring Flow and Diffusion-based Generative Models with Scalable Interpolant Transformers (2024)](https://arxiv.org/abs/2401.08740)
 - [StegoGAN: Leveraging Steganography for Non-Bijective Image-to-Image Translation (CVPR 2024)](https://openaccess.thecvf.com/content/CVPR2024/papers/Wu_StegoGAN_Leveraging_Steganography_for_Non-Bijective_Image-to-Image_Translation_CVPR_2024_paper.pdf)
+- [Parallel-GAN: SAR-to-Optical Image Translation with Hierarchical Latent Features (TGRS 2022)](https://ieeexplore.ieee.org/document/9864654)
 - [CUT: Contrastive Unpaired Translation (ECCV 2020)](https://link.springer.com/chapter/10.1007/978-3-030-58545-7_19)
 - [CycleGAN (ICCV 2017)](https://openaccess.thecvf.com/content_iccv_2017/html/Zhu_Unpaired_Image-To-Image_Translation_ICCV_2017_paper.html)
 - [img2img-turbo (2024)](https://doi.org/10.48550/arXiv.2403.12036)
