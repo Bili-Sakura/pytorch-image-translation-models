@@ -4,7 +4,7 @@ A library for multi-modal image translation with diffusion bridges,
 GANs, and transformer backbones.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 from src.data import PairedImageDataset, UnpairedImageDataset, default_transforms, get_transforms
 from src.inference import ImageTranslator
@@ -30,6 +30,8 @@ from src.pipelines import (
     I2SBPipelineOutput,
     LBMPipeline,
     LBMPipelineOutput,
+    StegoGANPipeline,
+    StegoGANPipelineOutput,
 )
 from src.schedulers import (
     BDBMScheduler,
@@ -49,7 +51,6 @@ from src.schedulers import (
     LBMScheduler,
     LBMSchedulerOutput,
 )
-from src.training import Pix2PixTrainer, StegoGANTrainer, StegoGANConfig
 
 __all__ = [
     # Models — native
@@ -105,6 +106,8 @@ __all__ = [
     "I2SBPipelineOutput",
     "LBMPipeline",
     "LBMPipelineOutput",
+    "StegoGANPipeline",
+    "StegoGANPipelineOutput",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",
@@ -113,10 +116,6 @@ __all__ = [
     # Losses
     "GANLoss",
     "PerceptualLoss",
-    # Training
-    "Pix2PixTrainer",
-    "StegoGANTrainer",
-    "StegoGANConfig",
     # Inference
     "ImageTranslator",
     # Metrics

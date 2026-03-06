@@ -8,6 +8,7 @@ from src.pipelines.ddbm import DDBMPipeline, DDBMPipelineOutput
 from src.pipelines.ddib import DDIBPipeline, DDIBPipelineOutput
 from src.pipelines.i2sb import I2SBPipeline, I2SBPipelineOutput
 from src.pipelines.lbm import LBMPipeline, LBMPipelineOutput
+from src.pipelines.stegogan import StegoGANPipeline, StegoGANPipelineOutput
 
 __all__ = [
     "BDBMPipeline",
@@ -26,4 +27,6 @@ __all__ = [
     "I2SBPipelineOutput",
     "LBMPipeline",
     "LBMPipelineOutput",
+    "StegoGANPipeline",
+    "StegoGANPipelineOutput",
 ]

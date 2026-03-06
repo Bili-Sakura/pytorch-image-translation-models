@@ -1,6 +1,6 @@
 # Copyright (c) 2026 EarthBridge Team.
 
-"""Tests for the StegoGAN model components."""
+"""Tests for the StegoGAN model components and pipeline."""
 
 import pytest
 import torch
@@ -15,7 +15,7 @@ from src.models.stegogan.networks import (
     SoftClamp,
     mask_generate,
 )
-from src.training.stegogan_trainer import StegoGANConfig, StegoGANTrainer
+from examples.stegogan.train_stegogan import StegoGANConfig, StegoGANTrainer
 
 
 # ---------------------------------------------------------------------------
@@ -220,3 +220,64 @@ class TestStegoGANTrainer:
         assert cfg.lambda_consistency == 3.0
         assert cfg.resnet_layer == 8
         assert cfg.fusionblock is True
+
+
+# ---------------------------------------------------------------------------
+# Pipeline
+# ---------------------------------------------------------------------------
+
+
+class TestStegoGANPipeline:
+    @pytest.fixture
+    def pipeline(self):
+        from src.pipelines.stegogan import StegoGANPipeline
+
+        netG_A = ResnetMaskV1Generator(
+            input_nc=3, output_nc=3, ngf=16, n_blocks=3, resnet_layer=1,
+        )
+        netG_B = ResnetMaskV3Generator(
+            input_nc=3, output_nc=3, ngf=16, n_blocks=3,
+            input_dim=64, out_dim=64, resnet_layer=1,
+        )
+        return StegoGANPipeline(netG_A=netG_A, netG_B=netG_B)
+
+    def test_a2b_pt_output(self, pipeline):
+        from src.pipelines.stegogan import StegoGANPipelineOutput
+
+        source = torch.randn(1, 3, 64, 64)
+        result = pipeline(source, direction="a2b", output_type="pt")
+        assert isinstance(result, StegoGANPipelineOutput)
+        assert isinstance(result.images, torch.Tensor)
+        assert result.images.shape == (1, 3, 64, 64)
+        assert result.masks is None
+
+    def test_b2a_pt_output(self, pipeline):
+        source = torch.randn(1, 3, 64, 64)
+        result = pipeline(source, direction="b2a", output_type="pt")
+        assert isinstance(result.images, torch.Tensor)
+        assert result.images.shape == (1, 3, 64, 64)
+        assert result.masks is not None
+
+    def test_a2b_pil_output(self, pipeline):
+        source = torch.randn(1, 3, 64, 64)
+        result = pipeline(source, direction="a2b", output_type="pil")
+        assert isinstance(result.images, list)
+        assert len(result.images) == 1
+
+    def test_b2a_np_output(self, pipeline):
+        import numpy as np
+
+        source = torch.randn(1, 3, 64, 64)
+        result = pipeline(source, direction="b2a", output_type="np")
+        assert isinstance(result.images, np.ndarray)
+        assert result.masks is not None
+
+    def test_invalid_direction(self, pipeline):
+        source = torch.randn(1, 3, 64, 64)
+        with pytest.raises(ValueError, match="Unknown direction"):
+            pipeline(source, direction="invalid")
+
+    def test_invalid_output_type(self, pipeline):
+        source = torch.randn(1, 3, 64, 64)
+        with pytest.raises(ValueError, match="Unknown output_type"):
+            pipeline(source, direction="a2b", output_type="invalid")
