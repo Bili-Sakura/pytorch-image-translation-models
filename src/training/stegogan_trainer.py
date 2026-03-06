@@ -282,6 +282,7 @@ class StegoGANTrainer:
             + losses["idt_B"]
             + losses["reg"]
             + losses["consistency_B"]
+            + losses["consistency_feat"]
         )
         return losses
 
