@@ -45,11 +45,29 @@ pip install -e ".[all]"
 
 ### Schedulers
 
-- **I2SBScheduler** — Symmetric beta schedule with forward/reverse bridge kernels for I2SB
+| Scheduler | Description |
+|---|---|
+| **I2SBScheduler** | Symmetric beta schedule with forward/reverse bridge kernels for I2SB |
+| **DDBMScheduler** | Karras sigma schedule with Heun/Euler sampling for DDBM (VP/VE modes) |
+| **BiBBDMScheduler** | Brownian Bridge noise schedule with bidirectional sampling for BiBBDM |
+| **DDIBScheduler** | Gaussian diffusion with DDIM forward/reverse steps for DDIB |
+| **BDBMScheduler** | Bidirectional Brownian Bridge schedule for BDBM |
+| **DBIMScheduler** | Faster bridge sampler with eta-controlled stochasticity for DBIM |
+| **CDTSDEScheduler** | Dynamic domain-shift eta schedule for CDTSDE |
 
 ### Pipelines
 
-- **I2SBPipeline** — End-to-end inference for I2SB models (supports `"pt"`, `"pil"`, `"np"` output)
+| Pipeline | Description |
+|---|---|
+| **I2SBPipeline** | End-to-end inference for I2SB models |
+| **DDBMPipeline** | DDBM bridge diffusion with Heun's method |
+| **BiBBDMPipeline** | Bidirectional Brownian Bridge translation (b2a / a2b) |
+| **DDIBPipeline** | Dual-model DDIM encode/decode translation |
+| **BDBMPipeline** | Bidirectional diffusion bridge with context conditioning |
+| **DBIMPipeline** | Fast DBIM bridge sampling with bridge preconditioning |
+| **CDTSDEPipeline** | CDTSDE with dynamic domain-shift scheduling |
+
+All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 
 ### Data
 
@@ -107,6 +125,42 @@ pipeline = I2SBPipeline(unet=model, scheduler=scheduler)
 result = pipeline(source_tensor, nfe=20, output_type="pt")
 ```
 
+### DDBM bridge diffusion
+
+```python
+from src.schedulers import DDBMScheduler
+from src.pipelines import DDBMPipeline
+
+scheduler = DDBMScheduler(pred_mode="vp", num_train_timesteps=40)
+pipeline = DDBMPipeline(unet=my_unet, scheduler=scheduler)
+result = pipeline(source_image, num_inference_steps=40, output_type="pil")
+```
+
+### BiBBDM bidirectional translation
+
+```python
+from src.schedulers import BiBBDMScheduler
+from src.pipelines import BiBBDMPipeline
+
+scheduler = BiBBDMScheduler(num_timesteps=1000, sample_step=100)
+pipeline = BiBBDMPipeline(unet=my_unet, scheduler=scheduler)
+# Source → Target
+result = pipeline(source_tensor, direction="b2a", output_type="pt")
+# Target → Source
+result = pipeline(target_tensor, direction="a2b", output_type="pt")
+```
+
+### DDIB dual-model translation
+
+```python
+from src.schedulers import DDIBScheduler
+from src.pipelines import DDIBPipeline
+
+scheduler = DDIBScheduler(num_train_timesteps=1000)
+pipeline = DDIBPipeline(source_unet=src_model, target_unet=tgt_model, scheduler=scheduler)
+result = pipeline(source_image, num_inference_steps=250, output_type="pil")
+```
+
 ### I2SB training with task configs
 
 ```python
@@ -135,9 +189,21 @@ src/
 │       ├── i2sb_unet.py     # I2SBUNet
 │       └── unet_2d.py       # create_model factory
 ├── schedulers/
-│   └── i2sb.py              # I2SBScheduler
+│   ├── i2sb.py              # I2SBScheduler
+│   ├── ddbm.py              # DDBMScheduler
+│   ├── bibbdm.py            # BiBBDMScheduler
+│   ├── ddib.py              # DDIBScheduler
+│   ├── bdbm.py              # BDBMScheduler
+│   ├── dbim.py              # DBIMScheduler
+│   └── cdtsde.py            # CDTSDEScheduler
 ├── pipelines/
-│   └── i2sb.py              # I2SBPipeline
+│   ├── i2sb.py              # I2SBPipeline
+│   ├── ddbm.py              # DDBMPipeline
+│   ├── bibbdm.py            # BiBBDMPipeline
+│   ├── ddib.py              # DDIBPipeline
+│   ├── bdbm.py              # BDBMPipeline
+│   ├── dbim.py              # DBIMPipeline
+│   └── cdtsde.py            # CDTSDEPipeline
 ├── data/
 │   ├── datasets.py          # PairedImageDataset, UnpairedImageDataset
 │   └── transforms.py        # get_transforms, default_transforms
@@ -164,6 +230,7 @@ examples/
 - [DDBM: Denoising Diffusion Bridge Models (ICLR 2024)](https://openreview.net/forum?id=FKksTayvGo)
 - [DDIB: Dual Diffusion Implicit Bridges (ICLR 2023)](https://openreview.net/forum?id=5HLoTvVGDe)
 - [BBDM: Image-to-Image Translation with Brownian Bridge Diffusion Models (CVPR 2023)](http://openaccess.thecvf.com/content/CVPR2023/papers/Li_BBDM_Image-to-Image_Translation_With_Brownian_Bridge_Diffusion_Models_CVPR_2023_paper.pdf)
+- [DBIM: Diffusion Bridge Implicit Models (2024)](https://arxiv.org/abs/2405.15885)
 - [CUT: Contrastive Unpaired Translation (ECCV 2020)](https://link.springer.com/chapter/10.1007/978-3-030-58545-7_19)
 - [CycleGAN (ICCV 2017)](https://openaccess.thecvf.com/content_iccv_2017/html/Zhu_Unpaired_Image-To-Image_Translation_ICCV_2017_paper.html)
 - [img2img-turbo (2024)](https://doi.org/10.48550/arXiv.2403.12036)
