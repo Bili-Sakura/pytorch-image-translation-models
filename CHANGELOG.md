@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-06
+
+### Added
+
+- **Diffusers UNet wrappers** (`src/models/unet/diffusers_wrappers.py`): consolidated all 8 UNet wrapper classes (`DDBMUNet`, `DDIBUNet`, `I2SBDiffusersUNet`, `BiBBDMUNet`, `BDBMUNet`, `DBIMUNet`, `CDTSDEUNet`, `LBMUNet`) into a single shared module. These wrappers pair `diffusers.ModelMixin`/`ConfigMixin` with `UNet2DModel` for each method's calling convention.
+- Added `guidance` parameter to `DDBMScheduler.step()` and `DDBMScheduler.step_heun()` for scaling the ODE derivative.
+- Added `ot_ode` parameter to `I2SBScheduler.step()` and `I2SBPipeline.__call__()` for deterministic OT-ODE sampling.
+- New `examples/inference/run_inference.py`: unified inference script for all 8 methods, importing components from `src/` instead of duplicating code.
+
+### Changed
+
+- **Major architecture refactor** following the [diffusers](https://github.com/huggingface/diffusers) project structure:
+  - `src/` is the single source of truth for models, schedulers, and pipelines.
+  - `examples/` contains paper-oriented training code and documentation (no duplicated pipeline code).
+  - `examples/community/` provides community-contributed self-contained pipelines.
+- **Removed `examples/pipelines/`** (~3300 lines of duplicated code): the 8 self-contained pipeline directories have been replaced by importing from `src/models/`, `src/schedulers/`, and `src/pipelines/`.
+- Rewrote `test_pipeline_examples.py` and `test_dit_lbm.py` to import from `src/` exclusively.
+- Renamed the diffusers-compatible I2SB UNet wrapper to `I2SBDiffusersUNet` to avoid conflict with the native `I2SBUNet` backbone.
+
 ## [0.1.3] - 2026-03-06
 
 ### Added
@@ -61,7 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.0
 [0.1.3]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.3
 [0.1.2]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.2
 [0.1.1]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.1

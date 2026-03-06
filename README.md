@@ -236,60 +236,59 @@ losses = trainer.train_step(real_A_batch, real_B_batch)
 ## Package Structure
 
 ```
-src/
-├── __init__.py              # Public API
+src/                                 # ← Core library (single source of truth)
+├── __init__.py                      # Public API
 ├── models/
-│   ├── generators.py        # UNetGenerator, ResNetGenerator
-│   ├── discriminators.py    # PatchGANDiscriminator
-│   ├── unet/                # ADM-style U-Net for I2SB
-│   │   ├── i2sb_unet.py     # I2SBUNet
-│   │   └── unet_2d.py       # create_model factory
-│   ├── dit/                 # DiT (Diffusion Transformer) backbones
-│   │   └── sit.py           # SiTBackbone
-│   └── stegogan/            # StegoGAN (CVPR 2024) architectures
-│       ├── generators.py    # ResnetMaskV1Generator, ResnetMaskV3Generator
-│       └── networks.py      # NetMatchability, mask_generate, ResnetBlock
-├── schedulers/
-│   ├── i2sb.py              # I2SBScheduler
-│   ├── ddbm.py              # DDBMScheduler
-│   ├── bibbdm.py            # BiBBDMScheduler
-│   ├── ddib.py              # DDIBScheduler
-│   ├── bdbm.py              # BDBMScheduler
-│   ├── dbim.py              # DBIMScheduler
-│   ├── cdtsde.py            # CDTSDEScheduler
-│   └── lbm.py               # LBMScheduler
-├── pipelines/
-│   ├── i2sb.py              # I2SBPipeline
-│   ├── ddbm.py              # DDBMPipeline
-│   ├── bibbdm.py            # BiBBDMPipeline
-│   ├── ddib.py              # DDIBPipeline
-│   ├── bdbm.py              # BDBMPipeline
-│   ├── dbim.py              # DBIMPipeline
-│   ├── cdtsde.py            # CDTSDEPipeline
-│   └── lbm.py               # LBMPipeline
+│   ├── generators.py                # UNetGenerator, ResNetGenerator
+│   ├── discriminators.py            # PatchGANDiscriminator
+│   ├── unet/
+│   │   ├── i2sb_unet.py            # I2SBUNet (native ADM-style backbone)
+│   │   ├── unet_2d.py              # create_model factory
+│   │   └── diffusers_wrappers.py   # DDBMUNet, DDIBUNet, … (diffusers UNet2DModel wrappers)
+│   ├── dit/
+│   │   └── sit.py                  # SiTBackbone (Diffusion Transformer)
+│   └── stegogan/
+│       ├── generators.py           # ResnetMaskV1Generator, ResnetMaskV3Generator
+│       └── networks.py             # NetMatchability, mask_generate, ResnetBlock
+├── schedulers/                      # One scheduler per method
+│   ├── i2sb.py                     # I2SBScheduler
+│   ├── ddbm.py                     # DDBMScheduler
+│   ├── bibbdm.py                   # BiBBDMScheduler
+│   ├── ddib.py                     # DDIBScheduler
+│   ├── bdbm.py                     # BDBMScheduler
+│   ├── dbim.py                     # DBIMScheduler
+│   ├── cdtsde.py                   # CDTSDEScheduler
+│   └── lbm.py                      # LBMScheduler
+├── pipelines/                       # One pipeline per method
+│   ├── i2sb.py                     # I2SBPipeline
+│   ├── ddbm.py                     # DDBMPipeline
+│   ├── bibbdm.py                   # BiBBDMPipeline
+│   ├── ddib.py                     # DDIBPipeline
+│   ├── bdbm.py                     # BDBMPipeline
+│   ├── dbim.py                     # DBIMPipeline
+│   ├── cdtsde.py                   # CDTSDEPipeline
+│   └── lbm.py                      # LBMPipeline
 ├── data/
-│   ├── datasets.py          # PairedImageDataset, UnpairedImageDataset
-│   └── transforms.py        # get_transforms, default_transforms
+│   ├── datasets.py                 # PairedImageDataset, UnpairedImageDataset
+│   └── transforms.py               # get_transforms, default_transforms
 ├── losses/
-│   ├── adversarial.py       # GANLoss
-│   └── perceptual.py        # PerceptualLoss
+│   ├── adversarial.py              # GANLoss
+│   └── perceptual.py               # PerceptualLoss
 ├── training/
-│   ├── trainer.py           # Pix2PixTrainer, TrainingConfig
-│   └── stegogan_trainer.py  # StegoGANTrainer, StegoGANConfig
+│   ├── trainer.py                  # Pix2PixTrainer, TrainingConfig
+│   └── stegogan_trainer.py         # StegoGANTrainer, StegoGANConfig
 ├── inference/
-│   └── predictor.py         # ImageTranslator
+│   └── predictor.py                # ImageTranslator
 └── metrics/
-    └── image_quality.py     # PSNR, SSIM, LPIPS, FID
-examples/
-├── community/               # Community-contributed pipelines (single-file)
-│   └── parallel_gan.py      # Parallel-GAN (Wang et al., TGRS 2022)
-├── i2sb/
-│   ├── config.py            # TaskConfig, sar2eo_config, etc.
-│   └── trainer.py           # I2SBTrainer
-└── pipelines/               # Self-contained production pipelines
-    ├── ddbm/                # DDBM, DDIB, I2SB, BiBBDM, BDBM,
-    ├── ...                  # DBIM, CDTSDE, LBM
-    └── run_inference.py     # Unified inference script
+    └── image_quality.py            # PSNR, SSIM, LPIPS, FID
+examples/                            # ← Training/inference scripts (import from src/)
+├── community/                       # Community-contributed pipelines (single-file)
+│   └── parallel_gan.py             # Parallel-GAN (Wang et al., TGRS 2022)
+├── i2sb/                            # I2SB paper-oriented training code
+│   ├── config.py                   # TaskConfig, sar2eo_config, etc.
+│   └── trainer.py                  # I2SBTrainer
+└── inference/
+    └── run_inference.py            # Unified inference script for all methods
 ```
 
 ## Credits
