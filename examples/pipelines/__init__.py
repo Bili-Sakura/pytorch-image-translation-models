@@ -12,4 +12,6 @@ Usage:
     unet = DDBMUNet.from_pretrained(ckpt_path, subfolder="ema_unet")
     scheduler = DDBMScheduler.from_pretrained(ckpt_path, subfolder="scheduler")
     pipeline = DDBMPipeline(unet=unet, scheduler=scheduler)
+
+Available models: DDBM, DDIB, I2SB, BiBBDM, BDBM, DBIM, CDTSDE, LBM
 """

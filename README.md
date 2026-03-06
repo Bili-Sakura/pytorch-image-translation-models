@@ -42,6 +42,7 @@ pip install -e ".[all]"
 - **GAN generators** — `UNetGenerator` (encoder-decoder with skip connections), `ResNetGenerator` (residual blocks)
 - **GAN discriminators** — `PatchGANDiscriminator` (Markovian patch-level classifier)
 - **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net for Image-to-Image Schrödinger Bridge)
+- **DiT backbone** — `SiTBackbone` (Scalable Interpolant Transformer for diffusion bridges)
 
 ### Schedulers
 
@@ -54,6 +55,7 @@ pip install -e ".[all]"
 | **BDBMScheduler** | Bidirectional Brownian Bridge schedule for BDBM |
 | **DBIMScheduler** | Faster bridge sampler with eta-controlled stochasticity for DBIM |
 | **CDTSDEScheduler** | Dynamic domain-shift eta schedule for CDTSDE |
+| **LBMScheduler** | Flow-matching bridge for single/few-step LBM translation |
 
 ### Pipelines
 
@@ -66,6 +68,7 @@ pip install -e ".[all]"
 | **BDBMPipeline** | Bidirectional diffusion bridge with context conditioning |
 | **DBIMPipeline** | Fast DBIM bridge sampling with bridge preconditioning |
 | **CDTSDEPipeline** | CDTSDE with dynamic domain-shift scheduling |
+| **LBMPipeline** | LBM flow-matching for single/few-step image translation |
 
 All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 
@@ -161,6 +164,33 @@ pipeline = DDIBPipeline(source_unet=src_model, target_unet=tgt_model, scheduler=
 result = pipeline(source_image, num_inference_steps=250, output_type="pil")
 ```
 
+### LBM flow-matching translation
+
+```python
+from src.schedulers import LBMScheduler
+from src.pipelines import LBMPipeline
+
+scheduler = LBMScheduler(num_train_timesteps=1000)
+pipeline = LBMPipeline(unet=my_unet, scheduler=scheduler)
+result = pipeline(source_image, num_inference_steps=1, output_type="pil")
+```
+
+### DiT backbone (SiT) for diffusion bridges
+
+```python
+from src.models.dit import SiTBackbone, SIT_CONFIGS
+
+# Create a SiT-S/2 backbone (small, patch size 2)
+depth, hidden_size, num_heads = SIT_CONFIGS["S"]
+model = SiTBackbone(
+    image_size=256, patch_size=2, in_channels=3,
+    hidden_size=hidden_size, depth=depth, num_heads=num_heads,
+    condition_mode="concat",
+)
+# Use as drop-in replacement for UNet in any bridge pipeline
+output = model(noisy_sample, timestep, xT=source_image)
+```
+
 ### I2SB training with task configs
 
 ```python
@@ -185,9 +215,11 @@ src/
 ├── models/
 │   ├── generators.py        # UNetGenerator, ResNetGenerator
 │   ├── discriminators.py    # PatchGANDiscriminator
-│   └── unet/                # ADM-style U-Net for I2SB
-│       ├── i2sb_unet.py     # I2SBUNet
-│       └── unet_2d.py       # create_model factory
+│   ├── unet/                # ADM-style U-Net for I2SB
+│   │   ├── i2sb_unet.py     # I2SBUNet
+│   │   └── unet_2d.py       # create_model factory
+│   └── dit/                 # DiT (Diffusion Transformer) backbones
+│       └── sit.py           # SiTBackbone
 ├── schedulers/
 │   ├── i2sb.py              # I2SBScheduler
 │   ├── ddbm.py              # DDBMScheduler
@@ -195,7 +227,8 @@ src/
 │   ├── ddib.py              # DDIBScheduler
 │   ├── bdbm.py              # BDBMScheduler
 │   ├── dbim.py              # DBIMScheduler
-│   └── cdtsde.py            # CDTSDEScheduler
+│   ├── cdtsde.py            # CDTSDEScheduler
+│   └── lbm.py               # LBMScheduler
 ├── pipelines/
 │   ├── i2sb.py              # I2SBPipeline
 │   ├── ddbm.py              # DDBMPipeline
@@ -203,7 +236,8 @@ src/
 │   ├── ddib.py              # DDIBPipeline
 │   ├── bdbm.py              # BDBMPipeline
 │   ├── dbim.py              # DBIMPipeline
-│   └── cdtsde.py            # CDTSDEPipeline
+│   ├── cdtsde.py            # CDTSDEPipeline
+│   └── lbm.py               # LBMPipeline
 ├── data/
 │   ├── datasets.py          # PairedImageDataset, UnpairedImageDataset
 │   └── transforms.py        # get_transforms, default_transforms
@@ -217,9 +251,13 @@ src/
 └── metrics/
     └── image_quality.py     # PSNR, SSIM, LPIPS, FID
 examples/
-└── i2sb/
-    ├── config.py            # TaskConfig, sar2eo_config, etc.
-    └── trainer.py           # I2SBTrainer
+├── i2sb/
+│   ├── config.py            # TaskConfig, sar2eo_config, etc.
+│   └── trainer.py           # I2SBTrainer
+└── pipelines/               # Self-contained production pipelines
+    ├── ddbm/                # DDBM, DDIB, I2SB, BiBBDM, BDBM,
+    ├── ...                  # DBIM, CDTSDE, LBM
+    └── run_inference.py     # Unified inference script
 ```
 
 ## Credits
@@ -231,6 +269,8 @@ examples/
 - [DDIB: Dual Diffusion Implicit Bridges (ICLR 2023)](https://openreview.net/forum?id=5HLoTvVGDe)
 - [BBDM: Image-to-Image Translation with Brownian Bridge Diffusion Models (CVPR 2023)](http://openaccess.thecvf.com/content/CVPR2023/papers/Li_BBDM_Image-to-Image_Translation_With_Brownian_Bridge_Diffusion_Models_CVPR_2023_paper.pdf)
 - [DBIM: Diffusion Bridge Implicit Models (2024)](https://arxiv.org/abs/2405.15885)
+- [LBM: Latent Bridge Matching for Fast Image-to-Image Translation (2025)](https://arxiv.org/abs/2503.07535)
+- [SiT: Exploring Flow and Diffusion-based Generative Models with Scalable Interpolant Transformers (2024)](https://arxiv.org/abs/2401.08740)
 - [CUT: Contrastive Unpaired Translation (ECCV 2020)](https://link.springer.com/chapter/10.1007/978-3-030-58545-7_19)
 - [CycleGAN (ICCV 2017)](https://openaccess.thecvf.com/content_iccv_2017/html/Zhu_Unpaired_Image-To-Image_Translation_ICCV_2017_paper.html)
 - [img2img-turbo (2024)](https://doi.org/10.48550/arXiv.2403.12036)

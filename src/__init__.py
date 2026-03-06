@@ -10,7 +10,7 @@ from src.data import PairedImageDataset, UnpairedImageDataset, default_transform
 from src.inference import ImageTranslator
 from src.losses import GANLoss, PerceptualLoss
 from src.metrics import compute_fid, compute_lpips, compute_psnr, compute_ssim
-from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, UNetGenerator
+from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
 from src.pipelines import (
     BDBMPipeline,
     BDBMPipelineOutput,
@@ -26,6 +26,8 @@ from src.pipelines import (
     DDIBPipelineOutput,
     I2SBPipeline,
     I2SBPipelineOutput,
+    LBMPipeline,
+    LBMPipelineOutput,
 )
 from src.schedulers import (
     BDBMScheduler,
@@ -42,6 +44,8 @@ from src.schedulers import (
     DDIBSchedulerOutput,
     I2SBScheduler,
     I2SBSchedulerOutput,
+    LBMScheduler,
+    LBMSchedulerOutput,
 )
 from src.training import Pix2PixTrainer
 
@@ -51,6 +55,8 @@ __all__ = [
     "ResNetGenerator",
     "PatchGANDiscriminator",
     "I2SBUNet",
+    "SiTBackbone",
+    "SIT_CONFIGS",
     # Schedulers
     "BDBMScheduler",
     "BDBMSchedulerOutput",
@@ -66,6 +72,8 @@ __all__ = [
     "DDIBSchedulerOutput",
     "I2SBScheduler",
     "I2SBSchedulerOutput",
+    "LBMScheduler",
+    "LBMSchedulerOutput",
     # Pipelines
     "BDBMPipeline",
     "BDBMPipelineOutput",
@@ -81,6 +89,8 @@ __all__ = [
     "DDIBPipelineOutput",
     "I2SBPipeline",
     "I2SBPipelineOutput",
+    "LBMPipeline",
+    "LBMPipelineOutput",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",

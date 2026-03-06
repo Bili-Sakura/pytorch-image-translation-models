@@ -7,6 +7,7 @@ from src.schedulers.dbim import DBIMScheduler, DBIMSchedulerOutput
 from src.schedulers.ddbm import DDBMScheduler, DDBMSchedulerOutput
 from src.schedulers.ddib import DDIBScheduler, DDIBSchedulerOutput
 from src.schedulers.i2sb import I2SBScheduler, I2SBSchedulerOutput
+from src.schedulers.lbm import LBMScheduler, LBMSchedulerOutput
 
 __all__ = [
     "BDBMScheduler",
@@ -23,4 +24,6 @@ __all__ = [
     "DDIBSchedulerOutput",
     "I2SBScheduler",
     "I2SBSchedulerOutput",
+    "LBMScheduler",
+    "LBMSchedulerOutput",
 ]
