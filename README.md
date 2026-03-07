@@ -93,11 +93,12 @@ All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 
 ### Community Pipelines
 
-Self-contained, single-file modules contributed by the community (inspired by [diffusers community pipelines](https://github.com/huggingface/diffusers/tree/main/examples/community)):
+Self-contained community modules, each in its own subfolder with `model.py`, `pipeline.py`, and `readme.md` (inspired by [diffusers community pipelines](https://github.com/huggingface/diffusers/tree/main/examples/community)):
 
 | Pipeline | Paper | Description |
 |----------|-------|-------------|
-| [`parallel_gan.py`](examples/community/parallel_gan.py) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical with hierarchical latent features |
+| [`parallel_gan/`](examples/community/parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical with hierarchical latent features |
+| [`e3diff/`](examples/community/e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion for one-step SAR-to-Optical |
 
 ## Quick Start
 
@@ -282,8 +283,11 @@ src/                                 # ← Core library (single source of truth)
 └── metrics/
     └── image_quality.py            # PSNR, SSIM, LPIPS, FID
 examples/                            # ← Training/inference scripts (import from src/)
-├── community/                       # Community-contributed pipelines (single-file)
-│   └── parallel_gan.py             # Parallel-GAN (Wang et al., TGRS 2022)
+├── community/                       # Community-contributed pipelines (subfolder per model)
+│   ├── parallel_gan/               # Parallel-GAN (Wang et al., TGRS 2022)
+│   │   ├── model.py, pipeline.py, readme.md
+│   └── e3diff/                     # E3Diff (Qin et al., IEEE GRSL 2024)
+│       ├── model.py, pipeline.py, readme.md
 ├── i2sb/                            # I2SB paper-oriented training code
 │   ├── config.py                   # TaskConfig, sar2eo_config, etc.
 │   └── trainer.py                  # I2SBTrainer

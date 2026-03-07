@@ -1,21 +1,32 @@
 # Community Pipelines
 
-Community pipelines are **self-contained, single-file modules** contributed by the community.  They follow the same pattern as [Hugging Face diffusers community pipelines](https://github.com/huggingface/diffusers/tree/main/examples/community): each file bundles *all* model, loss, and utility code needed for training or inference so that it works without importing any other project code from `src/`.
+Community pipelines are **self-contained modules** contributed by the community.  Each pipeline lives in its own subfolder under `examples/community/<model_name>/` and includes:
+
+| File | Purpose |
+|------|---------|
+| `model.py` | All network architecture definitions and loss helpers |
+| `pipeline.py` | Configuration dataclass and training / inference pipeline |
+| `readme.md` | Documentation, usage examples, and citation |
+| `__init__.py` | Re-exports public symbols for convenient imports |
+
+Pipelines bundle *all* model, loss, and utility code needed for training or inference so that they work without importing any other project code from `src/`.
 
 ## How to use
 
 ```python
-# Import directly from the single file
+# Import directly from the community pipeline package
 from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTrainer, ParallelGANConfig
 ```
 
 ## How to contribute
 
-1. Create a single Python file under `examples/community/` named after the model (e.g. `my_model.py`).
-2. Include all network definitions, loss helpers, and a training/inference class in that one file.
-3. Add a module docstring describing the paper, usage, and citation.
-4. Add an entry to this README.
-5. Add tests in `tests/test_community_pipelines.py`.
+1. Create a new subfolder under `examples/community/` named after the model (e.g. `my_model/`).
+2. Add `model.py` with all network definitions and loss helpers.
+3. Add `pipeline.py` with a configuration dataclass and a training / inference class.
+4. Add `readme.md` describing the paper, usage, and citation.
+5. Add `__init__.py` that re-exports public symbols.
+6. Add an entry to this README.
+7. Add tests in `tests/test_community_pipelines.py`.
 
 ---
 
@@ -23,8 +34,8 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 
 | Pipeline | Paper | Description |
 |----------|-------|-------------|
-| [`parallel_gan.py`](parallel_gan.py) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical translation with hierarchical latent features via a two-stage approach (reconstruction + translation) |
-| [`e3diff.py`](e3diff.py) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
+| [`parallel_gan/`](parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical translation with hierarchical latent features via a two-stage approach (reconstruction + translation) |
+| [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
 
 ---
 
