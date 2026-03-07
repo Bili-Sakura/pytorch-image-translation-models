@@ -3,7 +3,8 @@
 Subpackages
 -----------
 ``community/``
-    Community-contributed self-contained pipelines (single-file modules).
+    Community-contributed pipelines, each in a dedicated subfolder with
+    ``model.py``, ``pipeline.py``, ``train.py``, and ``README.md``.
 ``i2sb/``
     I2SB (Image-to-Image Schrödinger Bridge) task configs and training loop.
 ``inference/``
