@@ -13,6 +13,7 @@ from src.metrics import compute_fid, compute_lpips, compute_psnr, compute_ssim
 from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
 from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchability
 from src.models import BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
+from src.models import UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
 from src.pipelines import (
     BDBMPipeline,
     BDBMPipelineOutput,
@@ -32,6 +33,8 @@ from src.pipelines import (
     LBMPipelineOutput,
     StegoGANPipeline,
     StegoGANPipelineOutput,
+    UNSBPipeline,
+    UNSBPipelineOutput,
 )
 from src.schedulers import (
     BDBMScheduler,
@@ -50,6 +53,8 @@ from src.schedulers import (
     I2SBSchedulerOutput,
     LBMScheduler,
     LBMSchedulerOutput,
+    UNSBScheduler,
+    UNSBSchedulerOutput,
 )
 
 __all__ = [
@@ -63,6 +68,10 @@ __all__ = [
     "ResnetMaskV1Generator",
     "ResnetMaskV3Generator",
     "NetMatchability",
+    # Models — UNSB
+    "UNSBGenerator",
+    "UNSBDiscriminator",
+    "UNSBEnergyNet",
     # Models — diffusers UNet wrappers
     "BDBMUNet",
     "BiBBDMUNet",
@@ -89,6 +98,8 @@ __all__ = [
     "I2SBSchedulerOutput",
     "LBMScheduler",
     "LBMSchedulerOutput",
+    "UNSBScheduler",
+    "UNSBSchedulerOutput",
     # Pipelines
     "BDBMPipeline",
     "BDBMPipelineOutput",
@@ -108,6 +119,8 @@ __all__ = [
     "LBMPipelineOutput",
     "StegoGANPipeline",
     "StegoGANPipelineOutput",
+    "UNSBPipeline",
+    "UNSBPipelineOutput",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",
