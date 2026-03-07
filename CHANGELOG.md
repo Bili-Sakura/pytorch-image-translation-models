@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-03-06
+
+### Added
+
+- **StegoGAN pipeline** (`src/pipelines/stegogan.py`): `StegoGANPipeline` and `StegoGANPipelineOutput` for bidirectional inference with trained StegoGAN generators (`G_A`: A→B, `G_B`: B→A with matchability masking).
+
+### Changed
+
+- **Moved training code to `examples/`** following the [diffusers](https://github.com/huggingface/diffusers) project structure where training scripts live in self-contained example subfolders:
+  - `src/training/trainer.py` → `examples/pix2pix/train_pix2pix.py`
+  - `src/training/stegogan_trainer.py` → `examples/stegogan/train_stegogan.py`
+  - `src/training/` now re-exports from `examples/` for backward compatibility.
+- Training classes (`Pix2PixTrainer`, `StegoGANTrainer`, `StegoGANConfig`) are no longer exported from the top-level `src` package; import from `examples.pix2pix`, `examples.stegogan`, or `src.training` instead.
+
 ## [0.2.0] - 2026-03-06
 
 ### Added
@@ -80,7 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.0
 [0.1.3]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.3
 [0.1.2]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.2
