@@ -8,6 +8,8 @@ from src.schedulers.ddbm import DDBMScheduler, DDBMSchedulerOutput
 from src.schedulers.ddib import DDIBScheduler, DDIBSchedulerOutput
 from src.schedulers.i2sb import I2SBScheduler, I2SBSchedulerOutput
 from src.schedulers.lbm import LBMScheduler, LBMSchedulerOutput
+from src.schedulers.unsb import UNSBScheduler, UNSBSchedulerOutput
+from src.schedulers.local_diffusion import LocalDiffusionScheduler, LocalDiffusionSchedulerOutput
 
 __all__ = [
     "BDBMScheduler",
@@ -26,4 +28,8 @@ __all__ = [
     "I2SBSchedulerOutput",
     "LBMScheduler",
     "LBMSchedulerOutput",
+    "UNSBScheduler",
+    "UNSBSchedulerOutput",
+    "LocalDiffusionScheduler",
+    "LocalDiffusionSchedulerOutput",
 ]

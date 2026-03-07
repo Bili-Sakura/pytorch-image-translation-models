@@ -10,6 +10,8 @@ from src.pipelines.i2sb import I2SBPipeline, I2SBPipelineOutput
 from src.pipelines.lbm import LBMPipeline, LBMPipelineOutput
 from src.pipelines.stegogan import StegoGANPipeline, StegoGANPipelineOutput
 from src.pipelines.cut import CUTPipeline, CUTPipelineOutput
+from src.pipelines.unsb import UNSBPipeline, UNSBPipelineOutput
+from src.pipelines.local_diffusion import LocalDiffusionPipeline, LocalDiffusionPipelineOutput
 
 __all__ = [
     "BDBMPipeline",
@@ -32,4 +34,8 @@ __all__ = [
     "StegoGANPipelineOutput",
     "CUTPipeline",
     "CUTPipelineOutput",
+    "UNSBPipeline",
+    "UNSBPipelineOutput",
+    "LocalDiffusionPipeline",
+    "LocalDiffusionPipelineOutput",
 ]

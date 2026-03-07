@@ -25,6 +25,15 @@ from src.models.cut import (
     create_discriminator,
     create_patch_sample_mlp,
 )
+from src.models.unsb import (
+    UNSBGenerator,
+    UNSBDiscriminator,
+    UNSBEnergyNet,
+)
+from src.models.local_diffusion import (
+    LocalDiffusionUNet,
+    ConditionEncoder,
+)
 
 __all__ = [
     "UNetGenerator",
@@ -48,4 +57,9 @@ __all__ = [
     "create_generator",
     "create_discriminator",
     "create_patch_sample_mlp",
+    "UNSBGenerator",
+    "UNSBDiscriminator",
+    "UNSBEnergyNet",
+    "LocalDiffusionUNet",
+    "ConditionEncoder",
 ]

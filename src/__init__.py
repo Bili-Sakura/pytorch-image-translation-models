@@ -4,7 +4,7 @@ A library for multi-modal image translation with diffusion bridges,
 GANs, and transformer backbones.
 """
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 from src.data import PairedImageDataset, UnpairedImageDataset, default_transforms, get_transforms
 from src.inference import ImageTranslator
@@ -13,6 +13,8 @@ from src.metrics import compute_fid, compute_lpips, compute_psnr, compute_ssim
 from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
 from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchability
 from src.models import BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
+from src.models import UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
+from src.models import LocalDiffusionUNet, ConditionEncoder
 from src.pipelines import (
     BDBMPipeline,
     BDBMPipelineOutput,
@@ -32,6 +34,10 @@ from src.pipelines import (
     LBMPipelineOutput,
     StegoGANPipeline,
     StegoGANPipelineOutput,
+    UNSBPipeline,
+    UNSBPipelineOutput,
+    LocalDiffusionPipeline,
+    LocalDiffusionPipelineOutput,
 )
 from src.schedulers import (
     BDBMScheduler,
@@ -50,6 +56,10 @@ from src.schedulers import (
     I2SBSchedulerOutput,
     LBMScheduler,
     LBMSchedulerOutput,
+    UNSBScheduler,
+    UNSBSchedulerOutput,
+    LocalDiffusionScheduler,
+    LocalDiffusionSchedulerOutput,
 )
 
 __all__ = [
@@ -63,6 +73,13 @@ __all__ = [
     "ResnetMaskV1Generator",
     "ResnetMaskV3Generator",
     "NetMatchability",
+    # Models — UNSB
+    "UNSBGenerator",
+    "UNSBDiscriminator",
+    "UNSBEnergyNet",
+    # Models — Local Diffusion
+    "LocalDiffusionUNet",
+    "ConditionEncoder",
     # Models — diffusers UNet wrappers
     "BDBMUNet",
     "BiBBDMUNet",
@@ -89,6 +106,10 @@ __all__ = [
     "I2SBSchedulerOutput",
     "LBMScheduler",
     "LBMSchedulerOutput",
+    "UNSBScheduler",
+    "UNSBSchedulerOutput",
+    "LocalDiffusionScheduler",
+    "LocalDiffusionSchedulerOutput",
     # Pipelines
     "BDBMPipeline",
     "BDBMPipelineOutput",
@@ -108,6 +129,10 @@ __all__ = [
     "LBMPipelineOutput",
     "StegoGANPipeline",
     "StegoGANPipelineOutput",
+    "UNSBPipeline",
+    "UNSBPipelineOutput",
+    "LocalDiffusionPipeline",
+    "LocalDiffusionPipelineOutput",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",
