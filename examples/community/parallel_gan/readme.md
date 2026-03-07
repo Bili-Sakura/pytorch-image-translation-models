@@ -13,10 +13,26 @@ Two-stage training:
 | File | Contents |
 |------|----------|
 | `model.py` | `ParaGAN`, `Resrecon`, `_NLayerDiscriminator`, `VGGLoss`, `_GANLoss`, `_init_weights` |
-| `pipeline.py` | `translate()` – inference helper |
+| `pipeline.py` | `ParallelGANPipeline` (inherits `DiffusionPipeline`), `ParallelGANPipelineOutput` |
 | `train.py` | `ParallelGANConfig`, `ParallelGANTrainer` |
 
 ## Quick start
+
+### Inference (pipeline)
+
+```python
+import torch
+from examples.community.parallel_gan import ParaGAN, ParallelGANPipeline
+
+gen = ParaGAN(input_nc=3, output_nc=3)
+# gen.load_state_dict(torch.load("generator_checkpoint.pth"))
+
+pipeline = ParallelGANPipeline(generator=gen)
+output = pipeline(source_image=sar_tensor, output_type="pil")  # or "pt", "np"
+images = output.images  # list of PIL images
+```
+
+### Training
 
 ```python
 from examples.community.parallel_gan import (

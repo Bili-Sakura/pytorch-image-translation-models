@@ -15,10 +15,30 @@ Two-stage training for SAR-to-Optical image translation:
 | File | Contents |
 |------|----------|
 | `model.py` | `E3DiffUNet`, `CPEN`, `FocalFrequencyLoss`, `_NLayerDiscriminator`, `_GANLoss`, building blocks |
-| `pipeline.py` | `GaussianDiffusion` – DDPM/DDIM diffusion wrapper, beta schedules |
+| `pipeline.py` | `E3DiffPipeline` (inherits `DiffusionPipeline`), `E3DiffPipelineOutput`, `GaussianDiffusion`, beta schedules |
 | `train.py` | `E3DiffConfig`, `E3DiffTrainer` |
 
 ## Quick start
+
+### Inference (pipeline)
+
+```python
+import torch
+from examples.community.e3diff import (
+    E3DiffUNet, GaussianDiffusion, E3DiffPipeline,
+)
+
+unet = E3DiffUNet(out_channel=3, inner_channel=64, condition_ch=3, image_size=256)
+diff = GaussianDiffusion(denoise_fn=unet, image_size=256, channels=3)
+diff.set_noise_schedule(n_timestep=1000, schedule="linear", device="cuda")
+# diff.load_state_dict(torch.load("diffusion_checkpoint.pth"))
+
+pipeline = E3DiffPipeline(diffusion=diff)
+output = pipeline(source_image=sar_tensor, num_inference_steps=50, output_type="pil")
+images = output.images  # list of PIL images
+```
+
+### Training
 
 ```python
 import torch
@@ -35,10 +55,6 @@ cfg2 = E3DiffConfig(stage=2, condition_ch=3, out_ch=3, lambda_gan=0.1, device="c
 trainer2 = E3DiffTrainer(cfg2)
 losses2 = trainer2.train_step(sar_batch, optical_batch)
 # losses2 = {'l_pix': ..., 'l_G': ..., 'l_D': ...}
-
-# Inference (DDIM, typically 50 steps for Stage-1 / 1 step for Stage-2 models)
-with torch.no_grad():
-    optical_pred = trainer2.sample(sar_batch, n_ddim_steps=1)
 ```
 
 ## Citation

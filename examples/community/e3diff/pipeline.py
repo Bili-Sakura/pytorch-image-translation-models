@@ -5,6 +5,8 @@
 
 Includes:
 
+* ``E3DiffPipeline`` – Inference pipeline inheriting from ``DiffusionPipeline``.
+* ``E3DiffPipelineOutput`` – Dataclass for pipeline output.
 * ``GaussianDiffusion`` – DDPM / DDIM diffusion wrapper for :class:`E3DiffUNet`.
 * ``_make_beta_schedule`` – Beta schedule factory (linear, cosine, etc.).
 """
@@ -12,13 +14,19 @@ Includes:
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 from functools import partial
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import torch
 import torch.nn as nn
+from PIL import Image
 
-from examples.community.e3diff.model import E3DiffUNet, _ResnetBlocWithAttn, _default
+from diffusers import DiffusionPipeline
+from diffusers.utils import BaseOutput
+
+from examples.community.e3diff.model import E3DiffUNet, _default
 
 
 # ---------------------------------------------------------------------------
@@ -367,3 +375,185 @@ class GaussianDiffusion(nn.Module):
             x = alpha_prev**0.5 * x0_pred + pred_dir + sigma2**0.5 * torch.randn_like(x)
 
         return x
+
+
+# ---------------------------------------------------------------------------
+# E3DiffPipeline – DiffusionPipeline-based inference wrapper
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class E3DiffPipelineOutput(BaseOutput):
+    """Output of the E3Diff pipeline.
+
+    Attributes
+    ----------
+    images : list[PIL.Image.Image] | np.ndarray | torch.Tensor
+        Translated images in the requested format.
+    nfe : int
+        Number of function evaluations (denoising steps) used.
+    """
+
+    images: Any
+    nfe: int = 0
+
+
+class E3DiffPipeline(DiffusionPipeline):
+    """Image-to-image translation pipeline using E3Diff conditional diffusion.
+
+    Wraps a :class:`GaussianDiffusion` model (which contains the
+    :class:`E3DiffUNet` and noise schedule) with a standard
+    ``DiffusionPipeline`` interface for inference.
+
+    Inherits from :class:`~diffusers.DiffusionPipeline` so that checkpoints
+    can be loaded via ``from_pretrained`` following the HuggingFace
+    *diffusers* convention.
+
+    Parameters
+    ----------
+    diffusion : GaussianDiffusion
+        A ``GaussianDiffusion`` instance with the noise schedule already set
+        via :meth:`GaussianDiffusion.set_noise_schedule`.
+
+    Example
+    -------
+    ::
+
+        from examples.community.e3diff import (
+            E3DiffUNet, GaussianDiffusion, E3DiffPipeline,
+        )
+
+        unet = E3DiffUNet(...)
+        diff = GaussianDiffusion(denoise_fn=unet, image_size=256, channels=3)
+        diff.set_noise_schedule(n_timestep=1000, schedule="linear", device="cpu")
+        pipeline = E3DiffPipeline(diffusion=diff)
+        output = pipeline(source_image=sar_tensor, num_inference_steps=50)
+    """
+
+    model_cpu_offload_seq = "diffusion"
+
+    def __init__(self, diffusion: GaussianDiffusion) -> None:
+        super().__init__()
+        self.register_modules(diffusion=diffusion)
+
+    @property
+    def device(self) -> torch.device:
+        """Get the device of the pipeline."""
+        return next(self.diffusion.parameters()).device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        """Get the dtype of the pipeline."""
+        return next(self.diffusion.parameters()).dtype
+
+    def prepare_inputs(
+        self,
+        image: Union[torch.Tensor, Image.Image, List[Image.Image]],
+        device: torch.device,
+        dtype: torch.dtype,
+    ) -> torch.Tensor:
+        """Prepare input images for the pipeline.
+
+        Converts PIL images or numpy arrays to normalised tensors in
+        ``[-1, 1]`` range.
+        """
+        if isinstance(image, Image.Image):
+            image = [image]
+
+        if isinstance(image, list) and isinstance(image[0], Image.Image):
+            images = []
+            for img in image:
+                img_array = np.array(img, dtype=np.float32)
+                if img_array.max() > 1.0:
+                    img_array = img_array / 255.0
+                if img_array.ndim == 2:
+                    img_array = img_array[:, :, np.newaxis]
+                img_tensor = torch.from_numpy(img_array).permute(2, 0, 1)
+                images.append(img_tensor)
+            image = torch.stack(images)
+
+        if isinstance(image, np.ndarray):
+            image = torch.from_numpy(image)
+
+        # Ensure image is in [-1, 1] range
+        if image.min() >= 0 and image.max() <= 1.0:
+            image = image * 2 - 1  # [0, 1] → [-1, 1]
+        elif image.max() > 1.0:
+            image = image / 255.0 * 2 - 1  # [0, 255] → [-1, 1]
+
+        return image.to(device=device, dtype=dtype)
+
+    @torch.no_grad()
+    def __call__(
+        self,
+        source_image: Union[torch.Tensor, Image.Image, List[Image.Image]],
+        num_inference_steps: int = 50,
+        eta: float = 0.8,
+        output_type: str = "pil",
+        return_dict: bool = True,
+    ) -> Union[E3DiffPipelineOutput, tuple]:
+        """Run E3Diff DDIM sampling to translate a conditioning (SAR) image.
+
+        Parameters
+        ----------
+        source_image : Tensor | PIL.Image | list[PIL.Image]
+            Source (SAR / conditioning) image(s).  Tensors should be
+            ``(B, C, H, W)`` in ``[0, 1]`` or ``[-1, 1]`` range.
+        num_inference_steps : int
+            Number of DDIM denoising steps.
+        eta : float
+            DDIM stochasticity parameter (0 = deterministic, 1 = DDPM).
+        output_type : str
+            ``"pil"``, ``"np"``, or ``"pt"`` (default ``"pil"``).
+        return_dict : bool
+            If ``True``, return an :class:`E3DiffPipelineOutput`.
+
+        Returns
+        -------
+        E3DiffPipelineOutput or tuple
+            Translated images and number of function evaluations.
+        """
+        device = self.device
+        dtype = self.dtype
+
+        condition = self.prepare_inputs(source_image, device, dtype)
+
+        self.diffusion.eval()
+        images = self.diffusion.sample(
+            condition, n_ddim_steps=num_inference_steps, eta=eta,
+        )
+        images = images.clamp(-1, 1)
+
+        nfe = num_inference_steps
+
+        if output_type == "pil":
+            images = self._convert_to_pil(images)
+        elif output_type == "np":
+            images = self._convert_to_numpy(images)
+
+        if not return_dict:
+            return (images, nfe)
+        return E3DiffPipelineOutput(images=images, nfe=nfe)
+
+    @staticmethod
+    def _convert_to_pil(images: torch.Tensor) -> List[Image.Image]:
+        """Convert tensor in [-1, 1] to PIL images."""
+        images = (images + 1) / 2  # [-1, 1] → [0, 1]
+        images = images.clamp(0, 1)
+        images = images.cpu().permute(0, 2, 3, 1).numpy()
+        images = (images * 255).round().astype(np.uint8)
+        pil_images = []
+        for img in images:
+            if img.shape[2] == 1:
+                pil_images.append(Image.fromarray(img.squeeze(2), mode="L"))
+            else:
+                pil_images.append(Image.fromarray(img))
+        return pil_images
+
+    @staticmethod
+    def _convert_to_numpy(images: torch.Tensor) -> np.ndarray:
+        """Convert tensor in [-1, 1] to numpy array in [0, 1]."""
+        images = (images + 1) / 2
+        images = images.clamp(0, 1)
+        images = images.cpu().permute(0, 2, 3, 1).numpy()
+        return images

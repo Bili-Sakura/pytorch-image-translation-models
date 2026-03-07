@@ -6,7 +6,7 @@
 This community pipeline is organised into three modules:
 
 * ``model.py`` – Network architectures (``ParaGAN``, ``Resrecon``, discriminator, losses).
-* ``pipeline.py`` – Inference helpers.
+* ``pipeline.py`` – Inference pipeline (``ParallelGANPipeline``, inherits ``DiffusionPipeline``).
 * ``train.py``  – Training configuration (``ParallelGANConfig``) and harness (``ParallelGANTrainer``).
 
 See ``readme.md`` in this directory for usage examples and citation info.
@@ -18,6 +18,10 @@ from examples.community.parallel_gan.model import (
     VGGLoss,
     _GANLoss,
 )
+from examples.community.parallel_gan.pipeline import (
+    ParallelGANPipeline,
+    ParallelGANPipelineOutput,
+)
 from examples.community.parallel_gan.train import (
     ParallelGANConfig,
     ParallelGANTrainer,
@@ -28,6 +32,8 @@ __all__ = [
     "Resrecon",
     "VGGLoss",
     "_GANLoss",
+    "ParallelGANPipeline",
+    "ParallelGANPipelineOutput",
     "ParallelGANConfig",
     "ParallelGANTrainer",
 ]

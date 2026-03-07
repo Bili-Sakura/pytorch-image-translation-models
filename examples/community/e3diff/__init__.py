@@ -6,7 +6,8 @@
 This community pipeline is organised into three modules:
 
 * ``model.py``    – Network architectures (``E3DiffUNet``, ``CPEN``, losses, building blocks).
-* ``pipeline.py`` – Diffusion pipeline (``GaussianDiffusion``, beta schedules).
+* ``pipeline.py`` – Inference pipeline (``E3DiffPipeline``, inherits ``DiffusionPipeline``)
+                    and diffusion internals (``GaussianDiffusion``, beta schedules).
 * ``train.py``    – Training configuration (``E3DiffConfig``) and harness (``E3DiffTrainer``).
 
 See ``readme.md`` in this directory for usage examples and citation info.
@@ -18,6 +19,8 @@ from examples.community.e3diff.model import (
     FocalFrequencyLoss,
 )
 from examples.community.e3diff.pipeline import (
+    E3DiffPipeline,
+    E3DiffPipelineOutput,
     GaussianDiffusion,
 )
 from examples.community.e3diff.train import (
@@ -29,6 +32,8 @@ __all__ = [
     "CPEN",
     "E3DiffUNet",
     "FocalFrequencyLoss",
+    "E3DiffPipeline",
+    "E3DiffPipelineOutput",
     "GaussianDiffusion",
     "E3DiffConfig",
     "E3DiffTrainer",

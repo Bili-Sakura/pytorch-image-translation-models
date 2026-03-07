@@ -425,3 +425,139 @@ class TestE3DiffTrainer:
     def test_instantiation_stage2(self, trainer_s2):
         assert trainer_s2.diffusion is not None
         assert trainer_s2.netD is not None
+
+
+# ---------------------------------------------------------------------------
+# DiffusionPipeline-based inference tests
+# ---------------------------------------------------------------------------
+
+
+class TestParallelGANPipeline:
+    """Tests for the ParallelGANPipeline (DiffusionPipeline subclass)."""
+
+    @pytest.fixture
+    def pipeline(self):
+        from examples.community.parallel_gan import ParaGAN, ParallelGANPipeline
+
+        gen = ParaGAN(input_nc=3, output_nc=3, n_blocks=2)
+        return ParallelGANPipeline(generator=gen)
+
+    def test_inherits_diffusion_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from examples.community.parallel_gan import ParallelGANPipeline
+
+        assert issubclass(ParallelGANPipeline, DiffusionPipeline)
+
+    def test_call_output_pt(self, pipeline):
+        from examples.community.parallel_gan import ParallelGANPipelineOutput
+
+        x = torch.randn(1, 3, 256, 256)
+        out = pipeline(source_image=x, output_type="pt")
+        assert isinstance(out, ParallelGANPipelineOutput)
+        assert isinstance(out.images, torch.Tensor)
+        assert out.images.shape == (1, 3, 256, 256)
+        assert out.images.min() >= -1.0
+        assert out.images.max() <= 1.0
+
+    def test_call_output_np(self, pipeline):
+        import numpy as np
+
+        x = torch.randn(1, 3, 256, 256)
+        out = pipeline(source_image=x, output_type="np")
+        assert isinstance(out.images, np.ndarray)
+        assert out.images.shape == (1, 256, 256, 3)
+        assert out.images.min() >= 0.0
+        assert out.images.max() <= 1.0
+
+    def test_call_output_pil(self, pipeline):
+        from PIL import Image
+
+        x = torch.randn(1, 3, 256, 256)
+        out = pipeline(source_image=x, output_type="pil")
+        assert isinstance(out.images, list)
+        assert isinstance(out.images[0], Image.Image)
+        assert out.images[0].size == (256, 256)
+
+    def test_call_return_tuple(self, pipeline):
+        x = torch.randn(1, 3, 256, 256)
+        out = pipeline(source_image=x, output_type="pt", return_dict=False)
+        assert isinstance(out, tuple)
+        assert isinstance(out[0], torch.Tensor)
+
+    def test_device_property(self, pipeline):
+        assert pipeline.device == torch.device("cpu")
+
+    def test_dtype_property(self, pipeline):
+        assert pipeline.dtype == torch.float32
+
+
+class TestE3DiffPipeline:
+    """Tests for the E3DiffPipeline (DiffusionPipeline subclass)."""
+
+    @pytest.fixture
+    def pipeline(self):
+        from examples.community.e3diff import E3DiffPipeline, E3DiffUNet, GaussianDiffusion
+
+        unet = E3DiffUNet(
+            out_channel=3,
+            inner_channel=16,
+            norm_groups=16,
+            channel_mults=(1, 2, 4, 8, 16),
+            res_blocks=1,
+            image_size=64,
+            condition_ch=3,
+        )
+        diff = GaussianDiffusion(
+            denoise_fn=unet, image_size=64, channels=3, xT_noise_r=0.1,
+        )
+        diff.set_noise_schedule(n_timestep=10, schedule="linear", device="cpu")
+        return E3DiffPipeline(diffusion=diff)
+
+    def test_inherits_diffusion_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from examples.community.e3diff import E3DiffPipeline
+
+        assert issubclass(E3DiffPipeline, DiffusionPipeline)
+
+    def test_call_output_pt(self, pipeline):
+        from examples.community.e3diff import E3DiffPipelineOutput
+
+        x = torch.randn(1, 3, 64, 64)
+        out = pipeline(source_image=x, num_inference_steps=2, output_type="pt")
+        assert isinstance(out, E3DiffPipelineOutput)
+        assert isinstance(out.images, torch.Tensor)
+        assert out.images.shape == (1, 3, 64, 64)
+        assert out.nfe == 2
+
+    def test_call_output_np(self, pipeline):
+        import numpy as np
+
+        x = torch.randn(1, 3, 64, 64)
+        out = pipeline(source_image=x, num_inference_steps=2, output_type="np")
+        assert isinstance(out.images, np.ndarray)
+        assert out.images.shape == (1, 64, 64, 3)
+        assert out.images.min() >= 0.0
+        assert out.images.max() <= 1.0
+
+    def test_call_output_pil(self, pipeline):
+        from PIL import Image
+
+        x = torch.randn(1, 3, 64, 64)
+        out = pipeline(source_image=x, num_inference_steps=2, output_type="pil")
+        assert isinstance(out.images, list)
+        assert isinstance(out.images[0], Image.Image)
+        assert out.images[0].size == (64, 64)
+
+    def test_call_return_tuple(self, pipeline):
+        x = torch.randn(1, 3, 64, 64)
+        out = pipeline(source_image=x, num_inference_steps=2, output_type="pt", return_dict=False)
+        assert isinstance(out, tuple)
+        assert len(out) == 2
+        assert isinstance(out[0], torch.Tensor)
+        assert out[1] == 2  # nfe
+
+    def test_device_property(self, pipeline):
+        assert pipeline.device == torch.device("cpu")
+
+    def test_dtype_property(self, pipeline):
+        assert pipeline.dtype == torch.float32
