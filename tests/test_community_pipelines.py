@@ -180,3 +180,248 @@ class TestGANLoss:
         loss = loss_fn(pred, target_is_real=False)
         assert loss.dim() == 0
         assert loss.item() >= 0.0
+
+
+# ---------------------------------------------------------------------------
+# E3Diff
+# ---------------------------------------------------------------------------
+
+# Shared small configuration used across all E3Diff tests to keep them fast.
+_E3DIFF_KWARGS = dict(
+    condition_ch=3,
+    out_ch=3,
+    image_size=64,
+    inner_channel=16,
+    channel_mults=(1, 2, 4, 8, 16),
+    res_blocks=1,
+    n_timestep=10,
+    device="cpu",
+)
+
+
+class TestCPEN:
+    """Tests for the Conditional Prior Enhancement Network."""
+
+    def test_output_shapes(self):
+        from examples.community.e3diff import CPEN
+
+        cpen = CPEN(in_channel=3, base_ch=16)
+        x = torch.randn(1, 3, 64, 64)
+        c1, c2, c3, c4, c5 = cpen(x)
+        assert c1.shape == (1, 16, 64, 64)
+        assert c2.shape == (1, 32, 32, 32)
+        assert c3.shape == (1, 64, 16, 16)
+        assert c4.shape == (1, 128, 8, 8)
+        assert c5.shape == (1, 256, 4, 4)
+
+    def test_single_channel_input(self):
+        """CPEN should accept single-channel (SAR) input."""
+        from examples.community.e3diff import CPEN
+
+        cpen = CPEN(in_channel=1, base_ch=16)
+        x = torch.randn(2, 1, 64, 64)
+        c1, c2, c3, c4, c5 = cpen(x)
+        assert c1.shape[0] == 2
+
+
+class TestE3DiffUNet:
+    """Tests for the E3Diff denoising U-Net."""
+
+    def test_output_shape(self):
+        from examples.community.e3diff import E3DiffUNet
+
+        unet = E3DiffUNet(
+            out_channel=3,
+            inner_channel=16,
+            norm_groups=16,
+            channel_mults=(1, 2, 4, 8, 16),
+            res_blocks=1,
+            image_size=64,
+            condition_ch=3,
+        )
+        # Input: condition (3ch) concatenated with noisy target (3ch)
+        x = torch.randn(1, 6, 64, 64)
+        noise_level = torch.rand(1, 1)
+        out = unet(x, noise_level)
+        assert out.shape == (1, 3, 64, 64)
+
+    def test_single_channel_condition(self):
+        """UNet should accept single-channel SAR conditioning."""
+        from examples.community.e3diff import E3DiffUNet
+
+        unet = E3DiffUNet(
+            out_channel=3,
+            inner_channel=16,
+            norm_groups=16,
+            channel_mults=(1, 2, 4, 8, 16),
+            res_blocks=1,
+            image_size=64,
+            condition_ch=1,
+        )
+        x = torch.randn(1, 4, 64, 64)  # 1 + 3 = 4 channels
+        noise_level = torch.rand(1, 1)
+        out = unet(x, noise_level)
+        assert out.shape == (1, 3, 64, 64)
+
+    def test_invalid_channel_mults(self):
+        """E3DiffUNet should raise if channel_mults does not have 5 entries."""
+        from examples.community.e3diff import E3DiffUNet
+
+        with pytest.raises(ValueError, match="exactly 5"):
+            E3DiffUNet(channel_mults=(1, 2, 4, 8))
+
+
+class TestGaussianDiffusion:
+    """Tests for the GaussianDiffusion wrapper."""
+
+    @pytest.fixture
+    def diffusion(self):
+        from examples.community.e3diff import E3DiffUNet, GaussianDiffusion
+
+        unet = E3DiffUNet(
+            out_channel=3,
+            inner_channel=16,
+            norm_groups=16,
+            channel_mults=(1, 2, 4, 8, 16),
+            res_blocks=1,
+            image_size=64,
+            condition_ch=3,
+        )
+        diff = GaussianDiffusion(denoise_fn=unet, image_size=64, channels=3, xT_noise_r=0.1)
+        diff.set_noise_schedule(n_timestep=10, schedule="linear", device="cpu")
+        return diff
+
+    def test_stage1_forward(self, diffusion):
+        data = {"HR": torch.randn(1, 3, 64, 64), "SR": torch.randn(1, 3, 64, 64)}
+        l_pix, x_start, x_pred = diffusion(data, stage=1)
+        assert l_pix.dim() == 0
+        assert x_start.shape == (1, 3, 64, 64)
+        assert x_pred.shape == (1, 3, 64, 64)
+        assert l_pix.item() >= 0.0
+
+    def test_stage2_forward(self, diffusion):
+        data = {"HR": torch.randn(1, 3, 64, 64), "SR": torch.randn(1, 3, 64, 64)}
+        l_pix, x_start, x_pred = diffusion(data, stage=2)
+        assert x_pred.shape == (1, 3, 64, 64)
+
+    def test_sample_shape(self, diffusion):
+        condition = torch.randn(1, 3, 64, 64)
+        out = diffusion.sample(condition, n_ddim_steps=2)
+        assert out.shape == (1, 3, 64, 64)
+
+
+class TestFocalFrequencyLoss:
+    """Tests for the Focal Frequency Loss."""
+
+    def test_output_is_scalar(self):
+        from examples.community.e3diff import FocalFrequencyLoss
+
+        loss_fn = FocalFrequencyLoss(loss_weight=1.0)
+        pred = torch.randn(2, 3, 64, 64)
+        target = torch.randn(2, 3, 64, 64)
+        loss = loss_fn(pred, target)
+        assert loss.dim() == 0
+
+    def test_identical_inputs_low_loss(self):
+        """Loss of identical pred and target should be near zero."""
+        from examples.community.e3diff import FocalFrequencyLoss
+
+        loss_fn = FocalFrequencyLoss(loss_weight=1.0)
+        x = torch.randn(2, 3, 64, 64)
+        loss = loss_fn(x, x)
+        assert loss.item() < 1e-4
+
+    def test_loss_weight(self):
+        from examples.community.e3diff import FocalFrequencyLoss
+
+        pred = torch.randn(1, 3, 64, 64)
+        target = torch.randn(1, 3, 64, 64)
+        loss1 = FocalFrequencyLoss(loss_weight=1.0)(pred, target)
+        loss2 = FocalFrequencyLoss(loss_weight=2.0)(pred, target)
+        assert abs(loss2.item() - 2 * loss1.item()) < 1e-5
+
+
+class TestE3DiffTrainer:
+    """Tests for the two-stage E3Diff trainer."""
+
+    @pytest.fixture
+    def trainer_s1(self):
+        from examples.community.e3diff import E3DiffConfig, E3DiffTrainer
+
+        cfg = E3DiffConfig(stage=1, **_E3DIFF_KWARGS)
+        return E3DiffTrainer(cfg)
+
+    @pytest.fixture
+    def trainer_s2(self):
+        from examples.community.e3diff import E3DiffConfig, E3DiffTrainer
+
+        cfg = E3DiffConfig(stage=2, lambda_gan=0.1, **_E3DIFF_KWARGS)
+        return E3DiffTrainer(cfg)
+
+    def test_stage1_train_step_keys(self, trainer_s1):
+        sar = torch.randn(1, 3, 64, 64)
+        opt = torch.randn(1, 3, 64, 64)
+        losses = trainer_s1.train_step(sar, opt)
+        assert "l_pix" in losses
+        assert isinstance(losses["l_pix"], float)
+
+    def test_stage1_with_fft_loss(self):
+        from examples.community.e3diff import E3DiffConfig, E3DiffTrainer
+
+        cfg = E3DiffConfig(stage=1, fft_weight=1.0, **_E3DIFF_KWARGS)
+        trainer = E3DiffTrainer(cfg)
+        sar = torch.randn(1, 3, 64, 64)
+        opt = torch.randn(1, 3, 64, 64)
+        losses = trainer.train_step(sar, opt)
+        assert "l_pix" in losses
+        assert "l_freq" in losses
+
+    def test_stage2_train_step_keys(self, trainer_s2):
+        sar = torch.randn(1, 3, 64, 64)
+        opt = torch.randn(1, 3, 64, 64)
+        losses = trainer_s2.train_step(sar, opt)
+        assert "l_pix" in losses
+        assert "l_G" in losses
+        assert "l_D" in losses
+        assert isinstance(losses["l_D"], float)
+
+    def test_stage2_requires_discriminator(self):
+        """Calling train_step_stage2 without stage=2 config should raise."""
+        from examples.community.e3diff import E3DiffConfig, E3DiffTrainer
+
+        cfg = E3DiffConfig(stage=1, **_E3DIFF_KWARGS)
+        trainer = E3DiffTrainer(cfg)
+        sar = torch.randn(1, 3, 64, 64)
+        opt = torch.randn(1, 3, 64, 64)
+        with pytest.raises(RuntimeError, match="stage=2"):
+            trainer.train_step_stage2(sar, opt)
+
+    def test_sample_shape(self, trainer_s1):
+        sar = torch.randn(1, 3, 64, 64)
+        pred = trainer_s1.sample(sar, n_ddim_steps=2)
+        assert pred.shape == (1, 3, 64, 64)
+
+    def test_sample_range(self, trainer_s1):
+        """Sampled output should be clipped to [-1, 1]."""
+        sar = torch.randn(1, 3, 64, 64)
+        pred = trainer_s1.sample(sar, n_ddim_steps=2)
+        assert pred.min().item() >= -1.1  # slight tolerance for float precision
+        assert pred.max().item() <= 1.1
+
+    def test_config_defaults(self):
+        from examples.community.e3diff import E3DiffConfig
+
+        cfg = E3DiffConfig()
+        assert cfg.stage == 1
+        assert cfg.condition_ch == 3
+        assert cfg.out_ch == 3
+        assert cfg.n_timestep == 1000
+        assert cfg.channel_mults == (1, 2, 4, 8, 16)
+
+    def test_instantiation_stage1(self, trainer_s1):
+        assert trainer_s1.diffusion is not None
+        assert trainer_s1.netD is None  # no discriminator in Stage 1
+
+    def test_instantiation_stage2(self, trainer_s2):
+        assert trainer_s2.diffusion is not None
+        assert trainer_s2.netD is not None
