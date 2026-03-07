@@ -508,7 +508,7 @@ class TestE3DiffPipeline:
             condition_ch=3,
         )
         diff = GaussianDiffusion(
-            denoise_fn=unet, image_size=64, channels=3, xT_noise_r=0.1,
+            denoise_fn=unet, image_size=64, channels=3, xT_noise_r=0.1
         )
         diff.set_noise_schedule(n_timestep=10, schedule="linear", device="cpu")
         return E3DiffPipeline(diffusion=diff)
@@ -523,6 +523,7 @@ class TestE3DiffPipeline:
         from examples.community.e3diff import E3DiffPipelineOutput
 
         x = torch.randn(1, 3, 64, 64)
+        # Use only 2 steps for test speed; production typically uses 50.
         out = pipeline(source_image=x, num_inference_steps=2, output_type="pt")
         assert isinstance(out, E3DiffPipelineOutput)
         assert isinstance(out.images, torch.Tensor)

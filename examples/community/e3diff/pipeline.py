@@ -16,7 +16,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from functools import partial
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import torch
@@ -394,7 +394,7 @@ class E3DiffPipelineOutput(BaseOutput):
         Number of function evaluations (denoising steps) used.
     """
 
-    images: Any
+    images: Union[List[Image.Image], np.ndarray, torch.Tensor]
     nfe: int = 0
 
 
@@ -520,7 +520,7 @@ class E3DiffPipeline(DiffusionPipeline):
 
         self.diffusion.eval()
         images = self.diffusion.sample(
-            condition, n_ddim_steps=num_inference_steps, eta=eta,
+            condition, n_ddim_steps=num_inference_steps, eta=eta
         )
         images = images.clamp(-1, 1)
 
