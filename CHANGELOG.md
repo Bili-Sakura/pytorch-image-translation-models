@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-03-07
+
+### Changed
+
+- Refactored community pipelines into per-model subfolders under `examples/community/<model_name>/` with `model.py`, `pipeline.py`, `train.py`, and `README.md`.
+- Updated `parallel_gan` and `e3diff` inference to use `DiffusionPipeline`-based pipeline classes.
+- Normalized community documentation filenames from `readme.md` to `README.md`.
+
 ## [0.2.1] - 2026-03-06
 
 ### Added
@@ -94,7 +102,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.2
 [0.2.1]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.0
 [0.1.3]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.1.3

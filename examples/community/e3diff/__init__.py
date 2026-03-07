@@ -10,7 +10,7 @@ This community pipeline is organised into three modules:
                     and diffusion internals (``GaussianDiffusion``, beta schedules).
 * ``train.py``    – Training configuration (``E3DiffConfig``) and harness (``E3DiffTrainer``).
 
-See ``readme.md`` in this directory for usage examples and citation info.
+See ``README.md`` in this directory for usage examples and citation info.
 """
 
 from examples.community.e3diff.model import (

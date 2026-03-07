@@ -7,7 +7,7 @@ Community pipelines are **self-contained modules** contributed by the community.
 | `model.py` | Network architectures, losses, and utility code |
 | `pipeline.py` | Inference / pipeline logic |
 | `train.py` | Training configuration and harness |
-| `readme.md` | Usage examples and citation information |
+| `README.md` | Usage examples and citation information |
 
 ## How to use
 
@@ -19,7 +19,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 ## How to contribute
 
 1. Create a subfolder under `examples/community/` named after the model (e.g. `my_model/`).
-2. Add `model.py`, `pipeline.py`, `train.py`, and `readme.md`.
+2. Add `model.py`, `pipeline.py`, `train.py`, and `README.md`.
 3. Create an `__init__.py` that re-exports all public symbols.
 4. Add an entry to this README.
 5. Add tests in `tests/test_community_pipelines.py`.

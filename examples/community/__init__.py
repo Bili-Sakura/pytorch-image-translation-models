@@ -9,13 +9,13 @@ Each community pipeline lives in its own subfolder under
 * ``model.py``    – Network architectures and losses.
 * ``pipeline.py`` – Inference / pipeline logic.
 * ``train.py``    – Training configuration and harness.
-* ``readme.md``   – Usage examples and citation information.
+* ``README.md``   – Usage examples and citation information.
 
 **How to add a new community pipeline**
 
 1. Create a subfolder under ``examples/community/`` named after the model,
    e.g. ``examples/community/my_model/``.
-2. Add ``model.py``, ``pipeline.py``, ``train.py``, and ``readme.md``.
+2. Add ``model.py``, ``pipeline.py``, ``train.py``, and ``README.md``.
 3. Create an ``__init__.py`` that re-exports all public symbols.
 4. Add an entry in ``examples/community/README.md``.
 

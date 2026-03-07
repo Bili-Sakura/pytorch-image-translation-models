@@ -9,7 +9,7 @@ This community pipeline is organised into three modules:
 * ``pipeline.py`` – Inference pipeline (``ParallelGANPipeline``, inherits ``DiffusionPipeline``).
 * ``train.py``  – Training configuration (``ParallelGANConfig``) and harness (``ParallelGANTrainer``).
 
-See ``readme.md`` in this directory for usage examples and citation info.
+See ``README.md`` in this directory for usage examples and citation info.
 """
 
 from examples.community.parallel_gan.model import (
