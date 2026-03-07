@@ -21,4 +21,5 @@ inference so that the pipeline works without any other project code.
 Available community pipelines:
 
 * ``parallel_gan.py`` – Parallel-GAN (Wang et al., TGRS 2022)
+* ``e3diff.py`` – E3Diff (Qin et al., IEEE GRSL 2024)
 """
