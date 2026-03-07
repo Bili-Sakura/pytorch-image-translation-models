@@ -1,0 +1,194 @@
+# Copyright (c) 2026 EarthBridge Team.
+# Credits: Local Diffusion from Kim et al. "Tackling Structural Hallucination in Image Translation with Local Diffusion" ECCV 2024 Oral.
+
+"""Local Diffusion trainer for paired conditional image-to-image translation."""
+
+from __future__ import annotations
+
+import logging
+import os
+from pathlib import Path
+
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from tqdm import tqdm
+
+from src.data.datasets import PairedImageDataset
+from src.models.local_diffusion import create_unet
+from src.schedulers.local_diffusion import LocalDiffusionScheduler
+
+from .config import LocalDiffusionConfig
+
+logger = logging.getLogger(__name__)
+
+
+def _build_transform(resolution: int):
+    """Build transform: resize, to tensor."""
+    return transforms.Compose([
+        transforms.Resize((resolution, resolution)),
+        transforms.ToTensor(),
+    ])
+
+
+class LocalDiffusionTrainer:
+    """Training harness for Local Diffusion.
+
+    Uses :class:`PairedImageDataset` for paired source (conditioning)
+    and target (ground truth) images.  The model learns to denoise the
+    target image conditioned on the source.
+    """
+
+    def __init__(self, config: LocalDiffusionConfig) -> None:
+        self.config = config
+        self.device = torch.device(config.device if torch.cuda.is_available() else "cpu")
+
+        # Model
+        self.model = create_unet(
+            dim=config.dim,
+            channels=config.channels,
+            dim_mults=config.dim_mults,
+            resnet_block_groups=config.resnet_block_groups,
+            attn_dim_head=config.attn_dim_head,
+            attn_heads=config.attn_heads,
+            full_attn=config.full_attn,
+            cond_in_channels=config.cond_in_channels,
+            cond_filters=config.cond_filters,
+            init_type=config.init_type,
+            init_gain=config.init_gain,
+        ).to(self.device)
+
+        # Scheduler
+        self.scheduler = LocalDiffusionScheduler(
+            num_train_timesteps=config.num_train_timesteps,
+            beta_schedule=config.beta_schedule,
+            objective=config.objective,
+            min_snr_loss_weight=config.min_snr_loss_weight,
+            min_snr_gamma=config.min_snr_gamma,
+        )
+
+        # Optimizer
+        self.optimizer = torch.optim.Adam(
+            self.model.parameters(),
+            lr=config.lr,
+            betas=(config.beta1, config.beta2),
+        )
+
+    def build_dataset(
+        self,
+        root_source: str | Path,
+        root_target: str | Path,
+    ) -> PairedImageDataset:
+        """Build paired dataset with transforms."""
+        transform = _build_transform(self.config.resolution)
+        return PairedImageDataset(
+            root_source=root_source,
+            root_target=root_target,
+            transform_source=transform,
+            transform_target=transform,
+        )
+
+    def train_step(self, source: torch.Tensor, target: torch.Tensor) -> dict:
+        """Single training step.
+
+        Parameters
+        ----------
+        source : Tensor (B, C, H, W)
+            Source/conditioning images in [0, 1].
+        target : Tensor (B, C, H, W)
+            Target/ground-truth images in [0, 1].
+
+        Returns
+        -------
+        dict
+            Loss values for logging.
+        """
+        cfg = self.config
+        source = source.to(self.device) * 2 - 1  # [0,1] → [-1,1]
+        target = target.to(self.device) * 2 - 1
+
+        b = target.shape[0]
+        t = torch.randint(0, cfg.num_train_timesteps, (b,), device=self.device).long()
+
+        # Forward diffusion
+        noise = torch.randn_like(target)
+        x_t = self.scheduler.q_sample(target, t, noise=noise)
+
+        # Model prediction
+        model_output = self.model(x_t, source, t)
+
+        # Select target based on objective
+        if cfg.objective == "pred_noise":
+            loss_target = noise
+        elif cfg.objective == "pred_x0":
+            loss_target = target
+        elif cfg.objective == "pred_v":
+            loss_target = (
+                self.scheduler._extract(self.scheduler.sqrt_alphas_cumprod, t, target.shape) * noise
+                - self.scheduler._extract(self.scheduler.sqrt_one_minus_alphas_cumprod, t, target.shape) * target
+            )
+
+        # Compute loss
+        loss = self.scheduler.compute_loss(model_output, loss_target, t)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        nn.utils.clip_grad_norm_(self.model.parameters(), cfg.max_grad_norm)
+        self.optimizer.step()
+
+        return {"loss": loss.item()}
+
+    def train(
+        self,
+        root_source: str | Path,
+        root_target: str | Path,
+    ) -> None:
+        """Run full training loop."""
+        cfg = self.config
+        os.makedirs(cfg.save_dir, exist_ok=True)
+
+        dataset = self.build_dataset(root_source, root_target)
+        dataloader = DataLoader(
+            dataset,
+            batch_size=cfg.batch_size,
+            shuffle=True,
+            num_workers=0,
+            drop_last=True,
+        )
+
+        global_step = 0
+        for epoch in range(cfg.epochs):
+            self.model.train()
+            pbar = tqdm(dataloader, desc=f"Epoch {epoch + 1}/{cfg.epochs}")
+
+            for batch in pbar:
+                source = batch["source"]
+                target = batch["target"]
+                logs = self.train_step(source, target)
+                global_step += 1
+
+                if global_step % cfg.log_every == 0:
+                    pbar.set_postfix(logs)
+                    logger.info(
+                        "step %d | loss=%.4f",
+                        global_step, logs["loss"],
+                    )
+
+            if (epoch + 1) % cfg.save_every == 0:
+                self.save_checkpoint(cfg.save_dir, epoch + 1)
+
+        logger.info("Local Diffusion training complete. Checkpoints saved to %s", cfg.save_dir)
+
+    def save_checkpoint(self, save_dir: str, epoch: int) -> None:
+        """Save model checkpoint."""
+        path = Path(save_dir) / f"checkpoint-epoch-{epoch}"
+        path.mkdir(parents=True, exist_ok=True)
+
+        from safetensors.torch import save_file
+
+        model_path = path / "model"
+        model_path.mkdir(exist_ok=True)
+        save_file(self.model.state_dict(), model_path / "model.safetensors")
+
+        logger.info("Saved checkpoint to %s", path)

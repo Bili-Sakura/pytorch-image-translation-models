@@ -44,6 +44,7 @@ pip install -e ".[all]"
 - **StegoGAN** — `ResnetMaskV1Generator`, `ResnetMaskV3Generator`, `NetMatchability` (steganographic masking for non-bijective translation, CVPR 2024)
 - **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net for Image-to-Image Schrödinger Bridge)
 - **UNSB** — `UNSBGenerator`, `UNSBDiscriminator`, `UNSBEnergyNet` (time-conditional networks for Unpaired Neural Schrödinger Bridge, ICLR 2024)
+- **Local Diffusion** — `LocalDiffusionUNet`, `ConditionEncoder` (conditional denoising U-Net with branch-and-fuse for hallucination suppression, ECCV 2024 Oral)
 - **DiT backbone** — `SiTBackbone` (Scalable Interpolant Transformer for diffusion bridges)
 
 ### Schedulers
@@ -59,6 +60,7 @@ pip install -e ".[all]"
 | **CDTSDEScheduler** | Dynamic domain-shift eta schedule for CDTSDE |
 | **LBMScheduler** | Flow-matching bridge for single/few-step LBM translation |
 | **UNSBScheduler** | Non-uniform harmonic time schedule with stochastic bridge dynamics for UNSB |
+| **LocalDiffusionScheduler** | Gaussian diffusion (DDPM/DDIM) with sigmoid/cosine/linear beta schedules for Local Diffusion |
 
 ### Pipelines
 
@@ -73,6 +75,7 @@ pip install -e ".[all]"
 | **CDTSDEPipeline** | CDTSDE with dynamic domain-shift scheduling |
 | **LBMPipeline** | LBM flow-matching for single/few-step image translation |
 | **UNSBPipeline** | Multi-step Schrödinger Bridge with adversarial + contrastive losses |
+| **LocalDiffusionPipeline** | Branch-and-fuse diffusion for hallucination-aware image translation |
 
 All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 
@@ -238,6 +241,43 @@ trainer = UNSBTrainer(cfg)
 losses = trainer.train_step(real_A_batch, real_B_batch)
 ```
 
+### Local Diffusion hallucination-aware translation
+
+```python
+from src.models.local_diffusion import create_unet
+from src.schedulers.local_diffusion import LocalDiffusionScheduler
+from src.pipelines.local_diffusion import LocalDiffusionPipeline
+
+# Create conditional U-Net and Gaussian diffusion scheduler
+unet = create_unet(dim=32, channels=1, dim_mults=(1, 2, 4, 8))
+scheduler = LocalDiffusionScheduler(num_train_timesteps=250, beta_schedule="sigmoid")
+
+# Standard inference
+pipeline = LocalDiffusionPipeline(unet=unet, scheduler=scheduler)
+result = pipeline(cond_image, output_type="pt")
+
+# Branch-and-fuse inference (hallucination suppression)
+result = pipeline(
+    cond_image, anomaly_mask=mask,
+    branch_out=True, fusion_timestep=2, output_type="pt",
+)
+```
+
+### Local Diffusion training
+
+```python
+from examples.local_diffusion.config import LocalDiffusionConfig
+from examples.local_diffusion.train_local_diffusion import LocalDiffusionTrainer
+
+cfg = LocalDiffusionConfig(
+    dim=32, channels=1,
+    num_train_timesteps=250, beta_schedule="sigmoid",
+    objective="pred_x0", device="cuda",
+)
+trainer = LocalDiffusionTrainer(cfg)
+losses = trainer.train_step(source_batch, target_batch)
+```
+
 ### I2SB training with task configs
 
 ```python
@@ -289,6 +329,8 @@ src/                                 # ← Core library (single source of truth)
 │       └── networks.py             # NetMatchability, mask_generate, ResnetBlock
 │   └── unsb/
 │       └── unsb_model.py           # UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
+│   └── local_diffusion/
+│       └── local_diffusion_model.py # LocalDiffusionUNet, ConditionEncoder
 ├── schedulers/                      # One scheduler per method
 │   ├── i2sb.py                     # I2SBScheduler
 │   ├── ddbm.py                     # DDBMScheduler
@@ -299,6 +341,7 @@ src/                                 # ← Core library (single source of truth)
 │   ├── cdtsde.py                   # CDTSDEScheduler
 │   └── lbm.py                      # LBMScheduler
 │   └── unsb.py                     # UNSBScheduler
+│   └── local_diffusion.py          # LocalDiffusionScheduler (DDPM/DDIM)
 ├── pipelines/                       # One pipeline per method
 │   ├── i2sb.py                     # I2SBPipeline
 │   ├── ddbm.py                     # DDBMPipeline
@@ -309,6 +352,7 @@ src/                                 # ← Core library (single source of truth)
 │   ├── cdtsde.py                   # CDTSDEPipeline
 │   └── lbm.py                      # LBMPipeline
 │   └── unsb.py                     # UNSBPipeline
+│   └── local_diffusion.py          # LocalDiffusionPipeline
 ├── data/
 │   ├── datasets.py                 # PairedImageDataset, UnpairedImageDataset
 │   └── transforms.py               # get_transforms, default_transforms
@@ -347,6 +391,7 @@ examples/                            # ← Training/inference scripts (import fr
 - [Parallel-GAN: SAR-to-Optical Image Translation with Hierarchical Latent Features (TGRS 2022)](https://ieeexplore.ieee.org/document/9864654)
 - [CUT: Contrastive Unpaired Translation (ECCV 2020)](https://link.springer.com/chapter/10.1007/978-3-030-58545-7_19)
 - [UNSB: Unpaired Image-to-Image Translation via Neural Schrödinger Bridge (ICLR 2024)](https://openreview.net/forum?id=uQBW7ELXfO)
+- [Local Diffusion: Tackling Structural Hallucination in Image Translation with Local Diffusion (ECCV 2024 Oral)](https://arxiv.org/abs/2407.17578)
 - [CycleGAN (ICCV 2017)](https://openaccess.thecvf.com/content_iccv_2017/html/Zhu_Unpaired_Image-To-Image_Translation_ICCV_2017_paper.html)
 - [img2img-turbo (2024)](https://doi.org/10.48550/arXiv.2403.12036)
 

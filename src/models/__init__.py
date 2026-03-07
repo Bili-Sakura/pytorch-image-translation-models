@@ -30,6 +30,10 @@ from src.models.unsb import (
     UNSBDiscriminator,
     UNSBEnergyNet,
 )
+from src.models.local_diffusion import (
+    LocalDiffusionUNet,
+    ConditionEncoder,
+)
 
 __all__ = [
     "UNetGenerator",
@@ -56,4 +60,6 @@ __all__ = [
     "UNSBGenerator",
     "UNSBDiscriminator",
     "UNSBEnergyNet",
+    "LocalDiffusionUNet",
+    "ConditionEncoder",
 ]
