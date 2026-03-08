@@ -75,36 +75,21 @@ class DDBMPipeline(DiffusionPipeline):
     ) -> "DDBMPipeline":
         """Load DDBM pipeline from a local checkpoint directory.
 
-        Tries, in order:
-        1. Raw .pt checkpoint (OpenAI/improved_diffusion format) – for BiliSakura/DDBM-ckpt
-        2. unet/ subfolder with config.json + diffusion_pytorch_model.safetensors
+        Expects unet/ with config.json + diffusion_pytorch_model.safetensors
+        (diffusers format). For BiliSakura/DDBM-ckpt (OpenAI-style), use
+        :func:`examples.community.ddbm.load_ddbm_community_pipeline`.
         """
         model_root = Path(pretrained_model_name_or_path)
         unet_dir = model_root / subfolder if subfolder else model_root
+        unet_config = unet_dir / "config.json"
+        unet_weights = unet_dir / "diffusion_pytorch_model.safetensors"
+        if not (unet_config.exists() and unet_weights.exists()):
+            return super().from_pretrained(
+                pretrained_model_name_or_path, subfolder=subfolder, **kwargs
+            )
 
-        unet = None
-        pt_files = list(model_root.glob("*.pt"))
-
-        if pt_files:
-            try:
-                from src.models.unet.openai_ddbm_unet import OpenAIDDBMUNet
-
-                unet = OpenAIDDBMUNet.from_pretrained(
-                    model_root, checkpoint_name=pt_files[0].name, device=device
-                )
-            except Exception:
-                pass
-
-        if unet is None:
-            unet_config = unet_dir / "config.json"
-            unet_weights = unet_dir / "diffusion_pytorch_model.safetensors"
-            if unet_config.exists() and unet_weights.exists():
-                unet = DDBMUNet.from_pretrained(model_root, subfolder=subfolder)
-                unet = unet.eval().to(device=device)
-            else:
-                return super().from_pretrained(
-                    pretrained_model_name_or_path, subfolder=subfolder, **kwargs
-                )
+        unet = DDBMUNet.from_pretrained(model_root, subfolder=subfolder)
+        unet = unet.eval().to(device=device)
 
         scheduler_cfg = None
         for candidate in (

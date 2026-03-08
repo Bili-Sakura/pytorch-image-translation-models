@@ -30,10 +30,33 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 
 | Pipeline | Paper | Description |
 |----------|-------|-------------|
+| [`ddbm/`](ddbm/) | [Zhou et al., ICLR 2024](https://arxiv.org/abs/2309.16948) | DDBM for OpenAI-style checkpoints (BiliSakura/DDBM-ckpt); uses improved_diffusion architecture |
 | [`parallel_gan/`](parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical translation with hierarchical latent features via a two-stage approach (reconstruction + translation) |
 | [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
 | [`openearthmap_sar/`](openearthmap_sar/) | [Park et al., ECCV 2020](https://arxiv.org/abs/2007.15651) | CUT models for SAR ↔ optical image translation with anti-aliased ResNet generator (opt2sar, sar2opt, seman2opt, seman2sar, etc.) |
 | [`sar2optical/`](sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation, adapted from yuuIind/SAR2Optical |
+
+---
+
+### DDBM (Community)
+
+**Paper:** *Denoising Diffusion Bridge Models* (Zhou et al., ICLR 2024)
+
+**Architecture:** OpenAI/improved_diffusion-style U-Net (input_blocks, middle_block, output_blocks). Compatible with [BiliSakura/DDBM-ckpt](https://huggingface.co/BiliSakura/DDBM-ckpt). The standard `src` DDBM uses diffusers UNet2DModel and does not match this architecture.
+
+**Quick start:**
+
+```python
+from examples.community.ddbm import load_ddbm_community_pipeline
+
+pipe = load_ddbm_community_pipeline(
+    "/path/to/DDBM-ckpt/edges2handbags-vp",
+    device="cuda",
+)
+out = pipe(source_image=image, num_inference_steps=40, output_type="pil")
+```
+
+**Converting from raw .pt:** `python -m examples.community.ddbm.convert_pt_to_unet /path/to/model_dir --checkpoint ckpt.pt`
 
 ---
 

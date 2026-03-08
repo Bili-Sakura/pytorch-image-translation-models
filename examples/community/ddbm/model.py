@@ -3,11 +3,13 @@
 
 """OpenAI-style UNet for DDBM checkpoints (input_blocks / middle_block / output_blocks).
 
-Loads raw .pt checkpoints from alexzhou907/DDBM (improved_diffusion format).
+Compatible with alexzhou907/DDBM checkpoints (improved_diffusion format).
+Loads from unet/diffusion_pytorch_model.safetensors (converted from raw .pt).
 """
 
 from __future__ import annotations
 
+import json
 import math
 from pathlib import Path
 from typing import Optional
@@ -20,6 +22,8 @@ __all__ = ["OpenAIDDBMUNet"]
 
 
 def _conv_nd(ndim: int, *args, **kwargs) -> nn.Module:
+    if ndim == 1:
+        return nn.Conv1d(*args, **kwargs)
     if ndim == 2:
         return nn.Conv2d(*args, **kwargs)
     raise ValueError(f"ndim={ndim} not supported")
@@ -33,7 +37,9 @@ def timestep_embedding(timesteps: torch.Tensor, dim: int) -> torch.Tensor:
     """Sinusoidal timestep embedding."""
     half = dim // 2
     freqs = torch.exp(
-        -math.log(10000) * torch.arange(half, dtype=torch.float32, device=timesteps.device) / half
+        -math.log(10000)
+        * torch.arange(half, dtype=torch.float32, device=timesteps.device)
+        / half
     )
     args = timesteps[:, None].float() * freqs[None]
     return torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
@@ -65,7 +71,9 @@ class Downsample(nn.Module):
             self.op = _conv_nd(dims, channels, channels, 3, stride=stride, padding=1)
         else:
             stride_val = stride if isinstance(stride, int) else stride[0]
-            self.op = nn.AvgPool2d(stride_val) if dims == 2 else nn.AvgPool3d(stride_val)
+            self.op = (
+                nn.AvgPool2d(stride_val) if dims == 2 else nn.AvgPool3d(stride_val)
+            )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.op(x)
@@ -120,19 +128,25 @@ class ResBlock(TimestepBlock):
             nn.SiLU(),
             _linear(
                 emb_channels,
-                2 * self.out_channels if use_scale_shift_norm else self.out_channels,
+                2 * self.out_channels
+                if use_scale_shift_norm
+                else self.out_channels,
             ),
         )
         self.out_layers = nn.Sequential(
             nn.GroupNorm(32, self.out_channels),
             nn.SiLU(),
             nn.Dropout(p=dropout),
-            zero_module(_conv_nd(dims, self.out_channels, self.out_channels, 3, padding=1)),
+            zero_module(
+                _conv_nd(dims, self.out_channels, self.out_channels, 3, padding=1)
+            ),
         )
         if self.out_channels == channels:
             self.skip_connection = nn.Identity()
         elif use_conv:
-            self.skip_connection = _conv_nd(dims, channels, self.out_channels, 3, padding=1)
+            self.skip_connection = _conv_nd(
+                dims, channels, self.out_channels, 3, padding=1
+            )
         else:
             self.skip_connection = _conv_nd(dims, channels, self.out_channels, 1)
 
@@ -163,29 +177,32 @@ class QKVAttention(nn.Module):
 
 
 class AttentionBlock(nn.Module):
-    def __init__(self, channels: int, num_heads: int = 1, use_checkpoint: bool = False):
+    def __init__(
+        self, channels: int, num_heads: int = 1, use_checkpoint: bool = False
+    ):
         super().__init__()
         self.channels = channels
         self.num_heads = num_heads
         self.use_checkpoint = use_checkpoint
         self.norm = nn.GroupNorm(32, channels)
-        self.qkv = _conv_nd(1, channels, channels * 3, 1)
+        self.qkv = nn.Conv2d(channels, channels * 3, 1)
         self.attention = QKVAttention()
-        self.proj_out = zero_module(_conv_nd(1, channels, channels, 1))
+        self.proj_out = zero_module(nn.Conv2d(channels, channels, 1))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         b, c, *spatial = x.shape
-        x_flat = x.reshape(b, c, -1)
-        qkv = self.qkv(self.norm(x_flat))
-        qkv = qkv.reshape(b * self.num_heads, -1, qkv.shape[-1])
+        h = self.norm(x)
+        qkv = self.qkv(h)
+        qkv = qkv.reshape(b, 3 * c, -1)
+        qkv = qkv.reshape(b * self.num_heads, 3 * c // self.num_heads, -1)
         h = self.attention(qkv)
-        h = h.reshape(b, -1, h.shape[-1])
+        h = h.reshape(b, c, *spatial)
         h = self.proj_out(h)
-        return (x_flat + h).reshape(b, c, *spatial)
+        return x + h
 
 
 class OpenAIDDBMUNetCore(nn.Module):
-    """OpenAI improved_diffusion UNetModel. Loads from raw .pt checkpoints."""
+    """OpenAI improved_diffusion UNetModel. Loads from safetensors (OpenAI key format)."""
 
     def __init__(
         self,
@@ -196,7 +213,7 @@ class OpenAIDDBMUNetCore(nn.Module):
         attention_resolutions: tuple[int, ...] = (2, 4, 8),
         dropout: float = 0.0,
         channel_mult: tuple[int, ...] = (1, 2, 3, 4),
-        conv_resample: bool = True,
+        conv_resample: bool = False,
         use_scale_shift_norm: bool = True,
         num_heads: int = 1,
     ):
@@ -213,7 +230,11 @@ class OpenAIDDBMUNetCore(nn.Module):
         )
 
         self.input_blocks = nn.ModuleList(
-            [TimestepEmbedSequential(_conv_nd(2, in_channels, model_channels, 3, padding=1))]
+            [
+                TimestepEmbedSequential(
+                    _conv_nd(2, in_channels, model_channels, 3, padding=1)
+                )
+            ]
         )
         input_block_chans = [model_channels]
         ch = model_channels
@@ -238,7 +259,9 @@ class OpenAIDDBMUNetCore(nn.Module):
                 input_block_chans.append(ch)
             if level != len(channel_mult) - 1:
                 self.input_blocks.append(
-                    TimestepEmbedSequential(Downsample(ch, conv_resample, dims=2))
+                    TimestepEmbedSequential(
+                        Downsample(ch, conv_resample, dims=2)
+                    )
                 )
                 input_block_chans.append(ch)
             ds *= 2
@@ -285,11 +308,15 @@ class OpenAIDDBMUNetCore(nn.Module):
         self.out = nn.Sequential(
             nn.GroupNorm(32, ch),
             nn.SiLU(),
-            zero_module(_conv_nd(2, model_channels, out_channels, 3, padding=1)),
+            zero_module(
+                _conv_nd(2, model_channels, out_channels, 3, padding=1)
+            ),
         )
 
     def forward(self, x: torch.Tensor, timesteps: torch.Tensor) -> torch.Tensor:
-        emb = self.time_embed(timestep_embedding(timesteps, self.model_channels))
+        emb = self.time_embed(
+            timestep_embedding(timesteps, self.model_channels)
+        )
         hs = []
         h = x
         for module in self.input_blocks:
@@ -314,7 +341,7 @@ class OpenAIDDBMUNet(nn.Module):
         attention_resolutions: tuple[int, ...] = (2, 4, 8),
         dropout: float = 0.0,
         channel_mult: tuple[int, ...] = (1, 2, 3, 4),
-        conv_resample: bool = True,
+        conv_resample: bool = False,
         use_scale_shift_norm: bool = True,
         condition_mode: str = "concat",
     ):
@@ -349,52 +376,45 @@ class OpenAIDDBMUNet(nn.Module):
         cls,
         pretrained_model_name_or_path: str | Path,
         *,
-        checkpoint_name: Optional[str] = None,
+        subfolder: str = "unet",
         device: str | torch.device = "cpu",
         **kwargs,
     ) -> "OpenAIDDBMUNet":
+        """Load from unet/ (config.json + diffusion_pytorch_model.safetensors)."""
         path = Path(pretrained_model_name_or_path)
-        if checkpoint_name is None:
-            pt_files = list(path.glob("*.pt"))
-            if not pt_files:
-                raise FileNotFoundError(f"No .pt checkpoint found in {path}")
-            ckpt_path = pt_files[0]
-        else:
-            ckpt_path = path / checkpoint_name
-            if not ckpt_path.exists():
-                raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
+        unet_dir = path / subfolder
+        config_path = unet_dir / "config.json"
+        weights_path = unet_dir / "diffusion_pytorch_model.safetensors"
 
-        state = torch.load(str(ckpt_path), map_location="cpu", weights_only=True)
-        if isinstance(state, dict) and "state_dict" in state:
-            state = state["state_dict"]
-        if isinstance(state, dict) and "ema_model" in state:
-            state = state["ema_model"]
+        if not config_path.exists() or not weights_path.exists():
+            raise FileNotFoundError(
+                f"DDBM community format requires {config_path} and {weights_path}"
+            )
 
-        config = cls._infer_config(state)
-        model = cls(**config)
-        missing, unexpected = model.load_state_dict(state, strict=False)
-        if missing:
-            raise RuntimeError(f"Missing keys when loading DDBM checkpoint: {missing[:10]}...")
+        with open(config_path, encoding="utf-8") as f:
+            config = json.load(f)
+
+        def _t(x):
+            return tuple(x) if isinstance(x, list) else x
+
+        model = cls(
+            in_channels=config.get("in_channels", 3),
+            model_channels=config["model_channels"],
+            out_channels=config.get("out_channels", 3),
+            num_res_blocks=config.get("num_res_blocks", 3),
+            attention_resolutions=_t(config.get("attention_resolutions", (2, 4, 8))),
+            channel_mult=_t(config.get("channel_mult", (1, 2, 3, 4))),
+            conv_resample=config.get("conv_resample", False),
+            condition_mode=config.get("condition_mode", "concat"),
+        )
+
+        from safetensors.torch import load_file
+        state = load_file(str(weights_path))
+        missing, unexpected = model.unet.load_state_dict(state, strict=False)
+        if len(missing) > 50:
+            raise RuntimeError(
+                f"Too many missing keys ({len(missing)}) loading DDBM community checkpoint"
+            )
         model.eval()
         model.to(device)
         return model
-
-    @staticmethod
-    def _infer_config(state: dict) -> dict:
-        w = state["input_blocks.0.0.weight"]
-        unet_in_ch, model_ch = int(w.shape[1]), int(w.shape[0])
-        base_ch = unet_in_ch // 2 if unet_in_ch == 6 else unet_in_ch
-        out_w = state.get("out.2.weight", state.get("out.0.weight"))
-        out_ch = int(out_w.shape[0]) if out_w is not None else 3
-        channel_mult = (1, 2, 3, 4)
-        num_res_blocks = 3
-        attention_resolutions = (2, 4, 8)
-        return {
-            "in_channels": base_ch,
-            "model_channels": model_ch,
-            "out_channels": out_ch,
-            "num_res_blocks": num_res_blocks,
-            "attention_resolutions": attention_resolutions,
-            "channel_mult": channel_mult,
-            "condition_mode": "concat",
-        }
