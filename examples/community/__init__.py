@@ -23,4 +23,5 @@ Available community pipelines:
 
 * ``parallel_gan/`` – Parallel-GAN (Wang et al., TGRS 2022)
 * ``e3diff/`` – E3Diff (Qin et al., IEEE GRSL 2024)
+* ``SAR2Optical`` – External community project (https://github.com/yuuIind/SAR2Optical.git)
 """
