@@ -32,6 +32,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 |----------|-------|-------------|
 | [`parallel_gan/`](parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical translation with hierarchical latent features via a two-stage approach (reconstruction + translation) |
 | [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
+| [`SAR2Optical (external)`](https://github.com/yuuIind/SAR2Optical.git) | GitHub repository | Community SAR-to-Optical translation project maintained externally |
 
 ---
 
