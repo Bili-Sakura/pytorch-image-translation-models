@@ -6,11 +6,15 @@
 
 from __future__ import annotations
 
+import functools
+import json
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
+import torch.nn as nn
 from PIL import Image
 
 from src.models.stegogan.generators import (
@@ -57,6 +61,83 @@ class StegoGANPipeline:
     ) -> None:
         self.netG_A = netG_A
         self.netG_B = netG_B
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder_a: str = "generator_A",
+        subfolder_b: str = "generator_B",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+    ) -> "StegoGANPipeline":
+        """Load StegoGAN generators from local config + safetensors."""
+        root = Path(pretrained_model_name_or_path)
+        dir_a = root / subfolder_a
+        dir_b = root / subfolder_b
+
+        cfg_a_path = dir_a / "config.json"
+        cfg_b_path = dir_b / "config.json"
+        w_a_path = dir_a / "diffusion_pytorch_model.safetensors"
+        w_b_path = dir_b / "diffusion_pytorch_model.safetensors"
+        if not (cfg_a_path.exists() and cfg_b_path.exists() and w_a_path.exists() and w_b_path.exists()):
+            raise FileNotFoundError(
+                "Expected StegoGAN layout with generator_A/generator_B config + safetensors."
+            )
+
+        with open(cfg_a_path, encoding="utf-8") as f:
+            cfg_a = json.load(f)
+        with open(cfg_b_path, encoding="utf-8") as f:
+            cfg_b = json.load(f)
+
+        norm_name = cfg_a.get("norm", "instance")
+        if norm_name == "instance":
+            norm_layer = functools.partial(nn.InstanceNorm2d, affine=False, track_running_stats=False)
+        elif norm_name == "batch":
+            norm_layer = nn.BatchNorm2d
+        else:
+            raise ValueError(f"Unsupported norm in StegoGAN config: {norm_name}")
+
+        netG_A = ResnetMaskV1Generator(
+            input_nc=cfg_a.get("input_nc", 3),
+            output_nc=cfg_a.get("output_nc", 3),
+            ngf=cfg_a.get("ngf", 64),
+            norm_layer=norm_layer,
+            use_dropout=cfg_a.get("use_dropout", False),
+            n_blocks=cfg_a.get("n_blocks", 9),
+            resnet_layer=cfg_a.get("resnet_layer", 1),
+            fusionblock=cfg_a.get("fusionblock", False),
+        )
+        netG_B = ResnetMaskV3Generator(
+            input_nc=cfg_b.get("input_nc", 3),
+            output_nc=cfg_b.get("output_nc", 3),
+            ngf=cfg_b.get("ngf", 64),
+            norm_layer=norm_layer,
+            use_dropout=cfg_b.get("use_dropout", False),
+            n_blocks=cfg_b.get("n_blocks", 9),
+            input_dim=cfg_b.get("input_dim", 256),
+            out_dim=cfg_b.get("out_dim", 256),
+            resnet_layer=cfg_b.get("resnet_layer", 1),
+        )
+
+        from safetensors.torch import load_file
+
+        netG_A.load_state_dict(load_file(str(w_a_path), device="cpu"), strict=True)
+        netG_B.load_state_dict(load_file(str(w_b_path), device="cpu"), strict=True)
+
+        netG_A = netG_A.eval().to(device=device)
+        netG_B = netG_B.eval().to(device=device)
+        if torch_dtype is not None:
+            netG_A = netG_A.to(dtype=torch_dtype)
+            netG_B = netG_B.to(dtype=torch_dtype)
+        return cls(netG_A=netG_A, netG_B=netG_B)
+
+    def to(self, device: str | torch.device) -> "StegoGANPipeline":
+        """Move both generators to a target device."""
+        self.netG_A = self.netG_A.to(device)
+        self.netG_B = self.netG_B.to(device)
+        return self
 
     @torch.no_grad()
     def __call__(

@@ -9,11 +9,15 @@ Parallel-GAN generator, following the diffusers-style pipeline pattern.
 
 from __future__ import annotations
 
+import functools
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Union
 
 import numpy as np
 import torch
+import torch.nn as nn
 from PIL import Image
 
 from diffusers import DiffusionPipeline
@@ -66,6 +70,54 @@ class ParallelGANPipeline(DiffusionPipeline):
     def __init__(self, generator: ParaGAN) -> None:
         super().__init__()
         self.register_modules(generator=generator)
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "generator",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "ParallelGANPipeline":
+        """Load Parallel-GAN from local config + safetensors."""
+        model_dir = Path(pretrained_model_name_or_path)
+        if subfolder:
+            model_dir = model_dir / subfolder
+
+        config_path = model_dir / "config.json"
+        weights_path = model_dir / "diffusion_pytorch_model.safetensors"
+        if not (config_path.exists() and weights_path.exists()):
+            return super().from_pretrained(pretrained_model_name_or_path, subfolder=subfolder, **kwargs)
+
+        with open(config_path, encoding="utf-8") as f:
+            cfg = json.load(f)
+
+        norm_name = cfg.get("norm", "batch")
+        if norm_name == "instance":
+            norm_layer = functools.partial(nn.InstanceNorm2d, affine=False, track_running_stats=False)
+        elif norm_name == "batch":
+            norm_layer = nn.BatchNorm2d
+        else:
+            raise ValueError(f"Unsupported norm in Parallel-GAN config: {norm_name}")
+
+        generator = ParaGAN(
+            input_nc=cfg.get("input_nc", 3),
+            output_nc=cfg.get("output_nc", 3),
+            channel=cfg.get("channel", 2048),
+            norm_layer=norm_layer,
+            use_dropout=cfg.get("use_dropout", False),
+            n_blocks=cfg.get("n_blocks", 6),
+        )
+        from safetensors.torch import load_file
+
+        state_dict = load_file(str(weights_path), device="cpu")
+        generator.load_state_dict(state_dict, strict=True)
+        generator = generator.eval().to(device=device)
+        if torch_dtype is not None:
+            generator = generator.to(dtype=torch_dtype)
+        return cls(generator=generator)
 
     @property
     def device(self) -> torch.device:

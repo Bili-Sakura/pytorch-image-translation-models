@@ -12,6 +12,7 @@ Reference: https://arxiv.org/abs/2503.07535
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, List, Optional, Union
 
 import numpy as np
@@ -22,6 +23,7 @@ from tqdm.auto import tqdm
 from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 
+from src.models.unet.diffusers_wrappers import LBMUNet
 from src.schedulers.lbm import LBMScheduler
 
 
@@ -57,6 +59,30 @@ class LBMPipeline(DiffusionPipeline):
     def __init__(self, unet: torch.nn.Module, scheduler: LBMScheduler) -> None:
         super().__init__()
         self.register_modules(unet=unet, scheduler=scheduler)
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "unet",
+        scheduler_subfolder: str = "scheduler",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "LBMPipeline":
+        """Load LBM pipeline from local checkpoint directories."""
+        unet = LBMUNet.from_pretrained(pretrained_model_name_or_path, subfolder=subfolder)
+        try:
+            scheduler = LBMScheduler.from_pretrained(
+                pretrained_model_name_or_path, subfolder=scheduler_subfolder
+            )
+        except Exception:
+            scheduler = LBMScheduler()
+        unet = unet.eval().to(device=device)
+        if torch_dtype is not None:
+            unet = unet.to(dtype=torch_dtype)
+        return cls(unet=unet, scheduler=scheduler)
 
     @property
     def device(self) -> torch.device:

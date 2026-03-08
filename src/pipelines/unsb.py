@@ -10,14 +10,16 @@ Schrödinger Bridge dynamics.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Union
 
 import numpy as np
 import torch
 from PIL import Image
 
-from src.models.unsb import UNSBGenerator
+from src.models.unsb import UNSBGenerator, create_generator
 from src.schedulers.unsb import UNSBScheduler
 
 
@@ -62,6 +64,54 @@ class UNSBPipeline:
     def __init__(self, generator: UNSBGenerator, scheduler: UNSBScheduler) -> None:
         self.generator = generator
         self.scheduler = scheduler
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "generator",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        scheduler_num_timesteps: int = 5,
+        scheduler_tau: float = 0.01,
+    ) -> "UNSBPipeline":
+        """Load UNSB pipeline from local config + safetensors."""
+        model_dir = Path(pretrained_model_name_or_path)
+        if subfolder:
+            model_dir = model_dir / subfolder
+
+        config_path = model_dir / "config.json"
+        weights_path = model_dir / "diffusion_pytorch_model.safetensors"
+        if not (config_path.exists() and weights_path.exists()):
+            raise FileNotFoundError("Expected UNSB generator config.json and diffusion_pytorch_model.safetensors")
+
+        with open(config_path, encoding="utf-8") as f:
+            cfg = json.load(f)
+
+        generator = create_generator(
+            input_nc=cfg.get("input_nc", 3),
+            output_nc=cfg.get("output_nc", 3),
+            ngf=cfg.get("ngf", 64),
+            n_blocks=cfg.get("n_blocks", 9),
+            n_mlp=cfg.get("n_mlp", 3),
+            norm_type=cfg.get("norm_type", "instance"),
+            use_dropout=cfg.get("use_dropout", False),
+            no_antialias=cfg.get("no_antialias", False),
+            no_antialias_up=cfg.get("no_antialias_up", False),
+            init_type=cfg.get("init_type", "normal"),
+            init_gain=cfg.get("init_gain", 0.02),
+        )
+        from safetensors.torch import load_file
+
+        state_dict = load_file(str(weights_path), device="cpu")
+        generator.load_state_dict(state_dict, strict=True)
+        generator = generator.eval().to(device=device)
+        if torch_dtype is not None:
+            generator = generator.to(dtype=torch_dtype)
+
+        scheduler = UNSBScheduler(num_timesteps=scheduler_num_timesteps, tau=scheduler_tau)
+        return cls(generator=generator, scheduler=scheduler)
 
     @property
     def device(self) -> torch.device:

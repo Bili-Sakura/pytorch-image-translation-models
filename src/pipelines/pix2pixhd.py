@@ -33,6 +33,52 @@ class Pix2PixHDPipeline(DiffusionPipeline):
         super().__init__()
         self.register_modules(generator=generator)
 
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "generator",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        strict: bool = False,
+        **kwargs,
+    ) -> "Pix2PixHDPipeline":
+        """Load pix2pixHD pipeline from local config + safetensors."""
+        model_dir = Path(pretrained_model_name_or_path)
+        if subfolder:
+            model_dir = model_dir / subfolder
+
+        config_path = model_dir / "config.json"
+        weights_path = model_dir / "diffusion_pytorch_model.safetensors"
+        if not (config_path.exists() and weights_path.exists()):
+            return super().from_pretrained(pretrained_model_name_or_path, subfolder=subfolder, **kwargs)
+
+        with open(config_path, encoding="utf-8") as f:
+            config = json.load(f)
+
+        norm_layer = functools.partial(nn.InstanceNorm2d, affine=False, track_running_stats=False)
+        generator = Pix2PixHDGenerator(
+            input_nc=config.get("input_nc", 3),
+            output_nc=config.get("output_nc", 3),
+            ngf=config.get("ngf", 64),
+            n_downsampling=config.get("n_downsampling", 4),
+            n_blocks=config.get("n_blocks", 9),
+            norm_layer=norm_layer,
+        )
+        from safetensors.torch import load_file
+
+        state_dict = load_file(str(weights_path), device="cpu")
+        try:
+            generator.load_state_dict(state_dict, strict=strict)
+        except RuntimeError:
+            # Fallback for keys saved without top-level "model." prefix.
+            generator.load_state_dict(_normalize_pix2pixhd_keys(state_dict), strict=strict)
+        generator = generator.eval().to(device=device)
+        if torch_dtype is not None:
+            generator = generator.to(dtype=torch_dtype)
+        return cls(generator=generator)
+
     @property
     def device(self) -> torch.device:
         return next(self.generator.parameters()).device

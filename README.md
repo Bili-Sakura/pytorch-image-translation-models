@@ -38,23 +38,33 @@ pip install -e ".[all]"
 
 ```python
 import src
+from PIL import Image
+from examples.community.e3diff import E3DiffPipeline
 
-gen = src.UNetGenerator(in_channels=3, out_channels=3)
-disc = src.PatchGANDiscriminator(in_channels=6)
+# Baseline method (DDBM) - one-stop load
+ddbm = src.DDBMPipeline.from_pretrained(
+    "/path/to/DDBM-ckpt/diode-vp",
+    subfolder="unet",
+    device="cuda",
+)
 
-from src.training import Pix2PixTrainer, TrainingConfig
-config = TrainingConfig(epochs=100, device="cuda")
-trainer = Pix2PixTrainer(gen, disc, config)
-trainer.fit(dataloader)  # expects {"source": tensor, "target": tensor}
+source = Image.open("/path/to/source.png").convert("RGB")
+baseline_out = ddbm(source_image=source, num_inference_steps=40, output_type="pil")
+baseline_out.images[0].save("ddbm_output.png")
 
-translator = src.ImageTranslator(gen, device="cuda")
-result = translator.predict(pil_image)
+# Community method (E3Diff) - one-stop load
+e3diff = E3DiffPipeline.from_pretrained(
+    "/path/to/E3Diff-ckpt/SEN12 ",
+    device="cuda",
+)
+community_out = e3diff(source_image=source, num_inference_steps=50, output_type="pil")
+community_out.images[0].save("e3diff_output.png")
 ```
 
 ## Documentation
 
 | Doc | Description |
-|-----|-------------|
+| --- | --- |
 | [Features](docs/features.md) | Models, schedulers, pipelines, data, losses, training, metrics |
 | [Examples](docs/examples.md) | Extended usage for I2SB, DDBM, UNSB, Local Diffusion, etc. |
 | [Package structure](docs/package-structure.md) | Source layout and module overview |

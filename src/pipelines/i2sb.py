@@ -5,13 +5,16 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
 from PIL import Image
 
+from src.models.unet.diffusers_wrappers import I2SBDiffusersUNet
 from src.models.unet.i2sb_unet import I2SBUNet
 from src.schedulers.i2sb import I2SBScheduler
 
@@ -46,6 +49,42 @@ class I2SBPipeline:
     def __init__(self, unet: I2SBUNet, scheduler: I2SBScheduler) -> None:
         self.unet = unet
         self.scheduler = scheduler
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "unet",
+        scheduler_config: str = "scheduler_config.json",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+    ) -> "I2SBPipeline":
+        """Load I2SB pipeline from local checkpoint and scheduler config."""
+        unet = I2SBDiffusersUNet.from_pretrained(pretrained_model_name_or_path, subfolder=subfolder)
+
+        root = Path(pretrained_model_name_or_path)
+        sched_cfg_path = root / scheduler_config
+        if not sched_cfg_path.exists():
+            sched_cfg_path = root / "scheduler" / scheduler_config
+        if sched_cfg_path.exists():
+            with open(sched_cfg_path, encoding="utf-8") as f:
+                cfg = json.load(f)
+            scheduler = I2SBScheduler(
+                interval=cfg.get("interval", 1000),
+                beta_max=cfg.get("beta_max", 0.3),
+            )
+        else:
+            scheduler = I2SBScheduler()
+
+        unet = unet.eval().to(device=device)
+        if torch_dtype is not None:
+            unet = unet.to(dtype=torch_dtype)
+        return cls(unet=unet, scheduler=scheduler)
+
+    def to(self, device: torch.device | str) -> "I2SBPipeline":
+        self.unet = self.unet.to(device)
+        return self
 
     @torch.no_grad()
     def __call__(

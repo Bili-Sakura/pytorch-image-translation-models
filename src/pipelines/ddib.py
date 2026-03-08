@@ -16,6 +16,7 @@ Translation." ICLR 2023.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, List, Optional, Union
 
 import numpy as np
@@ -25,6 +26,7 @@ from PIL import Image
 from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 
+from src.models.unet.diffusers_wrappers import DDIBUNet
 from src.schedulers.ddib import DDIBScheduler
 
 
@@ -74,6 +76,39 @@ class DDIBPipeline(DiffusionPipeline):
             target_unet=target_unet,
             scheduler=scheduler,
         )
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        source_subfolder: str = "source_unet",
+        target_subfolder: str = "target_unet",
+        scheduler_subfolder: str = "scheduler",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "DDIBPipeline":
+        """Load DDIB source/target UNets and scheduler from local folders."""
+        source_unet = DDIBUNet.from_pretrained(
+            pretrained_model_name_or_path, subfolder=source_subfolder
+        )
+        target_unet = DDIBUNet.from_pretrained(
+            pretrained_model_name_or_path, subfolder=target_subfolder
+        )
+        try:
+            scheduler = DDIBScheduler.from_pretrained(
+                pretrained_model_name_or_path, subfolder=scheduler_subfolder
+            )
+        except Exception:
+            scheduler = DDIBScheduler()
+
+        source_unet = source_unet.eval().to(device=device)
+        target_unet = target_unet.eval().to(device=device)
+        if torch_dtype is not None:
+            source_unet = source_unet.to(dtype=torch_dtype)
+            target_unet = target_unet.to(dtype=torch_dtype)
+        return cls(source_unet=source_unet, target_unet=target_unet, scheduler=scheduler)
 
     @property
     def device(self) -> torch.device:

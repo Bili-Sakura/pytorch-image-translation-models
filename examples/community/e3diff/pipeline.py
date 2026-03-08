@@ -13,9 +13,11 @@ Includes:
 
 from __future__ import annotations
 
+import json
 import math
 from dataclasses import dataclass
 from functools import partial
+from pathlib import Path
 from typing import List, Optional, Union
 
 import numpy as np
@@ -435,6 +437,58 @@ class E3DiffPipeline(DiffusionPipeline):
     def __init__(self, diffusion: GaussianDiffusion) -> None:
         super().__init__()
         self.register_modules(diffusion=diffusion)
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str | None = None,
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "E3DiffPipeline":
+        """Load E3Diff from local config + safetensors in one step."""
+        model_dir = Path(pretrained_model_name_or_path)
+        if subfolder:
+            model_dir = model_dir / subfolder
+
+        config_path = model_dir / "config.json"
+        weights_path = model_dir / "diffusion_pytorch_model.safetensors"
+        if not (config_path.exists() and weights_path.exists()):
+            if subfolder is None:
+                return super().from_pretrained(pretrained_model_name_or_path, **kwargs)
+            return super().from_pretrained(pretrained_model_name_or_path, subfolder=subfolder, **kwargs)
+
+        with open(config_path, encoding="utf-8") as f:
+            cfg = json.load(f)
+
+        unet_cfg = dict(cfg["unet_config"])
+        diff_cfg = dict(cfg["diffusion_config"])
+        unet = E3DiffUNet(**unet_cfg)
+        diffusion = GaussianDiffusion(
+            denoise_fn=unet,
+            image_size=diff_cfg["image_size"],
+            channels=diff_cfg["channels"],
+            loss_type=diff_cfg.get("loss_type", "l1"),
+            conditional=diff_cfg.get("conditional", True),
+            xT_noise_r=diff_cfg.get("xT_noise_r", 0.1),
+        )
+        diffusion.set_noise_schedule(
+            n_timestep=diff_cfg.get("n_timestep", 1000),
+            schedule=diff_cfg.get("schedule", "linear"),
+            device="cpu",
+        )
+
+        from safetensors.torch import load_file
+
+        state_dict = load_file(str(weights_path), device="cpu")
+        diffusion.load_state_dict(state_dict, strict=True)
+        diffusion = diffusion.eval().to(device=device)
+        if torch_dtype is not None:
+            diffusion = diffusion.to(dtype=torch_dtype)
+
+        return cls(diffusion=diffusion)
 
     @property
     def device(self) -> torch.device:

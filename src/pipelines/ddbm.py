@@ -9,7 +9,9 @@ using Heun's method for high-quality image-to-image translation.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, List, Optional, Union
 
 import numpy as np
@@ -21,6 +23,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 from diffusers.utils.torch_utils import randn_tensor
 
+from src.models.unet.diffusers_wrappers import DDBMUNet
 from src.schedulers.ddbm import DDBMScheduler
 
 
@@ -59,6 +62,64 @@ class DDBMPipeline(DiffusionPipeline):
         self.sigma_data = scheduler.config.sigma_data
         self.sigma_max = scheduler.config.sigma_max
         self.pred_mode = scheduler.config.pred_mode
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "unet",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "DDBMPipeline":
+        """Load DDBM pipeline from a local checkpoint directory.
+
+        Tries, in order:
+        1. Raw .pt checkpoint (OpenAI/improved_diffusion format) – for BiliSakura/DDBM-ckpt
+        2. unet/ subfolder with config.json + diffusion_pytorch_model.safetensors
+        """
+        model_root = Path(pretrained_model_name_or_path)
+        unet_dir = model_root / subfolder if subfolder else model_root
+
+        unet = None
+        pt_files = list(model_root.glob("*.pt"))
+
+        if pt_files:
+            try:
+                from src.models.unet.openai_ddbm_unet import OpenAIDDBMUNet
+
+                unet = OpenAIDDBMUNet.from_pretrained(
+                    model_root, checkpoint_name=pt_files[0].name, device=device
+                )
+            except Exception:
+                pass
+
+        if unet is None:
+            unet_config = unet_dir / "config.json"
+            unet_weights = unet_dir / "diffusion_pytorch_model.safetensors"
+            if unet_config.exists() and unet_weights.exists():
+                unet = DDBMUNet.from_pretrained(model_root, subfolder=subfolder)
+                unet = unet.eval().to(device=device)
+            else:
+                return super().from_pretrained(
+                    pretrained_model_name_or_path, subfolder=subfolder, **kwargs
+                )
+
+        scheduler_cfg = None
+        for candidate in (
+            model_root / "scheduler" / "scheduler_config.json",
+            model_root / "scheduler_config.json",
+        ):
+            if candidate.exists():
+                with open(candidate, encoding="utf-8") as f:
+                    scheduler_cfg = json.load(f)
+                break
+        scheduler = DDBMScheduler(**scheduler_cfg) if scheduler_cfg is not None else DDBMScheduler()
+
+        if torch_dtype is not None:
+            unet = unet.to(dtype=torch_dtype)
+        return cls(unet=unet, scheduler=scheduler)
 
     @property
     def device(self) -> torch.device:

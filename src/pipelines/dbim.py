@@ -15,6 +15,7 @@ Zheng, K., et al. "Diffusion Bridge Implicit Models." 2024.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, List, Optional, Tuple, Union
 
 import numpy as np
@@ -26,6 +27,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 from diffusers.utils.torch_utils import randn_tensor
 
+from src.models.unet.diffusers_wrappers import DBIMUNet
 from src.schedulers.dbim import DBIMScheduler
 
 
@@ -64,6 +66,30 @@ class DBIMPipeline(DiffusionPipeline):
     def __init__(self, unet: torch.nn.Module, scheduler: DBIMScheduler) -> None:
         super().__init__()
         self.register_modules(unet=unet, scheduler=scheduler)
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "unet",
+        scheduler_subfolder: str = "scheduler",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "DBIMPipeline":
+        """Load DBIM pipeline from local checkpoint directories."""
+        unet = DBIMUNet.from_pretrained(pretrained_model_name_or_path, subfolder=subfolder)
+        try:
+            scheduler = DBIMScheduler.from_pretrained(
+                pretrained_model_name_or_path, subfolder=scheduler_subfolder
+            )
+        except Exception:
+            scheduler = DBIMScheduler()
+        unet = unet.eval().to(device=device)
+        if torch_dtype is not None:
+            unet = unet.to(dtype=torch_dtype)
+        return cls(unet=unet, scheduler=scheduler)
 
     @property
     def device(self) -> torch.device:

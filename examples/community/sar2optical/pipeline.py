@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Union
@@ -31,6 +32,50 @@ class SAR2OpticalPipeline(DiffusionPipeline):
     def __init__(self, generator: SAR2OpticalGenerator) -> None:
         super().__init__()
         self.register_modules(generator=generator)
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "generator",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "SAR2OpticalPipeline":
+        """Load a SAR2Optical pipeline from local config + safetensors.
+
+        Expected layout:
+        ``<path>/<subfolder>/config.json`` and
+        ``<path>/<subfolder>/diffusion_pytorch_model.safetensors``.
+        """
+        model_dir = Path(pretrained_model_name_or_path)
+        if subfolder:
+            model_dir = model_dir / subfolder
+
+        config_path = model_dir / "config.json"
+        weights_path = model_dir / "diffusion_pytorch_model.safetensors"
+        if not (config_path.exists() and weights_path.exists()):
+            return super().from_pretrained(pretrained_model_name_or_path, subfolder=subfolder, **kwargs)
+
+        with open(config_path, encoding="utf-8") as f:
+            config = json.load(f)
+
+        generator = SAR2OpticalGenerator(
+            c_in=config.get("c_in", 3),
+            c_out=config.get("c_out", 3),
+            use_upsampling=config.get("use_upsampling", False),
+            mode=config.get("mode", "nearest"),
+        )
+        from safetensors.torch import load_file
+
+        state_dict = load_file(str(weights_path), device="cpu")
+        generator.load_state_dict(state_dict, strict=True)
+        generator = generator.eval().to(device=device)
+        if torch_dtype is not None:
+            generator = generator.to(dtype=torch_dtype)
+
+        return cls(generator=generator)
 
     @property
     def device(self) -> torch.device:

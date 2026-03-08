@@ -9,6 +9,7 @@ in :mod:`src.pipelines.ddbm`.
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Union
 
 import numpy as np
@@ -59,6 +60,27 @@ class CUTPipeline(DiffusionPipeline):
     def __init__(self, generator: CUTGenerator) -> None:
         super().__init__()
         self.register_modules(generator=generator)
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "generator",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "CUTPipeline":
+        """Load CUT pipeline from local generator checkpoint."""
+        generator = CUTGenerator.from_pretrained(
+            pretrained_model_name_or_path,
+            subfolder=subfolder,
+            **kwargs,
+        )
+        generator = generator.eval().to(device=device)
+        if torch_dtype is not None:
+            generator = generator.to(dtype=torch_dtype)
+        return cls(generator=generator)
 
     @property
     def device(self) -> torch.device:

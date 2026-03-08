@@ -10,6 +10,7 @@ for image-to-image translation with dynamic domain-shift scheduling.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, List, Optional, Union
 
 import numpy as np
@@ -21,6 +22,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 from diffusers.utils.torch_utils import randn_tensor
 
+from src.models.unet.diffusers_wrappers import CDTSDEUNet
 from src.schedulers.cdtsde import CDTSDEScheduler
 
 
@@ -57,6 +59,30 @@ class CDTSDEPipeline(DiffusionPipeline):
     def __init__(self, unet: torch.nn.Module, scheduler: CDTSDEScheduler) -> None:
         super().__init__()
         self.register_modules(unet=unet, scheduler=scheduler)
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "unet",
+        scheduler_subfolder: str = "scheduler",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "CDTSDEPipeline":
+        """Load CDTSDE pipeline from local checkpoint directories."""
+        unet = CDTSDEUNet.from_pretrained(pretrained_model_name_or_path, subfolder=subfolder)
+        try:
+            scheduler = CDTSDEScheduler.from_pretrained(
+                pretrained_model_name_or_path, subfolder=scheduler_subfolder
+            )
+        except Exception:
+            scheduler = CDTSDEScheduler()
+        unet = unet.eval().to(device=device)
+        if torch_dtype is not None:
+            unet = unet.to(dtype=torch_dtype)
+        return cls(unet=unet, scheduler=scheduler)
 
     @property
     def device(self) -> torch.device:

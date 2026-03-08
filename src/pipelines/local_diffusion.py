@@ -15,7 +15,10 @@ inference.  The pipeline supports two modes:
 
 from __future__ import annotations
 
+import inspect
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Optional, Union
 
 import numpy as np
@@ -70,6 +73,52 @@ class LocalDiffusionPipeline:
     ) -> None:
         self.unet = unet
         self.scheduler = scheduler
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        unet_subfolder: str = "unet",
+        scheduler_subfolder: str = "scheduler",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+    ) -> "LocalDiffusionPipeline":
+        """Load Local Diffusion UNet + scheduler from local config files."""
+        root = Path(pretrained_model_name_or_path)
+        unet_dir = root / unet_subfolder
+        cfg_path = unet_dir / "config.json"
+        weights_path = unet_dir / "diffusion_pytorch_model.safetensors"
+        if not (cfg_path.exists() and weights_path.exists()):
+            raise FileNotFoundError(
+                f"Expected {cfg_path} and {weights_path} for LocalDiffusionPipeline.from_pretrained"
+            )
+
+        with open(cfg_path, encoding="utf-8") as f:
+            unet_cfg = json.load(f)
+        valid_keys = set(inspect.signature(LocalDiffusionUNet.__init__).parameters.keys()) - {"self"}
+        unet_kwargs = {k: v for k, v in unet_cfg.items() if k in valid_keys}
+        unet = LocalDiffusionUNet(**unet_kwargs)
+
+        from safetensors.torch import load_file
+
+        state_dict = load_file(str(weights_path), device="cpu")
+        unet.load_state_dict(state_dict, strict=True)
+
+        sched_cfg_path = root / scheduler_subfolder / "scheduler_config.json"
+        if sched_cfg_path.exists():
+            with open(sched_cfg_path, encoding="utf-8") as f:
+                sched_cfg = json.load(f)
+            valid_s_keys = set(inspect.signature(LocalDiffusionScheduler.__init__).parameters.keys()) - {"self"}
+            sched_kwargs = {k: v for k, v in sched_cfg.items() if k in valid_s_keys}
+            scheduler = LocalDiffusionScheduler(**sched_kwargs)
+        else:
+            scheduler = LocalDiffusionScheduler()
+
+        unet = unet.eval().to(device=device)
+        if torch_dtype is not None:
+            unet = unet.to(dtype=torch_dtype)
+        return cls(unet=unet, scheduler=scheduler)
 
     @property
     def device(self) -> torch.device:
