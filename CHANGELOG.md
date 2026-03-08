@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-03-09
+
+### Added
+
+- **DDBM community pipeline** (`examples/community/ddbm/`): compatible with [BiliSakura/DDBM-ckpt](https://huggingface.co/BiliSakura/DDBM-ckpt) OpenAI-style checkpoints.
+  - Custom UNet architecture and conversion utilities (`convert_pt_to_unet.py`) to convert raw `.pt` checkpoints to the required unet format.
+  - `load_ddbm_pipeline` and `from_pretrained` methods for loading DDBM pipelines from local directories.
+  - Documentation with usage examples and checkpoint layout conventions.
+- **`from_pretrained` pipeline loading**: implemented for BDBM, BiBBDM, CDTSDE, CUT, DBIM, DDBM, DDIB, I2SB, LBM, LocalDiffusion, Pix2PixHD, StegoGAN, UNSB, plus community pipelines (E3Diff, ParallelGAN, SAR2Optical).
+- **OpenAI-style DDBM UNet** (`src/models/unet/openai_ddbm_unet.py`) for compatibility with existing DDBM checkpoints.
+
+### Changed
+
+- Enhanced error handling for missing configuration files and weights in pipeline loading.
+- Updated community catalog to include DDBM as an integrated pipeline option.
+
 ## [0.2.4] - 2026-03-08
 
 ### Added
@@ -120,7 +136,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.5
 [0.2.4]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.4
 [0.2.2]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.2
 [0.2.1]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.1
