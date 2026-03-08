@@ -5,6 +5,7 @@
 - **GAN generators** — `UNetGenerator` (encoder-decoder with skip connections), `ResNetGenerator` (residual blocks)
 - **GAN discriminators** — `PatchGANDiscriminator` (Markovian patch-level classifier)
 - **StegoGAN** — `ResnetMaskV1Generator`, `ResnetMaskV3Generator`, `NetMatchability` (steganographic masking for non-bijective translation, CVPR 2024)
+- **pix2pixHD** — `Pix2PixHDGenerator`, `Pix2PixHDGlobalGenerator` (high-resolution conditional GAN baseline, CVPR 2018)
 - **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net for Image-to-Image Schrödinger Bridge)
 - **UNSB** — `UNSBGenerator`, `UNSBDiscriminator`, `UNSBEnergyNet` (time-conditional networks for Unpaired Neural Schrödinger Bridge, ICLR 2024)
 - **Local Diffusion** — `LocalDiffusionUNet`, `ConditionEncoder` (conditional denoising U-Net with branch-and-fuse for hallucination suppression, ECCV 2024 Oral)
@@ -39,6 +40,7 @@
 | **LBMPipeline** | LBM flow-matching for single/few-step image translation |
 | **UNSBPipeline** | Multi-step Schrödinger Bridge with adversarial + contrastive losses |
 | **LocalDiffusionPipeline** | Branch-and-fuse diffusion for hallucination-aware image translation |
+| **Pix2PixHDPipeline** | Native pix2pixHD single-pass generator inference with checkpoint loader |
 
 All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 
@@ -68,4 +70,4 @@ Self-contained, single-file modules contributed by the community (inspired by [d
 |----------|-------|-------------|
 | [`parallel_gan/`](../examples/community/parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical with hierarchical latent features |
 | [`e3diff/`](../examples/community/e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion for one-step SAR-to-Optical |
-| [`SAR2Optical (external)`](https://github.com/yuuIind/SAR2Optical.git) | GitHub repository | Community SAR-to-Optical translation project maintained externally |
+| [`sar2optical/`](../examples/community/sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation adapted from yuuIind/SAR2Optical |

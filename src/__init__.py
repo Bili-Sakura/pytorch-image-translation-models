@@ -15,6 +15,7 @@ from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchabi
 from src.models import BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
 from src.models import UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
 from src.models import LocalDiffusionUNet, ConditionEncoder
+from src.models import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
 from src.pipelines import (
     BDBMPipeline,
     BDBMPipelineOutput,
@@ -38,6 +39,9 @@ from src.pipelines import (
     UNSBPipelineOutput,
     LocalDiffusionPipeline,
     LocalDiffusionPipelineOutput,
+    Pix2PixHDPipeline,
+    Pix2PixHDPipelineOutput,
+    load_pix2pixhd_pipeline,
 )
 from src.schedulers import (
     BDBMScheduler,
@@ -80,6 +84,8 @@ __all__ = [
     # Models — Local Diffusion
     "LocalDiffusionUNet",
     "ConditionEncoder",
+    "Pix2PixHDGenerator",
+    "Pix2PixHDGlobalGenerator",
     # Models — diffusers UNet wrappers
     "BDBMUNet",
     "BiBBDMUNet",
@@ -133,6 +139,9 @@ __all__ = [
     "UNSBPipelineOutput",
     "LocalDiffusionPipeline",
     "LocalDiffusionPipelineOutput",
+    "Pix2PixHDPipeline",
+    "Pix2PixHDPipelineOutput",
+    "load_pix2pixhd_pipeline",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",

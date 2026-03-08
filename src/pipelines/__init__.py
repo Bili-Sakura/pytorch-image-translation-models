@@ -12,6 +12,11 @@ from src.pipelines.stegogan import StegoGANPipeline, StegoGANPipelineOutput
 from src.pipelines.cut import CUTPipeline, CUTPipelineOutput
 from src.pipelines.unsb import UNSBPipeline, UNSBPipelineOutput
 from src.pipelines.local_diffusion import LocalDiffusionPipeline, LocalDiffusionPipelineOutput
+from src.pipelines.pix2pixhd import (
+    Pix2PixHDPipeline,
+    Pix2PixHDPipelineOutput,
+    load_pix2pixhd_pipeline,
+)
 
 __all__ = [
     "BDBMPipeline",
@@ -38,4 +43,7 @@ __all__ = [
     "UNSBPipelineOutput",
     "LocalDiffusionPipeline",
     "LocalDiffusionPipelineOutput",
+    "Pix2PixHDPipeline",
+    "Pix2PixHDPipelineOutput",
+    "load_pix2pixhd_pipeline",
 ]

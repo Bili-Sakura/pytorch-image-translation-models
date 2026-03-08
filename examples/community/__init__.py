@@ -23,5 +23,6 @@ Available community pipelines:
 
 * ``parallel_gan/`` – Parallel-GAN (Wang et al., TGRS 2022)
 * ``e3diff/`` – E3Diff (Qin et al., IEEE GRSL 2024)
-* ``SAR2Optical [external]`` – External community project (https://github.com/yuuIind/SAR2Optical.git)
+* ``openearthmap_sar`` – OpenEarthMap-SAR CUT models for SAR ↔ optical translation (Park et al., ECCV 2020)
+* ``sar2optical`` – Pix2Pix cGAN SAR → optical translation (Isola et al., CVPR 2017; yuuIind/SAR2Optical)
 """

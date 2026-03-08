@@ -428,6 +428,85 @@ class TestE3DiffTrainer:
 
 
 # ---------------------------------------------------------------------------
+# OpenEarthMap-SAR
+# ---------------------------------------------------------------------------
+
+
+class TestOpenEarthMapSARGenerator:
+    """Tests for the OpenEarthMap-SAR CUT generator."""
+
+    def test_output_shape(self):
+        from examples.community.openearthmap_sar import OpenEarthMapSARGenerator
+
+        gen = OpenEarthMapSARGenerator(in_channels=3, out_channels=3, base_filters=64, n_blocks=2)
+        x = torch.randn(1, 3, 256, 256)
+        out = gen(x)
+        assert out.shape == (1, 3, 256, 256)
+
+    def test_output_range(self):
+        from examples.community.openearthmap_sar import OpenEarthMapSARGenerator
+
+        gen = OpenEarthMapSARGenerator(in_channels=3, out_channels=3, base_filters=64, n_blocks=2)
+        x = torch.randn(1, 3, 256, 256)
+        out = gen(x)
+        assert out.min() >= -1.0
+        assert out.max() <= 1.0
+
+    def test_antialias_variants(self):
+        """Generator should work with both antialias and no-antialias configs."""
+        from examples.community.openearthmap_sar import OpenEarthMapSARGenerator
+
+        gen_aa = OpenEarthMapSARGenerator(no_antialias=False, no_antialias_up=False, n_blocks=2)
+        gen_no_aa = OpenEarthMapSARGenerator(no_antialias=True, no_antialias_up=True, n_blocks=2)
+        x = torch.randn(1, 3, 64, 64)
+        out_aa = gen_aa(x)
+        out_no_aa = gen_no_aa(x)
+        assert out_aa.shape == out_no_aa.shape == (1, 3, 64, 64)
+
+
+# ---------------------------------------------------------------------------
+# SAR2Optical
+# ---------------------------------------------------------------------------
+
+
+class TestSAR2OpticalGenerator:
+    """Tests for SAR2Optical pix2pix generator."""
+
+    def test_output_shape(self):
+        from examples.community.sar2optical import SAR2OpticalGenerator
+
+        gen = SAR2OpticalGenerator(c_in=3, c_out=3)
+        x = torch.randn(2, 3, 256, 256)
+        out = gen(x)
+        assert out.shape == (2, 3, 256, 256)
+
+    def test_output_range(self):
+        from examples.community.sar2optical import SAR2OpticalGenerator
+
+        gen = SAR2OpticalGenerator(c_in=3, c_out=3)
+        x = torch.randn(2, 3, 256, 256)
+        out = gen(x)
+        assert out.min() >= -1.0
+        assert out.max() <= 1.0
+
+
+class TestSAR2OpticalTrainer:
+    """Tests for SAR2Optical trainer."""
+
+    def test_train_step_keys(self):
+        from examples.community.sar2optical import SAR2OpticalConfig, SAR2OpticalTrainer
+
+        trainer = SAR2OpticalTrainer(SAR2OpticalConfig(c_in=3, c_out=3, device="cpu"))
+        x = torch.randn(2, 3, 256, 256)
+        y = torch.randn(2, 3, 256, 256)
+        losses = trainer.train_step(x, y)
+        assert "loss_D" in losses
+        assert "loss_G" in losses
+        assert "loss_G_GAN" in losses
+        assert "loss_G_L1" in losses
+
+
+# ---------------------------------------------------------------------------
 # DiffusionPipeline-based inference tests
 # ---------------------------------------------------------------------------
 
@@ -562,3 +641,75 @@ class TestE3DiffPipeline:
 
     def test_dtype_property(self, pipeline):
         assert pipeline.dtype == torch.float32
+
+
+class TestOpenEarthMapSARPipeline:
+    """Tests for CUTPipeline with OpenEarthMapSARGenerator (OpenEarthMap-SAR)."""
+
+    @pytest.fixture
+    def pipeline(self):
+        from examples.community.openearthmap_sar import OpenEarthMapSARGenerator
+        from src.pipelines.cut import CUTPipeline
+
+        gen = OpenEarthMapSARGenerator(in_channels=3, out_channels=3, base_filters=64, n_blocks=2)
+        return CUTPipeline(generator=gen)
+
+    def test_inherits_diffusion_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from src.pipelines.cut import CUTPipeline
+
+        assert issubclass(CUTPipeline, DiffusionPipeline)
+
+    def test_call_output_pt(self, pipeline):
+        from src.pipelines.cut import CUTPipelineOutput
+
+        x = torch.randn(1, 3, 256, 256)
+        out = pipeline(source_image=x, output_type="pt")
+        assert isinstance(out, CUTPipelineOutput)
+        assert isinstance(out.images, torch.Tensor)
+        assert out.images.shape == (1, 3, 256, 256)
+        assert out.images.min() >= -1.0
+        assert out.images.max() <= 1.0
+
+    def test_call_output_pil(self, pipeline):
+        from PIL import Image
+
+        x = torch.randn(1, 3, 256, 256)
+        out = pipeline(source_image=x, output_type="pil")
+        assert isinstance(out.images, list)
+        assert isinstance(out.images[0], Image.Image)
+        assert out.images[0].size == (256, 256)
+
+    def test_device_property(self, pipeline):
+        assert pipeline.device == torch.device("cpu")
+
+    def test_dtype_property(self, pipeline):
+        assert pipeline.dtype == torch.float32
+
+
+class TestSAR2OpticalPipeline:
+    """Tests for the SAR2Optical DiffusionPipeline wrapper."""
+
+    @pytest.fixture
+    def pipeline(self):
+        from examples.community.sar2optical import SAR2OpticalGenerator, SAR2OpticalPipeline
+
+        gen = SAR2OpticalGenerator(c_in=3, c_out=3)
+        return SAR2OpticalPipeline(generator=gen)
+
+    def test_inherits_diffusion_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from examples.community.sar2optical import SAR2OpticalPipeline
+
+        assert issubclass(SAR2OpticalPipeline, DiffusionPipeline)
+
+    def test_call_output_pt(self, pipeline):
+        from examples.community.sar2optical import SAR2OpticalPipelineOutput
+
+        x = torch.randn(2, 3, 256, 256)
+        out = pipeline(source_image=x, output_type="pt")
+        assert isinstance(out, SAR2OpticalPipelineOutput)
+        assert isinstance(out.images, torch.Tensor)
+        assert out.images.shape == (2, 3, 256, 256)
+        assert out.images.min() >= -1.0
+        assert out.images.max() <= 1.0

@@ -5,6 +5,7 @@ src/                                 # ← Core library (single source of truth)
 ├── __init__.py                      # Public API
 ├── models/
 │   ├── generators.py                # UNetGenerator, ResNetGenerator
+│   ├── pix2pixhd.py                 # Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
 │   ├── discriminators.py            # PatchGANDiscriminator
 │   ├── unet/
 │   │   ├── i2sb_unet.py            # I2SBUNet (native ADM-style backbone)
@@ -41,6 +42,7 @@ src/                                 # ← Core library (single source of truth)
 │   └── lbm.py                      # LBMPipeline
 │   └── unsb.py                     # UNSBPipeline
 │   └── local_diffusion.py          # LocalDiffusionPipeline
+│   └── pix2pixhd.py                # Pix2PixHDPipeline, load_pix2pixhd_pipeline
 ├── data/
 │   ├── datasets.py                 # PairedImageDataset, UnpairedImageDataset
 │   └── transforms.py               # get_transforms, default_transforms
@@ -57,7 +59,8 @@ src/                                 # ← Core library (single source of truth)
 examples/                            # ← Training/inference scripts (import from src/)
 ├── community/                       # Community-contributed pipelines (single-file)
 │   ├── parallel_gan/               # Parallel-GAN (Wang et al., TGRS 2022)
-│   └── e3diff/                     # E3Diff (Qin et al., IEEE GRSL 2024)
+│   ├── e3diff/                     # E3Diff (Qin et al., IEEE GRSL 2024)
+│   └── sar2optical/                # SAR2Optical Pix2Pix cGAN (Isola et al., CVPR 2017)
 ├── i2sb/                            # I2SB paper-oriented training code
 │   ├── config.py                   # TaskConfig, sar2eo_config, etc.
 │   └── trainer.py                  # I2SBTrainer

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-03-08
+
+### Added
+
+- **OpenEarthMap-SAR community pipeline** (`examples/community/openearthmap_sar/`): CUT models for SAR ↔ optical image translation, compatible with [OpenEarthMap-SAR](https://github.com/cliffbb/OpenEarthMap-SAR) checkpoints.
+  - `OpenEarthMapSARGenerator`: CUT ResNet generator with anti-aliased down/upsampling.
+  - `load_openearthmap_sar_pipeline`: loads safetensors or `.pth` checkpoints and returns `CUTPipeline`.
+  - Supports `opt2sar`, `sar2opt`, `seman2opt`, `seman2sar` and pseudo variants.
+  - CLI: `python -m examples.community.openearthmap_sar --checkpoint-dir PATH --model sar2opt`.
+- Added `examples/community/sar2optical/` as an in-repo community pipeline adapted from [yuuIind/SAR2Optical](https://github.com/yuuIind/SAR2Optical), including:
+  - `SAR2OpticalGenerator` and `SAR2OpticalDiscriminator` (pix2pix-style U-Net + PatchGAN/PixelGAN).
+  - `SAR2OpticalPipeline` + `load_sar2optical_pipeline` for single-pass inference.
+  - `SAR2OpticalConfig` + `SAR2OpticalTrainer` for cGAN training steps.
+
+### Changed
+
+- Updated community docs/catalog entries to list `openearthmap_sar/` and `sar2optical/` as integrated pipelines instead of external-only references.
+
 ## [0.2.2] - 2026-03-07
 
 ### Changed
@@ -102,7 +120,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.4
 [0.2.2]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.2
 [0.2.1]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.0

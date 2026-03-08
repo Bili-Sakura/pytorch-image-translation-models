@@ -334,3 +334,76 @@ class TestI2SBPipeline:
         source = torch.randn(1, 3, 32, 32)
         result = pipeline(source, nfe=3, ot_ode=True, output_type="pt")
         assert isinstance(result.images, torch.Tensor)
+
+
+# ---------------------------------------------------------------------------
+# pix2pixHD baseline tests
+# ---------------------------------------------------------------------------
+
+
+class TestPix2PixHDBaseline:
+    @pytest.fixture
+    def pipeline(self):
+        from src.models.pix2pixhd import Pix2PixHDGenerator
+        from src.pipelines.pix2pixhd import Pix2PixHDPipeline
+
+        gen = Pix2PixHDGenerator(input_nc=3, output_nc=3, ngf=32, n_downsampling=2, n_blocks=2)
+        return Pix2PixHDPipeline(generator=gen)
+
+    def test_generator_output_shape(self):
+        from src.models.pix2pixhd import Pix2PixHDGenerator
+
+        gen = Pix2PixHDGenerator(input_nc=3, output_nc=3, ngf=32, n_downsampling=2, n_blocks=2)
+        x = torch.randn(1, 3, 64, 64)
+        out = gen(x)
+        assert out.shape == (1, 3, 64, 64)
+        assert out.min() >= -1.0
+        assert out.max() <= 1.0
+
+    def test_pipeline_pt_output(self, pipeline):
+        from src.pipelines.pix2pixhd import Pix2PixHDPipelineOutput
+
+        x = torch.randn(1, 3, 64, 64)
+        out = pipeline(source_image=x, output_type="pt")
+        assert isinstance(out, Pix2PixHDPipelineOutput)
+        assert isinstance(out.images, torch.Tensor)
+        assert out.images.shape == (1, 3, 64, 64)
+
+    def test_pipeline_np_output(self, pipeline):
+        x = torch.randn(1, 3, 64, 64)
+        out = pipeline(source_image=x, output_type="np")
+        assert isinstance(out.images, np.ndarray)
+        assert out.images.shape == (1, 64, 64, 3)
+        assert out.images.min() >= 0.0
+        assert out.images.max() <= 1.0
+
+    def test_pipeline_pil_output(self, pipeline):
+        from PIL import Image
+
+        x = torch.randn(1, 3, 64, 64)
+        out = pipeline(source_image=x, output_type="pil")
+        assert isinstance(out.images, list)
+        assert isinstance(out.images[0], Image.Image)
+        assert out.images[0].size == (64, 64)
+
+    def test_loader_from_checkpoint(self, tmp_path):
+        from src.models.pix2pixhd import Pix2PixHDGenerator
+        from src.pipelines.pix2pixhd import load_pix2pixhd_pipeline
+
+        gen = Pix2PixHDGenerator(input_nc=3, output_nc=3, ngf=16, n_downsampling=2, n_blocks=2)
+        ckpt_path = tmp_path / "latest_net_G.pth"
+        torch.save(gen.state_dict(), ckpt_path)
+
+        pipe = load_pix2pixhd_pipeline(
+            ckpt_path,
+            input_nc=3,
+            output_nc=3,
+            ngf=16,
+            n_downsampling=2,
+            n_blocks=2,
+            device="cpu",
+        )
+        x = torch.randn(1, 3, 64, 64)
+        out = pipe(source_image=x, output_type="pt")
+        assert isinstance(out.images, torch.Tensor)
+        assert out.images.shape == (1, 3, 64, 64)

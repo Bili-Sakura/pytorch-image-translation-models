@@ -32,7 +32,8 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 |----------|-------|-------------|
 | [`parallel_gan/`](parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical translation with hierarchical latent features via a two-stage approach (reconstruction + translation) |
 | [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
-| [`SAR2Optical (external)`](https://github.com/yuuIind/SAR2Optical.git) | GitHub repository | Community SAR-to-Optical translation project maintained externally |
+| [`openearthmap_sar/`](openearthmap_sar/) | [Park et al., ECCV 2020](https://arxiv.org/abs/2007.15651) | CUT models for SAR ↔ optical image translation with anti-aliased ResNet generator (opt2sar, sar2opt, seman2opt, seman2sar, etc.) |
+| [`sar2optical/`](sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation, adapted from yuuIind/SAR2Optical |
 
 ---
 
@@ -82,6 +83,30 @@ losses = trainer.train_step_trans(sar_batch, optical_batch)
 
 ---
 
+### OpenEarthMap-SAR
+
+**Paper:** *Contrastive Learning for Unpaired Image-to-Image Translation* (Park et al., ECCV 2020)
+
+**Architecture:** CUT ResNet generator with anti-aliased down/upsampling, compatible with OpenEarthMap-SAR checkpoints. Supports opt2sar, sar2opt, seman2opt, seman2sar and pseudo variants.
+
+**Quick start:**
+
+```python
+from examples.community.openearthmap_sar import load_openearthmap_sar_pipeline
+
+# SAR → Optical (or opt2sar, seman2opt, etc.)
+pipeline = load_openearthmap_sar_pipeline(
+    checkpoint_dir="/path/to/OpenEarthMap-SAR",
+    model_name="sar2opt",
+    device="cuda",
+)
+output = pipeline(source_image=pil_image, output_type="pil")
+```
+
+CLI: `python -m examples.community.openearthmap_sar --checkpoint-dir /path/to/CUT-OpenEarthMap-SAR --input sar.png --output out.png`
+
+---
+
 ### E3Diff
 
 **Paper:** *Efficient End-to-End Diffusion Model for One-step SAR-to-Optical Translation* (Qin et al., IEEE GRSL 2024)
@@ -126,4 +151,28 @@ losses = trainer.train_step(sar_batch, optical_batch)
   number={},
   pages={1-1},
   doi={10.1109/LGRS.2024.3506566}}
+```
+
+---
+
+### SAR2Optical
+
+**Paper:** *Image-to-Image Translation with Conditional Adversarial Networks* (Isola et al., CVPR 2017)
+
+**Source project:** [yuuIind/SAR2Optical](https://github.com/yuuIind/SAR2Optical)
+
+**Architecture:** Pix2Pix-style conditional GAN:
+- **Generator**: U-Net encoder-decoder with skip-connections.
+- **Discriminator**: PatchGAN (or PixelGAN mode).
+- **Objective**: adversarial BCE + weighted L1 reconstruction.
+
+**Quick start:**
+
+```python
+import torch
+from examples.community.sar2optical import SAR2OpticalGenerator, SAR2OpticalPipeline
+
+gen = SAR2OpticalGenerator(c_in=3, c_out=3)
+pipeline = SAR2OpticalPipeline(generator=gen)
+out = pipeline(source_image=torch.randn(1, 3, 256, 256), output_type="pt")
 ```

@@ -34,6 +34,7 @@ from src.models.local_diffusion import (
     LocalDiffusionUNet,
     ConditionEncoder,
 )
+from src.models.pix2pixhd import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
 
 __all__ = [
     "UNetGenerator",
@@ -62,4 +63,6 @@ __all__ = [
     "UNSBEnergyNet",
     "LocalDiffusionUNet",
     "ConditionEncoder",
+    "Pix2PixHDGenerator",
+    "Pix2PixHDGlobalGenerator",
 ]
