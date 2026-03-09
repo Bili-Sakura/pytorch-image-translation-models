@@ -31,6 +31,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | Pipeline | Paper | Description |
 |----------|-------|-------------|
 | [`ddbm/`](ddbm/) | [Zhou et al., ICLR 2024](https://arxiv.org/abs/2309.16948) | DDBM for OpenAI-style checkpoints (BiliSakura/DDBM-ckpt); uses improved_diffusion architecture |
+| [`bbdm/`](bbdm/) | [Li et al., CVPR 2023](https://arxiv.org/abs/2205.07680) | BBDM for original xuekt98/BBDM-style checkpoints with OpenAI UNet key layout |
 | [`parallel_gan/`](parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical translation with hierarchical latent features via a two-stage approach (reconstruction + translation) |
 | [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
 | [`openearthmap_sar/`](openearthmap_sar/) | [Park et al., ECCV 2020](https://arxiv.org/abs/2007.15651) | CUT models for SAR ↔ optical image translation with anti-aliased ResNet generator (opt2sar, sar2opt, seman2opt, seman2sar, etc.) |
@@ -57,6 +58,34 @@ out = pipe(source_image=image, num_inference_steps=40, output_type="pil")
 ```
 
 **Converting from raw .pt:** `python -m examples.community.ddbm.convert_pt_to_unet /path/to/model_dir --checkpoint ckpt.pt`
+
+---
+
+### BBDM (Community)
+
+**Paper:** *BBDM: Image-to-Image Translation with Brownian Bridge Diffusion Models* (Li et al., CVPR 2023)
+
+**Architecture:** OpenAI/improved_diffusion-style U-Net key layout used by xuekt98/BBDM checkpoints. The standard `src` BBDM wrapper uses diffusers `UNet2DModel`, so raw BBDM checkpoints typically need this community loader.
+
+**Quick start:**
+
+```python
+from examples.community.bbdm import load_bbdm_community_pipeline
+
+pipe = load_bbdm_community_pipeline(
+    "/path/to/BBDM-ckpt/edges2shoes",
+    device="cuda",
+)
+out = pipe(source_image=image, num_inference_steps=200, output_type="pil")
+```
+
+**Converting from raw checkpoints:**
+
+```bash
+python -m examples.community.bbdm.convert_ckpt_to_unet \
+  --raw-root "/path/to/raw/BBDM Checkpoints" \
+  --output-root "/path/to/BBDM-ckpt"
+```
 
 ---
 

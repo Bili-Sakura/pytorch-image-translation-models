@@ -37,56 +37,51 @@ pip install -e ".[all]"
 ## Quick Start
 
 ```python
-import src
 from PIL import Image
-from examples.community.e3diff import E3DiffPipeline
 
-# Baseline method (DDBM) - one-stop load
-ddbm = src.DDBMPipeline.from_pretrained(
-    "/path/to/DDBM-ckpt/diode-vp",
-    subfolder="unet",
+# Baseline method (UNSB) - one-stop load
+from src.pipelines.unsb import UNSBPipeline
+
+pipe = UNSBPipeline.from_pretrained(
+    "path/to/UNSB-ckpt/horse2zebra", # https://huggingface.co/BiliSakura/UNSB-ckpt
+    subfolder="generator",
     device="cuda",
+    scheduler_num_timesteps=5,
+    scheduler_tau=0.01,
 )
 
 source = Image.open("/path/to/source.png").convert("RGB")
-baseline_out = ddbm(source_image=source, num_inference_steps=40, output_type="pil")
-baseline_out.images[0].save("ddbm_output.png")
+out = pipe(source_image=source, output_type="pil")
+out.images[0].save("unsb_output.png")
 
+from examples.community.e3diff import E3DiffPipeline
 # Community method (E3Diff) - one-stop load
 e3diff = E3DiffPipeline.from_pretrained(
-    "/path/to/E3Diff-ckpt/SEN12 ",
+    "path/to/E3Diff-ckpt/SEN12 ", # https://huggingface.co/BiliSakura/E3Diff-ckpt
     device="cuda",
 )
 community_out = e3diff(source_image=source, num_inference_steps=50, output_type="pil")
 community_out.images[0].save("e3diff_output.png")
 ```
 
-## Checkpoint Layout Conventions
-
-`from_pretrained(...)` expects method-specific subfolders under your checkpoint root.
-
-| Method | Expected layout (relative to method root) |
-| --- | --- |
-| `DDBM`, `BDBM`, `BiBBDM`, `DBIM`, `CDTSDE`, `LBM` | `unet/config.json`, `unet/diffusion_pytorch_model.safetensors`, optional `scheduler/scheduler_config.json` |
-| `DDIB` | `source_unet/config.json`, `source_unet/diffusion_pytorch_model.safetensors`, `target_unet/config.json`, `target_unet/diffusion_pytorch_model.safetensors`, optional `scheduler/scheduler_config.json` |
-| `I2SB` | `unet/config.json`, `unet/diffusion_pytorch_model.safetensors`, optional `scheduler_config.json` (or `scheduler/scheduler_config.json`) |
-| `CUT` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors` |
-| `Pix2PixHD` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors` |
-| `UNSB` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors` |
-| `StegoGAN` | `generator_A/config.json`, `generator_A/diffusion_pytorch_model.safetensors`, `generator_B/config.json`, `generator_B/diffusion_pytorch_model.safetensors` |
-| `LocalDiffusion` | `unet/config.json`, `unet/diffusion_pytorch_model.safetensors`, optional `scheduler/scheduler_config.json` |
-| Community `sar2optical` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors` |
-| Community `parallel_gan` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors` |
-| Community `e3diff` | `config.json`, `diffusion_pytorch_model.safetensors` |
-
 ## Documentation
+
+All information regarding per-method checkpoint folder conventions required by `from_pretrained(...)`, as well as comprehensive package documentation, is integrated below.
 
 | Doc | Description |
 | --- | --- |
-| [Features](docs/features.md) | Models, schedulers, pipelines, data, losses, training, metrics |
-| [Examples](docs/examples.md) | Extended usage for I2SB, DDBM, UNSB, Local Diffusion, etc. |
-| [Package structure](docs/package-structure.md) | Source layout and module overview |
-| [Credits](docs/credits.md) | Reference papers and citations |
+| [Checkpoint layouts](docs/checkpoint-layouts.md) | Provides detailed checkpoint folder structures, naming conventions, and requirements for each pipeline and the `from_pretrained(...)` API. |
+| [Features](docs/features.md) | Documents supported models, schedulers, pipelines, data types, training methods, and evaluation metrics. |
+| [Examples](docs/examples.md) | Extended usage patterns and code snippets for pipelines such as I2SB, DDBM, UNSB, and Local Diffusion. |
+| [Package structure](docs/package-structure.md) | Overview of the codebase organization, modules, and directories. |
+| [Credits](docs/credits.md) | Citations for reference papers and third-party contributions. |
+
+## Credits
+
+This repository/package is primarily built upon [4th-MAVIC-T](https://github.com/Bili-Sakura/4th-MAVIC-T) by the **EarthBridge Team**:
+
+- **Zheyuan Chen** — bilisakura@zju.edu.cn  
+- **Yuanshen Guan** — guanys@mail.ustc.edu.cn  
 
 ## License
 

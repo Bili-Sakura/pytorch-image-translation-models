@@ -6,10 +6,10 @@
 Implements the Brownian Bridge noise schedule from the BiBBDM paper in a
 ``diffusers``-compatible style.
 
-Reference
----------
-Li, Bo, Kaitao Xue, Bin Liu, and Yu-Kun Lai.
-"BBDM: Image-to-Image Translation with Brownian Bridge Diffusion Models." CVPR 2023.
+Note
+----
+This scheduler is bidirectional and intentionally separate from
+``src.schedulers.bbdm.BBDMScheduler`` (one-way BBDM).
 
 The schedule defines:
 * ``m_t`` — interpolation weight between endpoints *a* (target) and *b* (source).

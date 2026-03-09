@@ -80,6 +80,38 @@ class TestBiBBDMScheduler:
         assert result.prev_sample.shape == x_t.shape
 
 
+class TestBBDMScheduler:
+    def test_instantiation(self):
+        from src.schedulers.bbdm import BBDMScheduler
+        s = BBDMScheduler(num_timesteps=100)
+        assert s.m_t is not None
+        assert s.steps is not None
+
+    def test_set_timesteps(self):
+        from src.schedulers.bbdm import BBDMScheduler
+        s = BBDMScheduler(num_timesteps=100, sample_step=10)
+        s.set_timesteps(20)
+        assert s.steps is not None
+
+    def test_step(self):
+        from src.schedulers.bbdm import BBDMScheduler
+        s = BBDMScheduler(num_timesteps=100, sample_step=10, objective="noise")
+        x_t = torch.randn(1, 3, 8, 8)
+        source = torch.randn(1, 3, 8, 8)
+        model_output = torch.randn(1, 3, 8, 8)
+        result = s.step(model_output, step_index=0, x_t=x_t, source=source)
+        assert result.prev_sample.shape == x_t.shape
+
+    def test_add_noise(self):
+        from src.schedulers.bbdm import BBDMScheduler
+        s = BBDMScheduler(num_timesteps=100)
+        target = torch.randn(2, 3, 8, 8)
+        source = torch.randn(2, 3, 8, 8)
+        t = torch.tensor([10, 50])
+        xt = s.add_noise(target, source, t)
+        assert xt.shape == target.shape
+
+
 class TestDDIBScheduler:
     def test_instantiation(self):
         from src.schedulers.ddib import DDIBScheduler
@@ -241,6 +273,11 @@ class TestPipelineImports:
         assert BiBBDMPipeline is not None
         assert BiBBDMPipelineOutput is not None
 
+    def test_import_bbdm_pipeline(self):
+        from src.pipelines import BBDMPipeline, BBDMPipelineOutput
+        assert BBDMPipeline is not None
+        assert BBDMPipelineOutput is not None
+
     def test_import_ddib_pipeline(self):
         from src.pipelines import DDIBPipeline, DDIBPipelineOutput
         assert DDIBPipeline is not None
@@ -283,7 +320,7 @@ class TestTopLevelExports:
     def test_all_schedulers_in_src(self):
         import src
         for name in [
-            "BDBMScheduler", "BiBBDMScheduler", "CDTSDEScheduler",
+            "BBDMScheduler", "BDBMScheduler", "BiBBDMScheduler", "CDTSDEScheduler",
             "DBIMScheduler", "DDBMScheduler", "DDIBScheduler", "I2SBScheduler",
             "LBMScheduler",
         ]:
@@ -292,7 +329,7 @@ class TestTopLevelExports:
     def test_all_pipelines_in_src(self):
         import src
         for name in [
-            "BDBMPipeline", "BiBBDMPipeline", "CDTSDEPipeline",
+            "BBDMPipeline", "BDBMPipeline", "BiBBDMPipeline", "CDTSDEPipeline",
             "DBIMPipeline", "DDBMPipeline", "DDIBPipeline", "I2SBPipeline",
             "LBMPipeline",
         ]:

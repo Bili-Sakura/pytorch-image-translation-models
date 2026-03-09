@@ -22,6 +22,7 @@ Each community pipeline lives in its own subfolder under
 Available community pipelines:
 
 * ``ddbm/`` – DDBM for OpenAI-style checkpoints (Zhou et al., ICLR 2024)
+* ``bbdm/`` – BBDM for OpenAI-style checkpoints (Li et al., CVPR 2023)
 * ``parallel_gan/`` – Parallel-GAN (Wang et al., TGRS 2022)
 * ``e3diff/`` – E3Diff (Qin et al., IEEE GRSL 2024)
 * ``openearthmap_sar`` – OpenEarthMap-SAR CUT models for SAR ↔ optical translation (Park et al., ECCV 2020)

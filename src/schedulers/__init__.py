@@ -1,5 +1,6 @@
 """Noise schedulers for diffusion bridge models."""
 
+from src.schedulers.bbdm import BBDMScheduler, BBDMSchedulerOutput
 from src.schedulers.bdbm import BDBMScheduler, BDBMSchedulerOutput
 from src.schedulers.bibbdm import BiBBDMScheduler, BiBBDMSchedulerOutput
 from src.schedulers.cdtsde import CDTSDEScheduler, CDTSDESchedulerOutput
@@ -12,6 +13,8 @@ from src.schedulers.unsb import UNSBScheduler, UNSBSchedulerOutput
 from src.schedulers.local_diffusion import LocalDiffusionScheduler, LocalDiffusionSchedulerOutput
 
 __all__ = [
+    "BBDMScheduler",
+    "BBDMSchedulerOutput",
     "BDBMScheduler",
     "BDBMSchedulerOutput",
     "BiBBDMScheduler",

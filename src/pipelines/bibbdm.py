@@ -6,10 +6,10 @@
 Supports bidirectional image-to-image translation using the Brownian Bridge
 diffusion process. The default direction is **b2a** (source → target).
 
-Reference
----------
-Li, Bo, et al. "BBDM: Image-to-Image Translation with Brownian Bridge
-Diffusion Models." CVPR 2023.
+Note
+----
+This pipeline is bidirectional and intentionally separate from
+``src.pipelines.bbdm.BBDMPipeline`` (one-way BBDM).
 """
 
 from __future__ import annotations

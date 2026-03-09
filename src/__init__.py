@@ -12,11 +12,13 @@ from src.losses import GANLoss, PerceptualLoss
 from src.metrics import compute_fid, compute_lpips, compute_psnr, compute_ssim
 from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
 from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchability
-from src.models import BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
+from src.models import BBDMUNet, BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
 from src.models import UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
 from src.models import LocalDiffusionUNet, ConditionEncoder
 from src.models import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
 from src.pipelines import (
+    BBDMPipeline,
+    BBDMPipelineOutput,
     BDBMPipeline,
     BDBMPipelineOutput,
     BiBBDMPipeline,
@@ -44,6 +46,8 @@ from src.pipelines import (
     load_pix2pixhd_pipeline,
 )
 from src.schedulers import (
+    BBDMScheduler,
+    BBDMSchedulerOutput,
     BDBMScheduler,
     BDBMSchedulerOutput,
     BiBBDMScheduler,
@@ -87,6 +91,7 @@ __all__ = [
     "Pix2PixHDGenerator",
     "Pix2PixHDGlobalGenerator",
     # Models — diffusers UNet wrappers
+    "BBDMUNet",
     "BDBMUNet",
     "BiBBDMUNet",
     "CDTSDEUNet",
@@ -96,6 +101,8 @@ __all__ = [
     "I2SBDiffusersUNet",
     "LBMUNet",
     # Schedulers
+    "BBDMScheduler",
+    "BBDMSchedulerOutput",
     "BDBMScheduler",
     "BDBMSchedulerOutput",
     "BiBBDMScheduler",
@@ -117,6 +124,8 @@ __all__ = [
     "LocalDiffusionScheduler",
     "LocalDiffusionSchedulerOutput",
     # Pipelines
+    "BBDMPipeline",
+    "BBDMPipelineOutput",
     "BDBMPipeline",
     "BDBMPipelineOutput",
     "BiBBDMPipeline",

@@ -17,6 +17,7 @@
 |---|---|
 | **I2SBScheduler** | Symmetric beta schedule with forward/reverse bridge kernels for I2SB |
 | **DDBMScheduler** | Karras sigma schedule with Heun/Euler sampling for DDBM (VP/VE modes) |
+| **BBDMScheduler** | One-way Brownian Bridge reverse sampler (source -> target) for BBDM |
 | **BiBBDMScheduler** | Brownian Bridge noise schedule with bidirectional sampling for BiBBDM |
 | **DDIBScheduler** | Gaussian diffusion with DDIM forward/reverse steps for DDIB |
 | **BDBMScheduler** | Bidirectional Brownian Bridge schedule for BDBM |
@@ -32,6 +33,7 @@
 |---|---|
 | **I2SBPipeline** | End-to-end inference for I2SB models |
 | **DDBMPipeline** | DDBM bridge diffusion with Heun's method |
+| **BBDMPipeline** | One-way BBDM reverse Brownian Bridge translation |
 | **BiBBDMPipeline** | Bidirectional Brownian Bridge translation (b2a / a2b) |
 | **DDIBPipeline** | Dual-model DDIM encode/decode translation |
 | **BDBMPipeline** | Bidirectional diffusion bridge with context conditioning |

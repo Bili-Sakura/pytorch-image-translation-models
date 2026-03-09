@@ -5,7 +5,7 @@
 """Unified inference script for all supported bridge-diffusion methods.
 
 This script imports all components from ``src/`` — no duplicated code.
-Supports: DDBM, DDIB, I2SB, BiBBDM, BDBM, DBIM, CDTSDE, LBM.
+Supports: DDBM, DDIB, I2SB, BBDM, BiBBDM, BDBM, DBIM, CDTSDE, LBM.
 
 Usage
 -----
@@ -38,6 +38,7 @@ import torch
 from PIL import Image
 
 from src.models.unet.diffusers_wrappers import (
+    BBDMUNet,
     BDBMUNet,
     BiBBDMUNet,
     CDTSDEUNet,
@@ -48,6 +49,7 @@ from src.models.unet.diffusers_wrappers import (
     LBMUNet,
 )
 from src.schedulers import (
+    BBDMScheduler,
     BDBMScheduler,
     BiBBDMScheduler,
     CDTSDEScheduler,
@@ -58,6 +60,7 @@ from src.schedulers import (
     LBMScheduler,
 )
 from src.pipelines import (
+    BBDMPipeline,
     BDBMPipeline,
     BiBBDMPipeline,
     CDTSDEPipeline,
@@ -68,7 +71,7 @@ from src.pipelines import (
     LBMPipeline,
 )
 
-SUPPORTED_MODELS = ("ddbm", "ddib", "i2sb", "bibbdm", "bdbm", "dbim", "cdtsde", "lbm")
+SUPPORTED_MODELS = ("ddbm", "ddib", "i2sb", "bbdm", "bibbdm", "bdbm", "dbim", "cdtsde", "lbm")
 
 
 def _load_unet(model_name: str, checkpoint_dir: str, **kwargs):
@@ -77,6 +80,7 @@ def _load_unet(model_name: str, checkpoint_dir: str, **kwargs):
         "ddbm": DDBMUNet,
         "ddib": DDIBUNet,
         "i2sb": I2SBDiffusersUNet,
+        "bbdm": BBDMUNet,
         "bibbdm": BiBBDMUNet,
         "bdbm": BDBMUNet,
         "dbim": DBIMUNet,
@@ -94,6 +98,7 @@ def _load_scheduler(model_name: str, checkpoint_dir: str, **kwargs):
         "ddbm": DDBMScheduler,
         "ddib": DDIBScheduler,
         "i2sb": I2SBScheduler,
+        "bbdm": BBDMScheduler,
         "bibbdm": BiBBDMScheduler,
         "bdbm": BDBMScheduler,
         "dbim": DBIMScheduler,
@@ -109,7 +114,7 @@ def load_pipeline(model_name: str, checkpoint_dir: str, device: str = "cpu"):
     Parameters
     ----------
     model_name : str
-        One of: ddbm, ddib, i2sb, bibbdm, bdbm, dbim, cdtsde, lbm.
+        One of: ddbm, ddib, i2sb, bbdm, bibbdm, bdbm, dbim, cdtsde, lbm.
     checkpoint_dir : str
         Path to the pretrained checkpoint directory.
     device : str
@@ -128,6 +133,7 @@ def load_pipeline(model_name: str, checkpoint_dir: str, device: str = "cpu"):
         "ddbm": DDBMPipeline,
         "ddib": DDIBPipeline,
         "i2sb": I2SBPipeline,
+        "bbdm": BBDMPipeline,
         "bibbdm": BiBBDMPipeline,
         "bdbm": BDBMPipeline,
         "dbim": DBIMPipeline,

@@ -3,6 +3,7 @@
 from src.models.unet.i2sb_unet import I2SBUNet
 from src.models.unet.unet_2d import create_model
 from src.models.unet.diffusers_wrappers import (
+    BBDMUNet,
     BDBMUNet,
     BiBBDMUNet,
     CDTSDEUNet,
@@ -16,6 +17,7 @@ from src.models.unet.diffusers_wrappers import (
 __all__ = [
     "I2SBUNet",
     "create_model",
+    "BBDMUNet",
     "BDBMUNet",
     "BiBBDMUNet",
     "CDTSDEUNet",

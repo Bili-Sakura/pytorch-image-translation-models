@@ -23,6 +23,7 @@ src/                                 # ← Core library (single source of truth)
 ├── schedulers/                      # One scheduler per method
 │   ├── i2sb.py                     # I2SBScheduler
 │   ├── ddbm.py                     # DDBMScheduler
+│   ├── bbdm.py                     # BBDMScheduler (one-way)
 │   ├── bibbdm.py                   # BiBBDMScheduler
 │   ├── ddib.py                     # DDIBScheduler
 │   ├── bdbm.py                     # BDBMScheduler
@@ -34,6 +35,7 @@ src/                                 # ← Core library (single source of truth)
 ├── pipelines/                       # One pipeline per method
 │   ├── i2sb.py                     # I2SBPipeline
 │   ├── ddbm.py                     # DDBMPipeline
+│   ├── bbdm.py                     # BBDMPipeline (one-way)
 │   ├── bibbdm.py                   # BiBBDMPipeline
 │   ├── ddib.py                     # DDIBPipeline
 │   ├── bdbm.py                     # BDBMPipeline

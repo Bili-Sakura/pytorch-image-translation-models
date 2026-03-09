@@ -1,5 +1,6 @@
 """Inference pipelines for image translation models."""
 
+from src.pipelines.bbdm import BBDMPipeline, BBDMPipelineOutput
 from src.pipelines.bdbm import BDBMPipeline, BDBMPipelineOutput
 from src.pipelines.bibbdm import BiBBDMPipeline, BiBBDMPipelineOutput
 from src.pipelines.cdtsde import CDTSDEPipeline, CDTSDEPipelineOutput
@@ -19,6 +20,8 @@ from src.pipelines.pix2pixhd import (
 )
 
 __all__ = [
+    "BBDMPipeline",
+    "BBDMPipelineOutput",
     "BDBMPipeline",
     "BDBMPipelineOutput",
     "BiBBDMPipeline",

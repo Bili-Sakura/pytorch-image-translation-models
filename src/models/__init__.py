@@ -4,6 +4,7 @@ from src.models.discriminators import PatchGANDiscriminator
 from src.models.generators import ResNetGenerator, UNetGenerator
 from src.models.unet import I2SBUNet
 from src.models.unet.diffusers_wrappers import (
+    BBDMUNet,
     BDBMUNet,
     BiBBDMUNet,
     CDTSDEUNet,
@@ -41,6 +42,7 @@ __all__ = [
     "ResNetGenerator",
     "PatchGANDiscriminator",
     "I2SBUNet",
+    "BBDMUNet",
     "BDBMUNet",
     "BiBBDMUNet",
     "CDTSDEUNet",

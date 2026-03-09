@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Decoupled **BBDM** from **BiBBDM** in `src/` by introducing explicit `BBDMUNet`, `BBDMScheduler`, and `BBDMPipeline` classes and exports.
+- Updated unified inference and tests to treat `bbdm` as a standalone method (separate from `bibbdm`).
+
 ## [0.2.5] - 2026-03-09
 
 ### Added

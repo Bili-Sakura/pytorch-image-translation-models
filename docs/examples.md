@@ -50,6 +50,18 @@ pipeline = DDBMPipeline(unet=my_unet, scheduler=scheduler)
 result = pipeline(source_image, num_inference_steps=40, output_type="pil")
 ```
 
+## BBDM one-way Brownian Bridge translation
+
+```python
+from src.schedulers import BBDMScheduler
+from src.pipelines import BBDMPipeline
+
+scheduler = BBDMScheduler(num_timesteps=1000, sample_step=200, objective="grad")
+pipeline = BBDMPipeline(unet=my_unet, scheduler=scheduler)
+# One-way only: source -> target
+result = pipeline(source_tensor, output_type="pt")
+```
+
 ## BiBBDM bidirectional translation
 
 ```python
