@@ -18,10 +18,21 @@ Convert legacy VQGAN checkpoints (for BBDM latent/tokenizer usage) into Diffuser
 
 ```bash
 python -m examples.community.bbdm.convert_ckpt_to_vqmodel \
+  --raw-dir "/root/worksapce/models/raw/BBDM Checkpoints/vq-f4.zip" \
+  --raw-dir "/root/worksapce/models/raw/BBDM Checkpoints/vq-f8.zip" \
+  --raw-dir "/root/worksapce/models/raw/BBDM Checkpoints/vq-f16.zip" \
+  --output-root "/root/worksapce/models/BiliSakura/BBDM-ckpt" \
+  --subfolder "vqvae"
+```
+
+or with extracted raw folders:
+
+```bash
+python -m examples.community.bbdm.convert_ckpt_to_vqmodel \
+  --raw-dir "/root/worksapce/models/raw/BBDM Checkpoints/vqgan_f4" \
   --raw-dir "/root/worksapce/models/raw/BBDM Checkpoints/vqgan_f8" \
-  --raw-dir "/root/worksapce/models/raw/BBDM Checkpoints/vqgan_f16_16384" \
-  --raw-dir "/root/worksapce/models/raw/BBDM Checkpoints/vqgan-f4-8192" \
-  --in-place \
+  --raw-dir "/root/worksapce/models/raw/BBDM Checkpoints/vqgan_f16" \
+  --output-root "/root/worksapce/models/BiliSakura/BBDM-ckpt" \
   --subfolder "vqvae"
 ```
 

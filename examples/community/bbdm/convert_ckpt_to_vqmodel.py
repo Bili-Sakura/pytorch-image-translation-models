@@ -17,6 +17,8 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import tempfile
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -362,9 +364,29 @@ def convert_one(raw_dir: Path, out_dir: Path) -> None:
     print(f"[ok] {raw_dir.name}: {ckpt_path.name} -> {out_dir}")
 
 
+def _prepare_raw_source(raw_arg: str) -> tuple[Path, str, tempfile.TemporaryDirectory[str] | None]:
+    """Return usable raw folder path, source name, and optional temp directory handle."""
+    src = Path(raw_arg)
+    if src.is_dir():
+        return src, src.name, None
+
+    if src.is_file() and src.suffix.lower() == ".zip":
+        tmp = tempfile.TemporaryDirectory(prefix="vqgan_raw_")
+        with zipfile.ZipFile(src, "r") as zf:
+            zf.extractall(tmp.name)
+        return Path(tmp.name), src.stem, tmp
+
+    raise FileNotFoundError(f"Raw source must be a folder or .zip file: {src}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Convert legacy VQGAN checkpoints to Diffusers VQModel")
-    parser.add_argument("--raw-dir", action="append", required=True, help="Raw VQGAN folder path")
+    parser.add_argument(
+        "--raw-dir",
+        action="append",
+        required=True,
+        help="Raw VQGAN folder path or .zip file path",
+    )
     parser.add_argument(
         "--output-root",
         type=str,
@@ -387,15 +409,18 @@ def main() -> None:
         output_root.mkdir(parents=True, exist_ok=True)
 
     for raw_dir_str in args.raw_dir:
-        raw_dir = Path(raw_dir_str)
-        if not raw_dir.exists():
-            raise FileNotFoundError(f"Raw folder does not exist: {raw_dir}")
-
-        if args.in_place:
-            out_dir = raw_dir / args.subfolder
-        else:
-            out_dir = output_root / raw_dir.name / args.subfolder
-        convert_one(raw_dir=raw_dir, out_dir=out_dir)
+        raw_dir, source_name, tmp_handle = _prepare_raw_source(raw_dir_str)
+        try:
+            if args.in_place:
+                if tmp_handle is not None:
+                    raise ValueError("--in-place is not supported when --raw-dir points to a .zip file")
+                out_dir = raw_dir / args.subfolder
+            else:
+                out_dir = output_root / source_name / args.subfolder
+            convert_one(raw_dir=raw_dir, out_dir=out_dir)
+        finally:
+            if tmp_handle is not None:
+                tmp_handle.cleanup()
 
 
 if __name__ == "__main__":
