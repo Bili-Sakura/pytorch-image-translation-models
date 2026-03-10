@@ -9,8 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Documented a CUDA-first usage pattern across docs (`README.md`, `docs/features.md`, `docs/examples.md`), including explicit guidance to switch to CPU with `"cpu"` when needed.
+- Standardized examples to show `pipeline.to("cuda")` / `pipeline.to("cpu")` as the preferred device placement flow.
+- Improved custom pipeline ergonomics for device migration:
+  - `I2SBPipeline` now exposes `device`/`dtype` properties and auto-moves tensor inputs to the pipeline device during inference.
+  - `StegoGANPipeline` now exposes `device`/`dtype` properties and auto-moves tensor inputs to the pipeline device during inference.
+- Added regression tests for `.to(...)` behavior in `tests/test_pipeline_examples.py` (I2SB) and `tests/test_stegogan.py` (StegoGAN).
+
+## [0.2.6] - 2026-03-10
+
+### Added
+
+- Native **StarGAN integration** in `src/`:
+  - `src/models/stargan/` (`StarGANGenerator`, `StarGANDiscriminator`, `StarGANResidualBlock`)
+  - `src/pipelines/stargan.py` (`StarGANPipeline`, `load_stargan_pipeline`)
+  - `src/training/stargan_trainer.py` (`StarGANTrainer`, `StarGANTrainingConfig`)
+- StarGAN tests (`tests/test_stargan.py` and pipeline coverage in `tests/test_pipeline_examples.py`).
+
+### Changed
+
 - Decoupled **BBDM** from **BiBBDM** in `src/` by introducing explicit `BBDMUNet`, `BBDMScheduler`, and `BBDMPipeline` classes and exports.
 - Updated unified inference and tests to treat `bbdm` as a standalone method (separate from `bibbdm`).
+- Refactored model layout under `src/models/` from flat files to package folders:
+  - `discriminators/`, `generators/`, `pix2pixhd/`, and `stargan/`.
 
 ## [0.2.5] - 2026-03-09
 
@@ -141,7 +162,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.5...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.6...HEAD
+[0.2.6]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.6
 [0.2.5]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.5
 [0.2.4]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.4
 [0.2.2]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.2

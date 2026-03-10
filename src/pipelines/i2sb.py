@@ -86,6 +86,14 @@ class I2SBPipeline:
         self.unet = self.unet.to(device)
         return self
 
+    @property
+    def device(self) -> torch.device:
+        return next(self.unet.parameters()).device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return next(self.unet.parameters()).dtype
+
     @torch.no_grad()
     def __call__(
         self,
@@ -108,8 +116,9 @@ class I2SBPipeline:
         output_type : ``"pt"`` | ``"pil"`` | ``"np"``
             Desired output format.
         """
+        source = source.to(device=self.device, dtype=self.dtype)
         self.scheduler.set_timesteps(nfe=nfe)
-        device = source.device
+        device = self.device
 
         # Corrupt source with maximum forward noise to initialise x_T
         noise = torch.randn_like(source)

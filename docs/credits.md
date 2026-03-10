@@ -10,6 +10,7 @@
 - [LBM: Latent Bridge Matching for Fast Image-to-Image Translation (2025)](https://arxiv.org/abs/2503.07535)
 - [SiT: Exploring Flow and Diffusion-based Generative Models with Scalable Interpolant Transformers (2024)](https://arxiv.org/abs/2401.08740)
 - [StegoGAN: Leveraging Steganography for Non-Bijective Image-to-Image Translation (CVPR 2024)](https://openaccess.thecvf.com/content/CVPR2024/papers/Wu_StegoGAN_Leveraging_Steganography_for_Non-Bijective_Image-to-Image_Translation_CVPR_2024_paper.pdf)
+- [StarGAN: Unified Generative Adversarial Networks for Multi-Domain Image-to-Image Translation (CVPR 2018)](https://arxiv.org/abs/1711.09020)
 - [Parallel-GAN: SAR-to-Optical Image Translation with Hierarchical Latent Features (TGRS 2022)](https://ieeexplore.ieee.org/document/9864654)
 - [CUT: Contrastive Unpaired Translation (ECCV 2020)](https://link.springer.com/chapter/10.1007/978-3-030-58545-7_19)
 - [UNSB: Unpaired Image-to-Image Translation via Neural Schrödinger Bridge (ICLR 2024)](https://openreview.net/forum?id=uQBW7ELXfO)

@@ -9,6 +9,7 @@ from examples.pix2pix.train_pix2pix import Pix2PixTrainer, TrainingConfig
 from examples.stegogan.train_stegogan import StegoGANTrainer, StegoGANConfig
 from examples.cut.train_cut import CUTTrainer
 from examples.cut.config import CUTConfig
+from src.training.stargan_trainer import StarGANTrainer, StarGANTrainingConfig
 
 __all__ = [
     "Pix2PixTrainer",
@@ -17,4 +18,6 @@ __all__ = [
     "StegoGANConfig",
     "CUTTrainer",
     "CUTConfig",
+    "StarGANTrainer",
+    "StarGANTrainingConfig",
 ]

@@ -1,4 +1,4 @@
-"""Discriminator architectures for image-to-image translation."""
+"""PatchGAN discriminator architecture."""
 
 from __future__ import annotations
 
@@ -7,22 +7,7 @@ import torch.nn as nn
 
 
 class PatchGANDiscriminator(nn.Module):
-    """PatchGAN discriminator (Markovian discriminator).
-
-    Classifies overlapping image patches as real or fake, producing a
-    2-D map of predictions rather than a single scalar.
-
-    Parameters
-    ----------
-    in_channels:
-        Number of input image channels (source + target concatenated).
-    base_filters:
-        Number of filters in the first convolution layer.
-    n_layers:
-        Number of intermediate convolution layers.
-    norm_layer:
-        Normalisation layer constructor.
-    """
+    """PatchGAN discriminator (Markovian discriminator)."""
 
     def __init__(
         self,
@@ -70,12 +55,11 @@ class PatchGANDiscriminator(nn.Module):
             nn.LeakyReLU(0.2, inplace=True),
         ]
 
-        # Final 1-channel prediction layer
         layers += [
             nn.Conv2d(base_filters * nf_mult, 1, kernel_size=4, stride=1, padding=1),
         ]
-
         self.model = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
+

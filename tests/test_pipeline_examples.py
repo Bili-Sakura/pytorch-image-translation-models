@@ -335,6 +335,12 @@ class TestI2SBPipeline:
         result = pipeline(source, nfe=3, ot_ode=True, output_type="pt")
         assert isinstance(result.images, torch.Tensor)
 
+    def test_pipeline_to_cpu(self, pipeline):
+        pipeline.to("cpu")
+        source = torch.randn(1, 3, 32, 32)
+        result = pipeline(source, nfe=3, output_type="pt")
+        assert isinstance(result.images, torch.Tensor)
+
 
 # ---------------------------------------------------------------------------
 # pix2pixHD baseline tests
@@ -407,3 +413,68 @@ class TestPix2PixHDBaseline:
         out = pipe(source_image=x, output_type="pt")
         assert isinstance(out.images, torch.Tensor)
         assert out.images.shape == (1, 3, 64, 64)
+
+
+# ---------------------------------------------------------------------------
+# StarGAN baseline tests
+# ---------------------------------------------------------------------------
+
+
+class TestStarGANBaseline:
+    @pytest.fixture
+    def pipeline(self):
+        from src.models.stargan import StarGANGenerator
+        from src.pipelines.stargan import StarGANPipeline
+
+        gen = StarGANGenerator(conv_dim=32, c_dim=5, repeat_num=2)
+        return StarGANPipeline(generator=gen)
+
+    def test_generator_output_shape(self):
+        from src.models.stargan import StarGANGenerator
+
+        gen = StarGANGenerator(conv_dim=32, c_dim=5, repeat_num=2)
+        x = torch.randn(2, 3, 64, 64)
+        labels = torch.randn(2, 5)
+        out = gen(x, labels)
+        assert out.shape == (2, 3, 64, 64)
+        assert out.min() >= -1.0
+        assert out.max() <= 1.0
+
+    def test_discriminator_output_shape(self):
+        from src.models.stargan import StarGANDiscriminator
+
+        disc = StarGANDiscriminator(image_size=64, conv_dim=32, c_dim=5, repeat_num=4)
+        x = torch.randn(2, 3, 64, 64)
+        out_src, out_cls = disc(x)
+        assert out_src.shape[0] == 2
+        assert out_src.shape[1] == 1
+        assert out_cls.shape == (2, 5)
+
+    def test_pipeline_pt_output(self, pipeline):
+        from src.pipelines.stargan import StarGANPipelineOutput
+
+        x = torch.randn(1, 3, 64, 64)
+        labels = torch.tensor([[1, 0, 0, 1, 0]], dtype=torch.float32)
+        out = pipeline(source_image=x, target_labels=labels, output_type="pt")
+        assert isinstance(out, StarGANPipelineOutput)
+        assert isinstance(out.images, torch.Tensor)
+        assert out.images.shape == (1, 3, 64, 64)
+
+    def test_pipeline_np_output(self, pipeline):
+        x = torch.randn(1, 3, 64, 64)
+        labels = torch.tensor([[0, 1, 1, 0, 1]], dtype=torch.float32)
+        out = pipeline(source_image=x, target_labels=labels, output_type="np")
+        assert isinstance(out.images, np.ndarray)
+        assert out.images.shape == (1, 64, 64, 3)
+        assert out.images.min() >= 0.0
+        assert out.images.max() <= 1.0
+
+    def test_pipeline_pil_output(self, pipeline):
+        from PIL import Image
+
+        x = torch.randn(1, 3, 64, 64)
+        labels = torch.tensor([[1, 1, 0, 0, 1]], dtype=torch.float32)
+        out = pipeline(source_image=x, target_labels=labels, output_type="pil")
+        assert isinstance(out.images, list)
+        assert isinstance(out.images[0], Image.Image)
+        assert out.images[0].size == (64, 64)

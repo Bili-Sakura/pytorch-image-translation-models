@@ -36,6 +36,8 @@ pip install -e ".[all]"
 
 ## Quick Start
 
+Examples default to `device="cuda"`. If your environment is CPU-only, replace `"cuda"` with `"cpu"`.
+
 ```python
 from PIL import Image
 
@@ -45,10 +47,10 @@ from src.pipelines.unsb import UNSBPipeline
 pipe = UNSBPipeline.from_pretrained(
     "path/to/UNSB-ckpt/horse2zebra", # https://huggingface.co/BiliSakura/UNSB-ckpt
     subfolder="generator",
-    device="cuda",
     scheduler_num_timesteps=5,
     scheduler_tau=0.01,
 )
+pipe.to("cuda")
 
 source = Image.open("/path/to/source.png").convert("RGB")
 out = pipe(source_image=source, output_type="pil")
@@ -58,8 +60,8 @@ from examples.community.e3diff import E3DiffPipeline
 # Community method (E3Diff) - one-stop load
 e3diff = E3DiffPipeline.from_pretrained(
     "path/to/E3Diff-ckpt/SEN12 ", # https://huggingface.co/BiliSakura/E3Diff-ckpt
-    device="cuda",
 )
+e3diff.to("cuda")
 community_out = e3diff(source_image=source, num_inference_steps=50, output_type="pil")
 community_out.images[0].save("e3diff_output.png")
 ```

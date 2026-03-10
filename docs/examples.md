@@ -2,21 +2,42 @@
 
 Extended usage examples for all supported methods. For a minimal quick start, see the [README](../README.md).
 
+Unless noted otherwise, examples default to `device="cuda"`. If you only have CPU, replace `"cuda"` with `"cpu"`.
+Pipelines also support `pipeline.to("cuda")` (or `"cpu"`).
+
 ## GAN-based translation (Pix2Pix)
 
 ```python
 import src
 
-gen = src.UNetGenerator(in_channels=3, out_channels=3)
-disc = src.PatchGANDiscriminator(in_channels=6)
+device = "cuda"
+gen = src.UNetGenerator(in_channels=3, out_channels=3).to(device)
+disc = src.PatchGANDiscriminator(in_channels=6).to(device)
 
 from src.training import Pix2PixTrainer, TrainingConfig
-config = TrainingConfig(epochs=100, device="cuda")
+config = TrainingConfig(epochs=100, device=device)
 trainer = Pix2PixTrainer(gen, disc, config)
 trainer.fit(dataloader)  # expects {"source": tensor, "target": tensor}
 
-translator = src.ImageTranslator(gen, device="cuda")
+translator = src.ImageTranslator(gen, device=device)
 result = translator.predict(pil_image)
+```
+
+## StarGAN multi-domain translation
+
+```python
+from src.models.stargan import StarGANGenerator
+from src.pipelines.stargan import StarGANPipeline
+import torch
+
+device = "cuda"
+generator = StarGANGenerator(conv_dim=64, c_dim=5, repeat_num=6)
+pipeline = StarGANPipeline(generator=generator)
+pipeline.to(device)
+
+source = torch.randn(1, 3, 128, 128)
+target_labels = torch.tensor([[1, 0, 0, 1, 0]], dtype=torch.float32)  # domain attributes
+result = pipeline(source_image=source, target_labels=target_labels, output_type="pt")
 ```
 
 ## Diffusion bridge translation (I2SB)
@@ -26,6 +47,7 @@ from src.models.unet import I2SBUNet, create_model
 from src.schedulers import I2SBScheduler
 from src.pipelines.i2sb import I2SBPipeline
 
+device = "cuda"
 # Create model and scheduler
 model = create_model(
     image_size=256, in_channels=3, num_channels=128,
@@ -36,6 +58,7 @@ scheduler = I2SBScheduler(interval=1000, beta_max=0.3)
 
 # Inference pipeline
 pipeline = I2SBPipeline(unet=model, scheduler=scheduler)
+pipeline.to(device)
 result = pipeline(source_tensor, nfe=20, output_type="pt")
 ```
 
@@ -45,8 +68,10 @@ result = pipeline(source_tensor, nfe=20, output_type="pt")
 from src.schedulers import DDBMScheduler
 from src.pipelines import DDBMPipeline
 
+device = "cuda"
 scheduler = DDBMScheduler(pred_mode="vp", num_train_timesteps=40)
 pipeline = DDBMPipeline(unet=my_unet, scheduler=scheduler)
+pipeline.to(device)
 result = pipeline(source_image, num_inference_steps=40, output_type="pil")
 ```
 
@@ -56,8 +81,10 @@ result = pipeline(source_image, num_inference_steps=40, output_type="pil")
 from src.schedulers import BBDMScheduler
 from src.pipelines import BBDMPipeline
 
+device = "cuda"
 scheduler = BBDMScheduler(num_timesteps=1000, sample_step=200, objective="grad")
 pipeline = BBDMPipeline(unet=my_unet, scheduler=scheduler)
+pipeline.to(device)
 # One-way only: source -> target
 result = pipeline(source_tensor, output_type="pt")
 ```
@@ -68,8 +95,10 @@ result = pipeline(source_tensor, output_type="pt")
 from src.schedulers import BiBBDMScheduler
 from src.pipelines import BiBBDMPipeline
 
+device = "cuda"
 scheduler = BiBBDMScheduler(num_timesteps=1000, sample_step=100)
 pipeline = BiBBDMPipeline(unet=my_unet, scheduler=scheduler)
+pipeline.to(device)
 # Source → Target
 result = pipeline(source_tensor, direction="b2a", output_type="pt")
 # Target → Source
@@ -82,8 +111,14 @@ result = pipeline(target_tensor, direction="a2b", output_type="pt")
 from src.schedulers import DDIBScheduler
 from src.pipelines import DDIBPipeline
 
+device = "cuda"
 scheduler = DDIBScheduler(num_train_timesteps=1000)
-pipeline = DDIBPipeline(source_unet=src_model, target_unet=tgt_model, scheduler=scheduler)
+pipeline = DDIBPipeline(
+    source_unet=src_model,
+    target_unet=tgt_model,
+    scheduler=scheduler,
+)
+pipeline.to(device)
 result = pipeline(source_image, num_inference_steps=250, output_type="pil")
 ```
 
@@ -93,8 +128,10 @@ result = pipeline(source_image, num_inference_steps=250, output_type="pil")
 from src.schedulers import LBMScheduler
 from src.pipelines import LBMPipeline
 
+device = "cuda"
 scheduler = LBMScheduler(num_train_timesteps=1000)
 pipeline = LBMPipeline(unet=my_unet, scheduler=scheduler)
+pipeline.to(device)
 result = pipeline(source_image, num_inference_steps=1, output_type="pil")
 ```
 
@@ -103,13 +140,14 @@ result = pipeline(source_image, num_inference_steps=1, output_type="pil")
 ```python
 from src.models.dit import SiTBackbone, SIT_CONFIGS
 
+device = "cuda"
 # Create a SiT-S/2 backbone (small, patch size 2)
 depth, hidden_size, num_heads = SIT_CONFIGS["S"]
 model = SiTBackbone(
     image_size=256, patch_size=2, in_channels=3,
     hidden_size=hidden_size, depth=depth, num_heads=num_heads,
     condition_mode="concat",
-)
+).to(device)
 # Use as drop-in replacement for UNet in any bridge pipeline
 output = model(noisy_sample, timestep, xT=source_image)
 ```
@@ -121,12 +159,14 @@ from src.models.unsb import create_generator
 from src.schedulers.unsb import UNSBScheduler
 from src.pipelines.unsb import UNSBPipeline
 
+device = "cuda"
 # Create time-conditional generator and scheduler
 generator = create_generator(input_nc=3, output_nc=3, ngf=64, n_blocks=9)
 scheduler = UNSBScheduler(num_timesteps=5, tau=0.01)
 
 # Inference pipeline (multi-step stochastic refinement)
 pipeline = UNSBPipeline(generator=generator, scheduler=scheduler)
+pipeline.to(device)
 result = pipeline(source_image, output_type="pt")
 print(result.nfe)  # 5 function evaluations
 ```
@@ -155,12 +195,14 @@ from src.models.local_diffusion import create_unet
 from src.schedulers.local_diffusion import LocalDiffusionScheduler
 from src.pipelines.local_diffusion import LocalDiffusionPipeline
 
+device = "cuda"
 # Create conditional U-Net and Gaussian diffusion scheduler
 unet = create_unet(dim=32, channels=1, dim_mults=(1, 2, 4, 8))
 scheduler = LocalDiffusionScheduler(num_train_timesteps=250, beta_schedule="sigmoid")
 
 # Standard inference
 pipeline = LocalDiffusionPipeline(unet=unet, scheduler=scheduler)
+pipeline.to(device)
 result = pipeline(cond_image, output_type="pt")
 
 # Branch-and-fuse inference (hallucination suppression)

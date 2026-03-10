@@ -1,11 +1,14 @@
 # Features
 
+Examples and pipeline snippets in docs default to `device="cuda"` unless explicitly noted. Pipelines support `pipeline.to("cuda")` / `pipeline.to("cpu")`.
+
 ## Models
 
 - **GAN generators** — `UNetGenerator` (encoder-decoder with skip connections), `ResNetGenerator` (residual blocks)
 - **GAN discriminators** — `PatchGANDiscriminator` (Markovian patch-level classifier)
 - **StegoGAN** — `ResnetMaskV1Generator`, `ResnetMaskV3Generator`, `NetMatchability` (steganographic masking for non-bijective translation, CVPR 2024)
 - **pix2pixHD** — `Pix2PixHDGenerator`, `Pix2PixHDGlobalGenerator` (high-resolution conditional GAN baseline, CVPR 2018)
+- **StarGAN** — `StarGANGenerator`, `StarGANDiscriminator` (single model for multi-domain translation, CVPR 2018)
 - **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net for Image-to-Image Schrödinger Bridge)
 - **UNSB** — `UNSBGenerator`, `UNSBDiscriminator`, `UNSBEnergyNet` (time-conditional networks for Unpaired Neural Schrödinger Bridge, ICLR 2024)
 - **Local Diffusion** — `LocalDiffusionUNet`, `ConditionEncoder` (conditional denoising U-Net with branch-and-fuse for hallucination suppression, ECCV 2024 Oral)
@@ -43,6 +46,7 @@
 | **UNSBPipeline** | Multi-step Schrödinger Bridge with adversarial + contrastive losses |
 | **LocalDiffusionPipeline** | Branch-and-fuse diffusion for hallucination-aware image translation |
 | **Pix2PixHDPipeline** | Native pix2pixHD single-pass generator inference with checkpoint loader |
+| **StarGANPipeline** | Native StarGAN single-pass multi-domain translation with label conditioning |
 
 All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 
@@ -59,6 +63,7 @@ All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 - `Pix2PixTrainer` — Paired GAN training with checkpoint save/load
 - `StegoGANTrainer` — StegoGAN unpaired training with steganographic masking and consistency losses
 - `I2SBTrainer` — I2SB bridge model training (in `examples/i2sb/`)
+- `StarGANTrainer` — WGAN-GP + domain classification + reconstruction training for multi-domain translation
 
 ## Metrics
 

@@ -36,6 +36,7 @@ from src.models.local_diffusion import (
     ConditionEncoder,
 )
 from src.models.pix2pixhd import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
+from src.models.stargan import StarGANGenerator, StarGANDiscriminator, StarGANResidualBlock
 
 __all__ = [
     "UNetGenerator",
@@ -67,4 +68,7 @@ __all__ = [
     "ConditionEncoder",
     "Pix2PixHDGenerator",
     "Pix2PixHDGlobalGenerator",
+    "StarGANGenerator",
+    "StarGANDiscriminator",
+    "StarGANResidualBlock",
 ]

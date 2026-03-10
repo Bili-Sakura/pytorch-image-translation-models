@@ -4,7 +4,7 @@ A library for multi-modal image translation with diffusion bridges,
 GANs, and transformer backbones.
 """
 
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 from src.data import PairedImageDataset, UnpairedImageDataset, default_transforms, get_transforms
 from src.inference import ImageTranslator
@@ -16,6 +16,7 @@ from src.models import BBDMUNet, BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDB
 from src.models import UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
 from src.models import LocalDiffusionUNet, ConditionEncoder
 from src.models import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
+from src.models import StarGANGenerator, StarGANDiscriminator, StarGANResidualBlock
 from src.pipelines import (
     BBDMPipeline,
     BBDMPipelineOutput,
@@ -44,6 +45,9 @@ from src.pipelines import (
     Pix2PixHDPipeline,
     Pix2PixHDPipelineOutput,
     load_pix2pixhd_pipeline,
+    StarGANPipeline,
+    StarGANPipelineOutput,
+    load_stargan_pipeline,
 )
 from src.schedulers import (
     BBDMScheduler,
@@ -90,6 +94,9 @@ __all__ = [
     "ConditionEncoder",
     "Pix2PixHDGenerator",
     "Pix2PixHDGlobalGenerator",
+    "StarGANGenerator",
+    "StarGANDiscriminator",
+    "StarGANResidualBlock",
     # Models — diffusers UNet wrappers
     "BBDMUNet",
     "BDBMUNet",
@@ -151,6 +158,9 @@ __all__ = [
     "Pix2PixHDPipeline",
     "Pix2PixHDPipelineOutput",
     "load_pix2pixhd_pipeline",
+    "StarGANPipeline",
+    "StarGANPipelineOutput",
+    "load_stargan_pipeline",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",

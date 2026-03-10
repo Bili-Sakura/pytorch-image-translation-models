@@ -139,6 +139,16 @@ class StegoGANPipeline:
         self.netG_B = self.netG_B.to(device)
         return self
 
+    @property
+    def device(self) -> torch.device:
+        """Get the current pipeline device."""
+        return next(self.netG_A.parameters()).device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        """Get the current pipeline dtype."""
+        return next(self.netG_A.parameters()).dtype
+
     @torch.no_grad()
     def __call__(
         self,
@@ -164,6 +174,8 @@ class StegoGANPipeline:
             Translated images and, for ``"b2a"`` direction, the
             matchability masks.
         """
+        source = source.to(device=self.device, dtype=self.dtype)
+
         if direction == "a2b":
             translated = self.netG_A(source)
             return self._format_output(translated, masks=None, output_type=output_type)

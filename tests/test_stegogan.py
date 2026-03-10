@@ -281,3 +281,10 @@ class TestStegoGANPipeline:
         source = torch.randn(1, 3, 64, 64)
         with pytest.raises(ValueError, match="Unknown output_type"):
             pipeline(source, direction="a2b", output_type="invalid")
+
+    def test_pipeline_to_cpu(self, pipeline):
+        returned = pipeline.to("cpu")
+        assert returned is pipeline
+        source = torch.randn(1, 3, 64, 64)
+        result = pipeline(source, direction="a2b", output_type="pt")
+        assert isinstance(result.images, torch.Tensor)

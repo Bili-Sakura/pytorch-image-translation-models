@@ -1,12 +1,17 @@
 # Package Structure
 
-```
+```text
 src/                                 # ← Core library (single source of truth)
 ├── __init__.py                      # Public API
 ├── models/
-│   ├── generators.py                # UNetGenerator, ResNetGenerator
-│   ├── pix2pixhd.py                 # Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
-│   ├── discriminators.py            # PatchGANDiscriminator
+│   ├── generators/
+│   │   ├── unet.py                  # UNetSkipConnection, UNetGenerator
+│   │   └── resnet.py                # ResidualBlock, ResNetGenerator
+│   ├── pix2pixhd/
+│   │   ├── blocks.py                # _ResnetBlock
+│   │   └── generator.py             # Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
+│   ├── discriminators/
+│   │   └── patchgan.py              # PatchGANDiscriminator
 │   ├── unet/
 │   │   ├── i2sb_unet.py            # I2SBUNet (native ADM-style backbone)
 │   │   ├── unet_2d.py              # create_model factory
@@ -20,6 +25,10 @@ src/                                 # ← Core library (single source of truth)
 │       └── unsb_model.py           # UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
 │   └── local_diffusion/
 │       └── local_diffusion_model.py # LocalDiffusionUNet, ConditionEncoder
+│   └── stargan/
+│       ├── blocks.py               # StarGANResidualBlock
+│       ├── generator.py            # StarGANGenerator
+│       └── discriminator.py        # StarGANDiscriminator
 ├── schedulers/                      # One scheduler per method
 │   ├── i2sb.py                     # I2SBScheduler
 │   ├── ddbm.py                     # DDBMScheduler
@@ -45,6 +54,7 @@ src/                                 # ← Core library (single source of truth)
 │   └── unsb.py                     # UNSBPipeline
 │   └── local_diffusion.py          # LocalDiffusionPipeline
 │   └── pix2pixhd.py                # Pix2PixHDPipeline, load_pix2pixhd_pipeline
+│   └── stargan.py                  # StarGANPipeline, load_stargan_pipeline
 ├── data/
 │   ├── datasets.py                 # PairedImageDataset, UnpairedImageDataset
 │   └── transforms.py               # get_transforms, default_transforms
@@ -54,6 +64,7 @@ src/                                 # ← Core library (single source of truth)
 ├── training/
 │   ├── trainer.py                  # Pix2PixTrainer, TrainingConfig
 │   └── stegogan_trainer.py         # StegoGANTrainer, StegoGANConfig
+│   └── stargan_trainer.py          # StarGANTrainer, StarGANTrainingConfig
 ├── inference/
 │   └── predictor.py                # ImageTranslator
 └── metrics/
