@@ -4,7 +4,7 @@ import torch
 
 
 def test_stargan_trainer_discriminator_step():
-    from src.training.stargan_trainer import StarGANTrainer, StarGANTrainingConfig
+    from examples.stargan.train_stargan import StarGANTrainer, StarGANTrainingConfig
 
     cfg = StarGANTrainingConfig(
         image_size=32,
@@ -27,7 +27,7 @@ def test_stargan_trainer_discriminator_step():
 
 
 def test_stargan_trainer_generator_step():
-    from src.training.stargan_trainer import StarGANTrainer, StarGANTrainingConfig
+    from examples.stargan.train_stargan import StarGANTrainer, StarGANTrainingConfig
 
     cfg = StarGANTrainingConfig(
         image_size=32,

@@ -68,7 +68,7 @@ class ImageTranslator:
         ----------
         checkpoint_path:
             Path to a ``.pt`` checkpoint saved by
-            :class:`~src.training.trainer.Pix2PixTrainer`.
+            :class:`~examples.pix2pix.train_pix2pix.Pix2PixTrainer`.
         generator:
             An **uninitialised** generator of the same architecture.
         device:

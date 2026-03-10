@@ -63,7 +63,7 @@ All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 - `Pix2PixTrainer` — Paired GAN training with checkpoint save/load
 - `StegoGANTrainer` — StegoGAN unpaired training with steganographic masking and consistency losses
 - `I2SBTrainer` — I2SB bridge model training (in `examples/i2sb/`)
-- `StarGANTrainer` — WGAN-GP + domain classification + reconstruction training for multi-domain translation
+- `StarGANTrainer` — WGAN-GP + domain classification + reconstruction training for multi-domain translation (in ``examples/stargan/``)
 
 ## Metrics
 

@@ -13,6 +13,10 @@ Subpackages
     Pix2Pix paired image-to-image translation training.
 ``stegogan/``
     StegoGAN non-bijective unpaired image translation training.
+``stargan/``
+    StarGAN multi-domain image translation training.
+``cut/``
+    CUT contrastive unpaired translation training.
 
 All training and inference examples import components from ``src/`` — no
 duplicated model, scheduler, or pipeline code.

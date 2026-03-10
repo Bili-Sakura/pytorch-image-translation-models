@@ -61,10 +61,6 @@ src/                                 # ← Core library (single source of truth)
 ├── losses/
 │   ├── adversarial.py              # GANLoss
 │   └── perceptual.py               # PerceptualLoss
-├── training/
-│   ├── trainer.py                  # Pix2PixTrainer, TrainingConfig
-│   └── stegogan_trainer.py         # StegoGANTrainer, StegoGANConfig
-│   └── stargan_trainer.py          # StarGANTrainer, StarGANTrainingConfig
 ├── inference/
 │   └── predictor.py                # ImageTranslator
 └── metrics/
@@ -77,6 +73,10 @@ examples/                            # ← Training/inference scripts (import fr
 ├── i2sb/                            # I2SB paper-oriented training code
 │   ├── config.py                   # TaskConfig, sar2eo_config, etc.
 │   └── trainer.py                  # I2SBTrainer
+├── pix2pix/                         # Pix2Pix paired translation (Pix2PixTrainer)
+├── stegogan/                        # StegoGAN unpaired translation (StegoGANTrainer)
+├── stargan/                         # StarGAN multi-domain translation (StarGANTrainer)
+├── cut/                             # CUT contrastive unpaired translation (CUTTrainer)
 └── inference/
     └── run_inference.py            # Unified inference script for all methods
 ```

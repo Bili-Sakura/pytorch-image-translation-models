@@ -167,4 +167,3 @@ class StarGANTrainer:
         if step % self.config.n_critic == 0:
             logs.update(self.train_generator(real_x, real_labels, target_labels))
         return logs
-

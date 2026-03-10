@@ -14,7 +14,7 @@ device = "cuda"
 gen = src.UNetGenerator(in_channels=3, out_channels=3).to(device)
 disc = src.PatchGANDiscriminator(in_channels=6).to(device)
 
-from src.training import Pix2PixTrainer, TrainingConfig
+from examples.pix2pix import Pix2PixTrainer, TrainingConfig
 config = TrainingConfig(epochs=100, device=device)
 trainer = Pix2PixTrainer(gen, disc, config)
 trainer.fit(dataloader)  # expects {"source": tensor, "target": tensor}
@@ -246,7 +246,7 @@ loss.backward()
 ## StegoGAN non-bijective translation
 
 ```python
-from src.training import StegoGANTrainer, StegoGANConfig
+from examples.stegogan import StegoGANTrainer, StegoGANConfig
 
 cfg = StegoGANConfig(
     input_nc=3, output_nc=3, ngf=64,

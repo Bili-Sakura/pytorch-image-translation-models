@@ -86,8 +86,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Moved training code to `examples/`** following the [diffusers](https://github.com/huggingface/diffusers) project structure where training scripts live in self-contained example subfolders:
   - `src/training/trainer.py` → `examples/pix2pix/train_pix2pix.py`
   - `src/training/stegogan_trainer.py` → `examples/stegogan/train_stegogan.py`
-  - `src/training/` now re-exports from `examples/` for backward compatibility.
-- Training classes (`Pix2PixTrainer`, `StegoGANTrainer`, `StegoGANConfig`) are no longer exported from the top-level `src` package; import from `examples.pix2pix`, `examples.stegogan`, or `src.training` instead.
+  - `src/training/stargan_trainer.py` → `examples/stargan/train_stargan.py`
+  - `src/training/` removed; all training code lives in `examples/`.
+- Training classes (`Pix2PixTrainer`, `StegoGANTrainer`, `StegoGANConfig`, `StarGANTrainer`, `StarGANTrainingConfig`, `CUTTrainer`, `CUTConfig`) are no longer exported from the top-level `src` package; import from `examples.pix2pix`, `examples.stegogan`, `examples.stargan`, or `examples.cut` instead.
 
 ## [0.2.0] - 2026-03-06
 
