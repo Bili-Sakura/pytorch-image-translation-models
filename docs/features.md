@@ -67,7 +67,9 @@ All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 
 ## Metrics
 
-- `compute_psnr`, `compute_ssim`, `compute_lpips`, `compute_fid`
+- **Paired** (reference-based): `PairedImageMetricEvaluator` — PSNR, SSIM, LPIPS, DISTS, SAMScore
+- **Unpaired** (distribution-based): `UnpairedImageMetricEvaluator` — FID, KID, IS, SFD, CMMD, Precision/Recall
+- One-stop usage and custom HuggingFace/local checkpoints: [src/metrics/README.md](../src/metrics/README.md)
 
 ## Community Pipelines
 

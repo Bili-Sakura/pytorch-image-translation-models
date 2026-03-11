@@ -64,7 +64,26 @@ src/                                 # ← Core library (single source of truth)
 ├── inference/
 │   └── predictor.py                # ImageTranslator
 └── metrics/
-    └── image_quality.py            # PSNR, SSIM, LPIPS, FID
+    ├── paired/                     # Reference-based metrics
+    │   ├── evaluator.py            # PairedImageMetricEvaluator
+    │   ├── psnr.py                 # PSNR (Wang et al., IEEE TIP 2004)
+    │   ├── ssim.py                 # SSIM (Wang et al., IEEE TIP 2004)
+    │   ├── lpips_impl.py           # LPIPS (Zhang et al., CVPR 2018)
+    │   ├── dists_impl.py           # DISTS (Ding et al., IEEE TPAMI 2022)
+    │   ├── samscore_impl.py        # SAMScore (Li et al., IEEE TAI 2025)
+    │   └── registry.py             # Metric registry
+    └── unpaired/                   # Distribution-based metrics
+        ├── evaluator.py            # UnpairedImageMetricEvaluator
+        ├── registry.py             # Metric registry
+        ├── fid.py                  # FID (Heusel et al., NeurIPS 2017)
+        ├── kid.py                  # KID (Binkowski et al., ICLR 2018)
+        ├── is_.py                  # IS (Salimans et al., NeurIPS 2016)
+        ├── sfd.py                  # SFD (Kim et al., Sensors 2020)
+        ├── sfid.py                 # sFID (Nash et al., ICML 2021)
+        ├── precision_recall.py     # P&R (Kynkäänniemi et al., NeurIPS 2019)
+        ├── cmmd.py                 # CMMD (Jayasumana et al., CVPR 2024)
+        ├── fwd.py                  # FWD (ICLR 2025)
+        └── ifid.py                 # iFID (arXiv 2026)
 examples/                            # ← Training/inference scripts (import from src/)
 ├── community/                       # Community-contributed pipelines (single-file)
 │   ├── parallel_gan/               # Parallel-GAN (Wang et al., TGRS 2022)

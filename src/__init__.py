@@ -9,7 +9,14 @@ __version__ = "0.2.6"
 from src.data import PairedImageDataset, UnpairedImageDataset, default_transforms, get_transforms
 from src.inference import ImageTranslator
 from src.losses import GANLoss, PerceptualLoss
-from src.metrics import compute_fid, compute_lpips, compute_psnr, compute_ssim
+from src.metrics import (
+    PairedImageMetricEvaluator,
+    compute_dists,
+    compute_fid,
+    compute_lpips,
+    compute_psnr,
+    compute_ssim,
+)
 from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
 from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchability
 from src.models import BBDMUNet, BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
@@ -172,8 +179,10 @@ __all__ = [
     # Inference
     "ImageTranslator",
     # Metrics
+    "PairedImageMetricEvaluator",
     "compute_psnr",
     "compute_ssim",
     "compute_lpips",
+    "compute_dists",
     "compute_fid",
 ]
