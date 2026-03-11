@@ -36,6 +36,8 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
 | [`openearthmap_sar/`](openearthmap_sar/) | [Park et al., ECCV 2020](https://arxiv.org/abs/2007.15651) | CUT models for SAR ↔ optical image translation with anti-aliased ResNet generator (opt2sar, sar2opt, seman2opt, seman2sar, etc.) |
 | [`sar2optical/`](sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation, adapted from yuuIind/SAR2Optical |
+| [`ddib/`](ddib/) | [Su et al., ICLR 2023](https://github.com/suxuann/ddib) | DDIB for OpenAI/guided_diffusion-style checkpoints; dual source/target UNets |
+| [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
 
 ---
 
@@ -86,6 +88,28 @@ python -m examples.community.bbdm.convert_ckpt_to_unet \
   --raw-root "/path/to/raw/BBDM Checkpoints" \
   --output-root "/path/to/BBDM-ckpt"
 ```
+
+---
+
+### DDIB (Community)
+
+**Paper:** *Dual Diffusion Implicit Bridges for Image-to-Image Translation* (Su et al., ICLR 2023)
+
+**Architecture:** OpenAI/guided_diffusion-style unconditional U-Net. Uses two models (source_unet, target_unet) for encode (source→latent) and decode (latent→target) via DDIM. Compatible with raw DDIB checkpoints after conversion.
+
+**Quick start:**
+
+```python
+from examples.community.ddib import load_ddib_community_pipeline
+
+pipe = load_ddib_community_pipeline(
+    "/path/to/DDIB-ckpt/Synthetic-log2D0-to-log2D1",
+    device="cuda",
+)
+out = pipe(source_image=image, num_inference_steps=250, output_type="pil")
+```
+
+**Converting from raw .pt:** See [ddib/README.md](ddib/README.md). Raw ImageNet256 and Synthetic log2D checkpoints may require architecture-specific config adjustments.
 
 ---
 
@@ -203,6 +227,36 @@ losses = trainer.train_step(sar_batch, optical_batch)
   number={},
   pages={1-1},
   doi={10.1109/LGRS.2024.3506566}}
+```
+
+---
+
+### CDTSDE (Community)
+
+**Source:** [projects/CDTSDE](../../CDTSDE) — ControlLDM for solar defect identification (PSCDE).
+
+**Architecture:** Latent diffusion with ControlNet conditioning, CLIP text encoder, and dynamic shift sampling. Converts to standard diffusers layout (`unet/`, `controlnet/`, `vae/`, `text_encoder/`, etc.).
+
+**Converting from raw .ckpt:**
+
+```bash
+python -m examples.community.cdtsde.convert_ckpt_to_cdtsde \
+  --ckpt /path/to/PSCDE.ckpt \
+  --output-dir /path/to/CDTSDE-ckpt/solar-defect-pscde
+```
+
+**Quick start** (diffusers-style checkpoint only; convert first):
+
+```python
+from examples.community.cdtsde import load_cdtsde_community_pipeline
+
+pipe = load_cdtsde_community_pipeline(
+    "/path/to/CDTSDE-ckpt/solar-defect-pscde",
+    cdtsde_src_path="/path/to/projects/CDTSDE",
+)
+pipe.to("cuda")
+out = pipe(source_image=image, num_inference_steps=50, output_type="pil")
+out.images[0].save("semantic_mask.png")
 ```
 
 ---

@@ -71,6 +71,14 @@ All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 - **Unpaired** (distribution-based): `UnpairedImageMetricEvaluator` — FID, KID, IS, SFD, CMMD, Precision/Recall
 - One-stop usage and custom HuggingFace/local checkpoints: [src/metrics/README.md](../src/metrics/README.md)
 
+## Baseline Pipelines
+
+Reference methods integrated from published work:
+
+| Pipeline | Paper | Description |
+|----------|-------|-------------|
+| [`diffuseit/`](../examples/baselines/diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based Image Translation with disentangled style/content (text- and image-guided) |
+
 ## Community Pipelines
 
 Self-contained, single-file modules contributed by the community (inspired by [diffusers community pipelines](https://github.com/huggingface/diffusers/tree/main/examples/community)):

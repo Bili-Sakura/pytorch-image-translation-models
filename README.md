@@ -41,26 +41,43 @@ Examples default to `device="cuda"`. If your environment is CPU-only, replace `"
 ```python
 from PIL import Image
 
-# Baseline method (UNSB) - one-stop load
-from src.pipelines.unsb import UNSBPipeline
+# Baseline method (DiffuseIT) - diffusion-based image translation
+from examples.baselines.diffuseit import DiffuseITPipeline
 
-pipe = UNSBPipeline.from_pretrained(
-    "path/to/UNSB-ckpt/horse2zebra", # https://huggingface.co/BiliSakura/UNSB-ckpt
-    subfolder="generator",
-    scheduler_num_timesteps=5,
-    scheduler_tau=0.01,
+pipe = DiffuseITPipeline.from_pretrained(
+    "projects/DiffuseIT",  # Clone from https://github.com/cyclomon/DiffuseIT
+    timestep_respacing="100",
+    skip_timesteps=80,
 )
 pipe.to("cuda")
 
 source = Image.open("/path/to/source.png").convert("RGB")
-out = pipe(source_image=source, output_type="pil")
-out.images[0].save("unsb_output.png")
-
-from examples.community.e3diff import E3DiffPipeline
-# Community method (E3Diff) - one-stop load
-e3diff = E3DiffPipeline.from_pretrained(
-    "path/to/E3Diff-ckpt/SEN12 ", # https://huggingface.co/BiliSakura/E3Diff-ckpt
+# Text-guided
+out = pipe(
+    source_image=source,
+    prompt="Black Leopard",
+    source="Lion",
+    use_range_restart=True,
+    use_noise_aug_all=True,
+    output_type="pil",
 )
+out.images[0].save("diffuseit_output.png")
+
+# Alternative: UNSB baseline
+from src.pipelines.unsb import UNSBPipeline
+unsb = UNSBPipeline.from_pretrained(
+    "path/to/UNSB-ckpt/horse2zebra",  # https://huggingface.co/BiliSakura/UNSB-ckpt
+    subfolder="generator",
+    scheduler_num_timesteps=5,
+    scheduler_tau=0.01,
+)
+unsb.to("cuda")
+unsb_out = unsb(source_image=source, output_type="pil")
+unsb_out.images[0].save("unsb_output.png")
+
+# Community method (E3Diff)
+from examples.community.e3diff import E3DiffPipeline
+e3diff = E3DiffPipeline.from_pretrained("path/to/E3Diff-ckpt/SEN12")
 e3diff.to("cuda")
 community_out = e3diff(source_image=source, num_inference_steps=50, output_type="pil")
 community_out.images[0].save("e3diff_output.png")

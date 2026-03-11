@@ -15,3 +15,4 @@
 | Community `sar2optical` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors` |
 | Community `parallel_gan` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors` |
 | Community `e3diff` | `config.json`, `diffusion_pytorch_model.safetensors` |
+| Baseline `diffuseit` | DiffuseIT repo root with `checkpoints/256x256_diffusion_uncond.pt` (or `ffhq_10m.pt`, `512x512_diffusion.pt`) |
