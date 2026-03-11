@@ -5,16 +5,15 @@ Extended usage examples for all supported methods. For a minimal quick start, se
 Unless noted otherwise, examples default to `device="cuda"`. If you only have CPU, replace `"cuda"` with `"cpu"`.
 Pipelines also support `pipeline.to("cuda")` (or `"cpu"`).
 
-## DiffuseIT baseline (text- and image-guided)
+## DiffuseIT (Community)
 
 ```python
-from examples.baselines.diffuseit import DiffuseITPipeline
+from examples.community.diffuseit import load_diffuseit_community_pipeline
 from PIL import Image
 
-pipe = DiffuseITPipeline.from_pretrained(
-    "projects/DiffuseIT",  # Clone from https://github.com/cyclomon/DiffuseIT
-    timestep_respacing="100",
-    skip_timesteps=80,
+pipe = load_diffuseit_community_pipeline(
+    "/path/to/DiffuseIT-ckpt/imagenet256-uncond",
+    diffuseit_src_path="projects/DiffuseIT",
 )
 pipe.to("cuda")
 

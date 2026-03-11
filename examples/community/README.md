@@ -38,6 +38,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`sar2optical/`](sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation, adapted from yuuIind/SAR2Optical |
 | [`ddib/`](ddib/) | [Su et al., ICLR 2023](https://github.com/suxuann/ddib) | DDIB for OpenAI/guided_diffusion-style checkpoints; dual source/target UNets |
 | [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
+| [`diffuseit/`](diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
 
 ---
 
@@ -110,6 +111,38 @@ out = pipe(source_image=image, num_inference_steps=250, output_type="pil")
 ```
 
 **Converting from raw .pt:** See [ddib/README.md](ddib/README.md). Raw ImageNet256 and Synthetic log2D checkpoints may require architecture-specific config adjustments.
+
+---
+
+### DiffuseIT (Community)
+
+**Paper:** *Diffusion-based Image Translation using Disentangled Style and Content Representation* (Kwon & Ye, ICLR 2023)
+
+**Architecture:** Guided diffusion (OpenAI-style) with CLIP text guidance and VIT content/style losses. Supports text-guided and image-guided translation. Requires DiffuseIT repo cloned (for CLIP, model_vit, etc.).
+
+**Converting from raw .pt:**
+
+```bash
+python -m examples.community.diffuseit.convert_ckpt_to_diffuseit \
+  --raw-root /path/to/DiffuseIT-ckpt-raw \
+  --output-root /path/to/BiliSakura/DiffuseIT-ckpt
+```
+
+**Quick start:**
+
+```python
+from examples.community.diffuseit import load_diffuseit_community_pipeline
+
+pipe = load_diffuseit_community_pipeline(
+    "/path/to/DiffuseIT-ckpt/imagenet256-uncond",
+    diffuseit_src_path="projects/DiffuseIT",
+)
+pipe.to("cuda")
+# Text-guided
+out = pipe(source_image=img, prompt="Black Leopard", source="Lion", output_type="pil")
+# Image-guided
+out = pipe(source_image=img, target_image=style_ref, use_colormatch=True, output_type="pil")
+```
 
 ---
 

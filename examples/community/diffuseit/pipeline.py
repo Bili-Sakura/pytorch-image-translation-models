@@ -1,15 +1,15 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: DiffuseIT (Kwon & Ye, ICLR 2023) - https://github.com/cyclomon/DiffuseIT
 
-"""DiffuseIT baseline pipeline for diffusion-based image translation.
+"""DiffuseIT community pipeline for diffusion-based image translation.
 
-Wraps the DiffuseIT ImageEditor for text-guided and image-guided translation.
-Expects DiffuseIT repo cloned at projects/DiffuseIT (or diffuseit_src_path).
+Loads from BiliSakura/DiffuseIT-ckpt layout (after convert_ckpt_to_diffuseit).
 """
 
 from __future__ import annotations
 
 import os
+import shutil
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,9 +22,8 @@ from PIL import Image
 from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 
-
 def _ensure_diffuseit_path(diffuseit_src_path: Optional[str | Path]) -> Path:
-    """Resolve DiffuseIT source path. Default: workspace/projects/DiffuseIT."""
+    """Resolve DiffuseIT source path."""
     if diffuseit_src_path is not None:
         path = Path(diffuseit_src_path)
         if path.exists():
@@ -32,8 +31,8 @@ def _ensure_diffuseit_path(diffuseit_src_path: Optional[str | Path]) -> Path:
         raise FileNotFoundError(f"DiffuseIT source not found: {path}")
 
     candidates = [
-        Path(__file__).resolve().parents[4] / "DiffuseIT",  # .../projects/DiffuseIT
-        Path.cwd().parent / "DiffuseIT",  # when cwd is projects/pytorch-image-translation-models
+        Path(__file__).resolve().parents[4] / "DiffuseIT",
+        Path.cwd().parent / "DiffuseIT",
         Path.cwd() / "projects" / "DiffuseIT",
         Path.cwd() / "DiffuseIT",
     ]
@@ -43,38 +42,85 @@ def _ensure_diffuseit_path(diffuseit_src_path: Optional[str | Path]) -> Path:
 
     raise FileNotFoundError(
         "DiffuseIT source not found. Clone from https://github.com/cyclomon/DiffuseIT "
-        "and set diffuseit_src_path or place at projects/DiffuseIT"
+        "and set diffuseit_src_path"
+    )
+
+
+def _setup_id_model(ckpt_dir: Path, diffuseit_path: Path) -> None:
+    """Copy ArcFace id_model from self-contained ckpt to DiffuseIT for use_ffhq."""
+    id_src_dir = ckpt_dir / "id_model"
+    id_dst_dir = diffuseit_path / "id_model"
+    id_dst_dir.mkdir(exist_ok=True)
+    dst = id_dst_dir / "model_ir_se50.pth"
+
+    src_pt = id_src_dir / "model_ir_se50.pth"
+    src_safetensors = id_src_dir / "model_ir_se50.safetensors"
+    if src_pt.exists():
+        if not dst.exists() or dst.resolve() != src_pt.resolve():
+            try:
+                dst.unlink(missing_ok=True)
+                dst.symlink_to(src_pt.resolve())
+            except OSError:
+                shutil.copy2(src_pt, dst)
+    elif src_safetensors.exists():
+        from safetensors.torch import load_file
+        state = load_file(str(src_safetensors))
+        torch.save(state, dst)
+
+
+def _setup_checkpoint_for_editor(
+    ckpt_dir: Path,
+    diffuseit_path: Path,
+    use_ffhq: bool,
+    image_size: int,
+) -> None:
+    """Copy BiliSakura checkpoint to DiffuseIT checkpoints/ for ImageEditor."""
+    ckpt_dir = Path(ckpt_dir)
+    checkpoints_dir = diffuseit_path / "checkpoints"
+    checkpoints_dir.mkdir(exist_ok=True)
+
+    if use_ffhq:
+        ckpt_name = "ffhq_10m.pt"
+    elif image_size == 512:
+        ckpt_name = "512x512_diffusion.pt"
+    else:
+        ckpt_name = "256x256_diffusion_uncond.pt"
+
+    dst = checkpoints_dir / ckpt_name
+    src = ckpt_dir / "diffusion_pytorch_model.pt"
+    if src.exists():
+        if not dst.exists() or dst.resolve() != src.resolve():
+            try:
+                dst.unlink(missing_ok=True)
+                dst.symlink_to(src.resolve())
+            except OSError:
+                shutil.copy2(src, dst)
+        return
+
+    safetensors_path = ckpt_dir / "unet" / "diffusion_pytorch_model.safetensors"
+    if safetensors_path.exists():
+        from safetensors.torch import load_file
+        state = load_file(str(safetensors_path))
+        torch.save(state, dst)
+        return
+
+    raise FileNotFoundError(
+        f"No checkpoint found in {ckpt_dir}. Run convert_ckpt_to_diffuseit first."
     )
 
 
 @dataclass
 class DiffuseITPipelineOutput(BaseOutput):
-    """Output of the DiffuseIT baseline pipeline.
-
-    Attributes
-    ----------
-    images : list[PIL.Image.Image] | np.ndarray | torch.Tensor
-        Translated images.
-    nfe : int
-        Effective sampling steps (diffusion iterations).
-    """
+    """Output of the DiffuseIT community pipeline."""
 
     images: Any
     nfe: int = 0
 
 
 class DiffuseITPipeline(DiffusionPipeline):
-    """Image translation pipeline using DiffuseIT (ICLR 2023).
+    """Image translation pipeline using DiffuseIT (ICLR 2023)."""
 
-    Supports text-guided (prompt + source text) and image-guided (target_image)
-    translation. Uses pre-trained diffusion models from the DiffuseIT checkpoint layout.
-    """
-
-    def __init__(
-        self,
-        editor: Any,
-        diffuseit_path: Path,
-    ) -> None:
+    def __init__(self, editor: Any, diffuseit_path: Path) -> None:
         super().__init__()
         self._editor = editor
         self._diffuseit_path = diffuseit_path
@@ -96,36 +142,26 @@ class DiffuseITPipeline(DiffusionPipeline):
         device: Optional[str] = None,
         **kwargs,
     ) -> "DiffuseITPipeline":
-        """Load DiffuseIT pipeline from DiffuseIT checkpoint layout.
+        """Load DiffuseIT pipeline from BiliSakura checkpoint.
 
-        Expects checkpoint at ``pretrained_model_name_or_path``:
-        - For ImageNet256: ``256x256_diffusion_uncond.pt``
-        - For FFHQ: ``ffhq_10m.pt``
-        - For ImageNet512: ``512x512_diffusion.pt`` (in checkpoints/)
-
-        Parameters
-        ----------
-        pretrained_model_name_or_path : str | Path
-            Path to DiffuseIT root (containing checkpoints/) or to checkpoint dir.
-        diffuseit_src_path : str | Path, optional
-            Path to DiffuseIT repo. Default: projects/DiffuseIT.
-        use_ffhq : bool
-            Use FFHQ face model.
-        image_size : int
-            Output resolution (256 or 512).
-        timestep_respacing : str
-            DDIM respacing (e.g. "100").
-        skip_timesteps : int
-            Timesteps to skip for inpainting start.
-        device : str, optional
-            Device to load onto.
+        Expects path like ``/path/to/DiffuseIT-ckpt/imagenet256-uncond`` with
+        ``unet/config.json``, ``diffusion_pytorch_model.pt`` (from convert_ckpt_to_diffuseit).
         """
-        # Resolve DiffuseIT root: prefer pretrained path if it's the repo
-        p = Path(pretrained_model_name_or_path)
-        if p.exists() and (p / "optimization" / "image_editor.py").exists():
-            diffuseit_path = p.resolve()
-        else:
-            diffuseit_path = _ensure_diffuseit_path(diffuseit_src_path)
+        ckpt_path = Path(pretrained_model_name_or_path)
+        diffuseit_path = _ensure_diffuseit_path(diffuseit_src_path)
+
+        # If ckpt_path is BiliSakura layout (not DiffuseIT repo), setup checkpoint
+        if (ckpt_path / "unet" / "config.json").exists() or (
+            ckpt_path / "diffusion_pytorch_model.pt"
+        ).exists():
+            _setup_checkpoint_for_editor(
+                ckpt_path, diffuseit_path, use_ffhq, image_size
+            )
+            if use_ffhq:
+                _setup_id_model(ckpt_path, diffuseit_path)
+        elif (ckpt_path / "optimization" / "image_editor.py").exists():
+            diffuseit_path = ckpt_path.resolve()
+
         import sys
         diffuseit_str = str(diffuseit_path)
         if diffuseit_str not in sys.path:
@@ -133,7 +169,6 @@ class DiffuseITPipeline(DiffusionPipeline):
 
         from optimization.image_editor import ImageEditor
 
-        # Build minimal args for ImageEditor
         class Args:
             pass
         args = Args()
@@ -208,33 +243,7 @@ class DiffuseITPipeline(DiffusionPipeline):
         iterations_num: int = 1,
         output_type: str = "pil",
     ) -> DiffuseITPipelineOutput:
-        """Run DiffuseIT image translation.
-
-        Parameters
-        ----------
-        source_image : PIL.Image | np.ndarray | torch.Tensor
-            Input image to translate.
-        prompt : str, optional
-            Target text prompt (text-guided mode).
-        source : str, optional
-            Source domain text (text-guided mode).
-        target_image : PIL.Image | np.ndarray | torch.Tensor, optional
-            Target style image (image-guided mode).
-        use_colormatch : bool
-            Apply color matching to target (image-guided).
-        use_range_restart : bool
-            Use range restart for stability.
-        use_noise_aug_all : bool
-            Use noise augmentation for VIT losses.
-        iterations_num : int
-            Number of diffusion iterations.
-        output_type : str
-            "pil" or "pt".
-
-        Returns
-        -------
-        DiffuseITPipelineOutput
-        """
+        """Run DiffuseIT image translation."""
         if prompt is None and target_image is None:
             raise ValueError("Provide either prompt (text-guided) or target_image (image-guided)")
 
@@ -243,15 +252,13 @@ class DiffuseITPipeline(DiffusionPipeline):
         pipe.args.use_range_restart = use_range_restart
         pipe.args.use_noise_aug_all = use_noise_aug_all
         pipe.args.iterations_num = iterations_num
-
         if prompt is not None:
             pipe.args.prompt = prompt
         if source is not None:
             pipe.args.source = source
         if target_image is not None:
-            pipe.args.target_image = None  # set path below
+            pipe.args.target_image = None
 
-        # Convert input to PIL if needed
         if isinstance(source_image, torch.Tensor):
             from torchvision.transforms.functional import to_pil_image
             if source_image.dim() == 3:
@@ -269,7 +276,6 @@ class DiffuseITPipeline(DiffusionPipeline):
             in_path = Path(tmpdir) / "input.png"
             out_path = Path(tmpdir) / "output"
             out_path.mkdir(exist_ok=True)
-
             source_pil.save(in_path)
             pipe.args.init_image = str(in_path)
             pipe.args.output_path = str(out_path)
@@ -300,23 +306,18 @@ class DiffuseITPipeline(DiffusionPipeline):
             finally:
                 os.chdir(orig_cwd)
 
-            # Find output (ImageEditor saves with iteration/batch in name)
             outs = list(out_path.glob("out_i_*_b_0.png"))
             if not outs:
                 outs = list(out_path.glob("*.png"))
             if not outs:
                 raise RuntimeError("DiffuseIT produced no output")
-
-            result_path = sorted(outs)[-1]
-            result_pil = Image.open(result_path).convert("RGB")
+            result_pil = Image.open(sorted(outs)[-1]).convert("RGB")
 
         total_t = getattr(pipe.diffusion, "num_timesteps", 1000)
         num_steps = total_t - pipe.args.skip_timesteps
         if pipe.args.ddim and hasattr(pipe.args, "timestep_respacing"):
             num_steps = len(
-                timestep_respacing_to_steps(
-                    pipe.args.timestep_respacing, total_t
-                )
+                _timestep_respacing_to_steps(pipe.args.timestep_respacing, total_t)
             )
 
         images: List[Any] = [result_pil]
@@ -327,8 +328,7 @@ class DiffuseITPipeline(DiffusionPipeline):
         return DiffuseITPipelineOutput(images=images, nfe=num_steps)
 
 
-def timestep_respacing_to_steps(respacing: str, total: int) -> list:
-    """Parse timestep_respacing string to step list."""
+def _timestep_respacing_to_steps(respacing: str, total: int) -> list:
     parts = respacing.replace(" ", "").split(",")
     if len(parts) == 1 and parts[0].isdigit():
         n = int(parts[0])
@@ -336,7 +336,7 @@ def timestep_respacing_to_steps(respacing: str, total: int) -> list:
     return list(range(total))
 
 
-def load_diffuseit_baseline_pipeline(
+def load_diffuseit_community_pipeline(
     checkpoint_path: str | Path,
     *,
     diffuseit_src_path: Optional[str | Path] = None,
@@ -345,25 +345,7 @@ def load_diffuseit_baseline_pipeline(
     device: str = "cuda",
     **kwargs,
 ) -> DiffuseITPipeline:
-    """Load DiffuseIT baseline pipeline from checkpoint.
-
-    Parameters
-    ----------
-    checkpoint_path : str | Path
-        Path to DiffuseIT root (with checkpoints/) or checkpoint directory.
-    diffuseit_src_path : str | Path, optional
-        Path to DiffuseIT repo. Default: projects/DiffuseIT.
-    use_ffhq : bool
-        Use FFHQ model.
-    image_size : int
-        Output resolution.
-    device : str
-        Device to use.
-
-    Returns
-    -------
-    DiffuseITPipeline
-    """
+    """Load DiffuseIT community pipeline from BiliSakura checkpoint."""
     return DiffuseITPipeline.from_pretrained(
         checkpoint_path,
         diffuseit_src_path=diffuseit_src_path,
