@@ -8,12 +8,15 @@ from src.metrics.paired.psnr import compute_psnr
 from src.metrics.paired.ssim import compute_ssim
 from src.metrics.paired.lpips_impl import compute_lpips
 from src.metrics.paired.dists_impl import compute_dists
+from src.metrics.paired.l1_l2 import compute_l1, compute_l2
 
 METRIC_REGISTRY: dict[str, Callable[..., float]] = {
     "psnr": compute_psnr,
     "ssim": compute_ssim,
     "lpips": compute_lpips,
     "dists": compute_dists,
+    "l1": compute_l1,
+    "l2": compute_l2,
 }
 
 

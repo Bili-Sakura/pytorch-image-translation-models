@@ -23,14 +23,14 @@ from src.metrics import PairedImageMetricEvaluator
 
 # One-stop: pick metrics, run once
 evaluator = PairedImageMetricEvaluator(
-    metrics=["psnr", "ssim", "lpips", "dists"],
+    metrics=["psnr", "ssim", "lpips", "dists", "l1", "l2"],
     data_range=1.0,
     device="cuda",
 )
 generated = torch.rand(8, 3, 256, 256).cuda()   # (N, C, H, W) in [0, 1]
 reference = torch.rand(8, 3, 256, 256).cuda()
 scores = evaluator(generated, reference)
-# → {"psnr": 28.5, "ssim": 0.92, "lpips": 0.15, "dists": 0.85}
+# → {"psnr": 28.5, "ssim": 0.92, "lpips": 0.15, "dists": 0.85, "l1": 0.04, "l2": 0.002}
 ```
 
 ### Unpaired Metrics (distribution-based)
@@ -55,7 +55,7 @@ scores = evaluator(real_images, fake_images)
 ```python
 # Paired
 print(PairedImageMetricEvaluator.available_metrics())
-# ['psnr', 'ssim', 'lpips', 'dists', 'samscore']
+# ['psnr', 'ssim', 'lpips', 'dists', 'l1', 'l2', 'samscore']
 
 # Unpaired
 print(UnpairedImageMetricEvaluator.available_metrics())

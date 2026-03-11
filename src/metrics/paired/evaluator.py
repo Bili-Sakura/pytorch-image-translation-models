@@ -16,7 +16,7 @@ class PairedImageMetricEvaluator:
     """Evaluator for paired (reference-based) image quality metrics.
 
     Compares generated images to reference images using one or more metrics.
-    Supports PSNR, SSIM, LPIPS, DISTS, and SAMScore.
+    Supports PSNR, SSIM, LPIPS, DISTS, L1, L2, and SAMScore.
 
     Parameters
     ----------
@@ -69,7 +69,7 @@ class PairedImageMetricEvaluator:
         -------
         dict[str, float] :
             Metric name -> scalar value. Higher is better for PSNR, SSIM, DISTS,
-            SAMScore; lower is better for LPIPS.
+            SAMScore; lower is better for LPIPS, L1, L2.
         """
         which = list(metrics) if metrics is not None else self.metrics
         pred = pred.to(self.device)

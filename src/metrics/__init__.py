@@ -19,6 +19,7 @@ from src.metrics.paired.psnr import compute_psnr
 from src.metrics.paired.ssim import compute_ssim
 from src.metrics.paired.lpips_impl import compute_lpips
 from src.metrics.paired.dists_impl import compute_dists
+from src.metrics.paired.l1_l2 import compute_l1, compute_l2
 
 from src.metrics.unpaired import (
     UnpairedImageMetricEvaluator,
@@ -34,6 +35,8 @@ __all__ = [
     "compute_ssim",
     "compute_lpips",
     "compute_dists",
+    "compute_l1",
+    "compute_l2",
     "UnpairedImageMetricEvaluator",
     "compute_fid",
     "compute_is",
