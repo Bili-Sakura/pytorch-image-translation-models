@@ -7,8 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-03-11
+
+### Added
+
+- **iFID** (interpolated FID, Xu et al. 2026): full implementation with VAE encode → nearest-neighbor latent interpolation → decode → FID. Supports multiple diffusers VAEs (`AutoencoderKL`, `AutoencoderTiny`, `AsymmetricAutoencoderKL`, `ConsistencyDecoderVAE`) via `vae_path` + `vae_cls` or pre-loaded `vae`.
+- **FWD** (Fréchet Wavelet Distance, ICLR 2025): implementation via `pytorchfwd` subprocess. Domain-agnostic wavelet-based evaluation.
+- **sFID** (Sparse FID, Nash et al. ICML 2021): implementation via `pyiqa` spatial Inception features.
+
 ### Changed
 
+- **Metrics no-fallback policy**: iFID, FWD, and sFID no longer fall back to standard FID when required backends are missing. They now raise `ImportError` or `ValueError` with prominent stderr warnings.
+- iFID requires `vae_path` or `vae`; FWD requires `pytorchfwd`; sFID requires `pyiqa`.
 - Documented a CUDA-first usage pattern across docs (`README.md`, `docs/features.md`, `docs/examples.md`), including explicit guidance to switch to CPU with `"cpu"` when needed.
 - Standardized examples to show `pipeline.to("cuda")` / `pipeline.to("cpu")` as the preferred device placement flow.
 - Improved custom pipeline ergonomics for device migration:
@@ -163,7 +173,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.6...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.7...HEAD
+[0.2.7]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.7
 [0.2.6]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.6
 [0.2.5]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.5
 [0.2.4]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.4
