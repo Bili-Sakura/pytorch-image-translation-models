@@ -23,7 +23,7 @@ from tqdm.auto import tqdm
 from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 
-from src.models.unet.diffusers_wrappers import LBMUNet
+from src.models.unet import LBMUNet
 from src.schedulers.lbm import LBMScheduler
 
 

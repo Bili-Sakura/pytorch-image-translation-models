@@ -21,7 +21,7 @@ from tqdm.auto import tqdm
 from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 
-from src.models.unet.diffusers_wrappers import BDBMUNet
+from src.models.unet import BDBMUNet
 from src.schedulers.bdbm import BDBMScheduler
 
 

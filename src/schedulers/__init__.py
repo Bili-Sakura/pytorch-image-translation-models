@@ -11,6 +11,8 @@ from src.schedulers.i2sb import I2SBScheduler, I2SBSchedulerOutput
 from src.schedulers.lbm import LBMScheduler, LBMSchedulerOutput
 from src.schedulers.unsb import UNSBScheduler, UNSBSchedulerOutput
 from src.schedulers.local_diffusion import LocalDiffusionScheduler, LocalDiffusionSchedulerOutput
+from src.schedulers.sid2 import SiD2Scheduler
+from src.schedulers.fcdm import FCDMScheduler, FCDMSchedulerOutput
 
 __all__ = [
     "BBDMScheduler",
@@ -35,4 +37,7 @@ __all__ = [
     "UNSBSchedulerOutput",
     "LocalDiffusionScheduler",
     "LocalDiffusionSchedulerOutput",
+    "SiD2Scheduler",
+    "FCDMScheduler",
+    "FCDMSchedulerOutput",
 ]

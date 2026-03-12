@@ -2,8 +2,7 @@
 
 from src.models.discriminators import PatchGANDiscriminator
 from src.models.generators import ResNetGenerator, UNetGenerator
-from src.models.unet import I2SBUNet
-from src.models.unet.diffusers_wrappers import (
+from src.models.unet import (
     BBDMUNet,
     BDBMUNet,
     BiBBDMUNet,
@@ -12,7 +11,9 @@ from src.models.unet.diffusers_wrappers import (
     DDBMUNet,
     DDIBUNet,
     I2SBDiffusersUNet,
+    I2SBUNet,
     LBMUNet,
+    create_model,
 )
 from src.models.dit import SiTBackbone, SIT_CONFIGS
 from src.models.stegogan import (
@@ -37,6 +38,15 @@ from src.models.local_diffusion import (
 )
 from src.models.pix2pixhd import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
 from src.models.stargan import StarGANGenerator, StarGANDiscriminator, StarGANResidualBlock
+from src.models.fcdm import (
+    FCDM,
+    FCDM_S,
+    FCDM_B,
+    FCDM_L,
+    FCDM_XL,
+    FCDMImageCond,
+    FCDM_MODELS,
+)
 
 __all__ = [
     "UNetGenerator",
@@ -71,4 +81,11 @@ __all__ = [
     "StarGANGenerator",
     "StarGANDiscriminator",
     "StarGANResidualBlock",
+    "FCDM",
+    "FCDM_S",
+    "FCDM_B",
+    "FCDM_L",
+    "FCDM_XL",
+    "FCDMImageCond",
+    "FCDM_MODELS",
 ]

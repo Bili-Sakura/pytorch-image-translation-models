@@ -74,6 +74,7 @@ class LocalDiffusionConfig:
     num_train_timesteps: int = 250
     beta_schedule: str = "sigmoid"
     objective: str = "pred_x0"
+    loss_type: str = "min_snr"  # mse | min_snr | sid2 | edm
     min_snr_loss_weight: bool = False
     min_snr_gamma: float = 5.0
 

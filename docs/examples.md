@@ -78,7 +78,7 @@ result = pipeline(source_image=source, target_labels=target_labels, output_type=
 ## Diffusion bridge translation (I2SB)
 
 ```python
-from src.models.unet import I2SBUNet, create_model
+from src.models.unet import I2SBUNet, create_model  # adm.py
 from src.schedulers import I2SBScheduler
 from src.pipelines.i2sb import I2SBPipeline
 
@@ -274,7 +274,7 @@ model = trainer.build_model()
 scheduler = trainer.build_scheduler()
 
 # Single-step loss computation
-loss = I2SBTrainer.compute_training_loss(model, scheduler, source_batch, target_batch)
+loss = trainer.compute_training_loss(model, scheduler, source_batch, target_batch)
 loss.backward()
 ```
 

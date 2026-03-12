@@ -13,9 +13,12 @@ src/                                 # ← Core library (single source of truth)
 │   ├── discriminators/
 │   │   └── patchgan.py              # PatchGANDiscriminator
 │   ├── unet/
-│   │   ├── i2sb_unet.py            # I2SBUNet (native ADM-style backbone)
-│   │   ├── unet_2d.py              # create_model factory
-│   │   └── diffusers_wrappers.py   # DDBMUNet, DDIBUNet, … (diffusers UNet2DModel wrappers)
+│   │   ├── adm.py                  # ADM-style UNet (I2SBUNet, create_model, DDBM/DDIB/… wrappers)
+│   │   ├── edm.py                  # EDM placeholder
+│   │   ├── vdmpp.py                # VDM++ placeholder
+│   │   ├── rin.py                  # RIN placeholder
+│   │   ├── sid.py                  # SID placeholder
+│   │   └── sid2.py                 # SiD2 placeholder
 │   ├── dit/
 │   │   └── sit.py                  # SiTBackbone (Diffusion Transformer)
 │   └── stegogan/
@@ -41,6 +44,7 @@ src/                                 # ← Core library (single source of truth)
 │   └── lbm.py                      # LBMScheduler
 │   └── unsb.py                     # UNSBScheduler
 │   └── local_diffusion.py          # LocalDiffusionScheduler (DDPM/DDIM)
+│   └── sid2.py                     # SiD2Scheduler
 ├── pipelines/                       # One pipeline per method
 │   ├── i2sb.py                     # I2SBPipeline
 │   ├── ddbm.py                     # DDBMPipeline

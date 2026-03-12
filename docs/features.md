@@ -9,10 +9,11 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 - **StegoGAN** — `ResnetMaskV1Generator`, `ResnetMaskV3Generator`, `NetMatchability` (steganographic masking for non-bijective translation, CVPR 2024)
 - **pix2pixHD** — `Pix2PixHDGenerator`, `Pix2PixHDGlobalGenerator` (high-resolution conditional GAN baseline, CVPR 2018)
 - **StarGAN** — `StarGANGenerator`, `StarGANDiscriminator` (single model for multi-domain translation, CVPR 2018)
-- **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net for Image-to-Image Schrödinger Bridge)
+- **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net in `adm.py` for Image-to-Image Schrödinger Bridge)
 - **UNSB** — `UNSBGenerator`, `UNSBDiscriminator`, `UNSBEnergyNet` (time-conditional networks for Unpaired Neural Schrödinger Bridge, ICLR 2024)
 - **Local Diffusion** — `LocalDiffusionUNet`, `ConditionEncoder` (conditional denoising U-Net with branch-and-fuse for hallucination suppression, ECCV 2024 Oral)
 - **DiT backbone** — `SiTBackbone` (Scalable Interpolant Transformer for diffusion bridges)
+- **FCDM** — `FCDM`, `FCDMImageCond` (ConvNeXt-based diffusion backbone for class-conditional and image-conditioned generation, CVPR 2026)
 
 ## Schedulers
 
@@ -27,8 +28,10 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 | **DBIMScheduler** | Faster bridge sampler with eta-controlled stochasticity for DBIM |
 | **CDTSDEScheduler** | Dynamic domain-shift eta schedule for CDTSDE |
 | **LBMScheduler** | Flow-matching bridge for single/few-step LBM translation |
+| **SiD2Scheduler** | Exact SiD2 continuous scheduler (t ∈ [0,1]) with cosine-interpolated log-SNR; drop-in for DDPMScheduler (CVPR 2025) |
 | **UNSBScheduler** | Non-uniform harmonic time schedule with stochastic bridge dynamics for UNSB |
 | **LocalDiffusionScheduler** | Gaussian diffusion (DDPM/DDIM) with sigmoid/cosine/linear beta schedules for Local Diffusion |
+| **FCDMScheduler** | DDPM/DDIM with linear schedule and pred_noise for FCDM latent diffusion |
 
 ## Pipelines
 
@@ -47,6 +50,8 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 | **LocalDiffusionPipeline** | Branch-and-fuse diffusion for hallucination-aware image translation |
 | **Pix2PixHDPipeline** | Native pix2pixHD single-pass generator inference with checkpoint loader |
 | **StarGANPipeline** | Native StarGAN single-pass multi-domain translation with label conditioning |
+| **FCDMPipeline** | Class-conditional FCDM latent diffusion (DDPM/DDIM) with optional VAE decode and CFG |
+| **FCDMImageCondPipeline** | Image-conditioned FCDM for translation (source latent → target) |
 
 All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 

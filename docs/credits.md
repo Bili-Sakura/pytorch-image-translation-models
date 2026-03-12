@@ -18,3 +18,4 @@
 - [Local Diffusion: Tackling Structural Hallucination in Image Translation with Local Diffusion (ECCV 2024 Oral)](https://arxiv.org/abs/2407.17578)
 - [CycleGAN (ICCV 2017)](https://openaccess.thecvf.com/content_iccv_2017/html/Zhu_Unpaired_Image-To-Image_Translation_ICCV_2017_paper.html)
 - [img2img-turbo (2024)](https://doi.org/10.48550/arXiv.2403.12036)
+- [FCDM: Reviving ConvNeXt for Efficient Convolutional Diffusion Models (CVPR 2026)](https://github.com/star-kwon/FCDM)

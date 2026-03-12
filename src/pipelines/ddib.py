@@ -26,7 +26,7 @@ from PIL import Image
 from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 
-from src.models.unet.diffusers_wrappers import DDIBUNet
+from src.models.unet import DDIBUNet
 from src.schedulers.ddib import DDIBScheduler
 
 

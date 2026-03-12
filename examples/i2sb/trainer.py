@@ -11,8 +11,8 @@ import torch
 import torch.nn as nn
 
 from examples.i2sb.config import TaskConfig
-from src.models.unet.i2sb_unet import I2SBUNet
-from src.models.unet.unet_2d import create_model
+from src.losses import get_diffusion_loss
+from src.models.unet import I2SBUNet, create_model
 from src.schedulers.i2sb import I2SBScheduler
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,11 @@ class I2SBTrainer:
 
     def __init__(self, cfg: TaskConfig) -> None:
         self.cfg = cfg
+        self.loss_fn = get_diffusion_loss(
+            loss_type=getattr(cfg, "loss_type", "mse"),
+            prediction_type="epsilon",
+            loss_norm=getattr(cfg, "loss_norm", "mse"),
+        )
 
     # ------------------------------------------------------------------
     # Factory helpers
@@ -56,8 +61,8 @@ class I2SBTrainer:
     # Training loss
     # ------------------------------------------------------------------
 
-    @staticmethod
     def compute_training_loss(
+        self,
         model: nn.Module,
         scheduler: I2SBScheduler,
         x0: torch.Tensor,
@@ -100,4 +105,9 @@ class I2SBTrainer:
         else:
             pred = model(xt, t_float)
 
-        return torch.nn.functional.mse_loss(pred, label)
+        return self.loss_fn(
+            pred,
+            target=label,
+            timesteps_or_sigma=t.to(x0.device),
+            scheduler=scheduler,
+        )

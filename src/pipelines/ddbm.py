@@ -23,7 +23,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 from diffusers.utils.torch_utils import randn_tensor
 
-from src.models.unet.diffusers_wrappers import DDBMUNet
+from src.models.unet import DDBMUNet
 from src.schedulers.ddbm import DDBMScheduler
 
 

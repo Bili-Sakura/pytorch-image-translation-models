@@ -37,7 +37,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from src.models.unet.diffusers_wrappers import (
+from src.models.unet import (
     BBDMUNet,
     BDBMUNet,
     BiBBDMUNet,

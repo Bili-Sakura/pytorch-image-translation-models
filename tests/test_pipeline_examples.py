@@ -22,7 +22,7 @@ import numpy as np
 class TestDDBMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from src.models.unet.diffusers_wrappers import DDBMUNet
+        from src.models.unet import DDBMUNet
         from src.schedulers.ddbm import DDBMScheduler
         from src.pipelines.ddbm import DDBMPipeline
 
@@ -38,7 +38,7 @@ class TestDDBMPipeline:
         return DDBMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from src.models.unet.diffusers_wrappers import DDBMUNet
+        from src.models.unet import DDBMUNet
 
         unet = DDBMUNet(
             image_size=32,
@@ -92,7 +92,7 @@ class TestDDBMPipeline:
 class TestDDIBPipeline:
     @pytest.fixture
     def pipeline(self):
-        from src.models.unet.diffusers_wrappers import DDIBUNet
+        from src.models.unet import DDIBUNet
         from src.schedulers.ddib import DDIBScheduler
         from src.pipelines.ddib import DDIBPipeline
 
@@ -118,7 +118,7 @@ class TestDDIBPipeline:
         )
 
     def test_unet_forward(self):
-        from src.models.unet.diffusers_wrappers import DDIBUNet
+        from src.models.unet import DDIBUNet
 
         unet = DDIBUNet(
             image_size=32,
@@ -180,7 +180,7 @@ class TestDDIBPipeline:
 class TestBiBBDMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from src.models.unet.diffusers_wrappers import BiBBDMUNet
+        from src.models.unet import BiBBDMUNet
         from src.schedulers.bibbdm import BiBBDMScheduler
         from src.pipelines.bibbdm import BiBBDMPipeline
 
@@ -198,7 +198,7 @@ class TestBiBBDMPipeline:
         return BiBBDMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from src.models.unet.diffusers_wrappers import BiBBDMUNet
+        from src.models.unet import BiBBDMUNet
 
         unet = BiBBDMUNet(
             image_size=32,
@@ -262,7 +262,7 @@ class TestBiBBDMPipeline:
 class TestI2SBPipeline:
     @pytest.fixture
     def pipeline(self):
-        from src.models.unet.diffusers_wrappers import I2SBDiffusersUNet
+        from src.models.unet import I2SBDiffusersUNet
         from src.schedulers.i2sb import I2SBScheduler
         from src.pipelines.i2sb import I2SBPipeline
 
@@ -278,7 +278,7 @@ class TestI2SBPipeline:
         return I2SBPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from src.models.unet.diffusers_wrappers import I2SBDiffusersUNet
+        from src.models.unet import I2SBDiffusersUNet
 
         unet = I2SBDiffusersUNet(
             image_size=32,

@@ -22,7 +22,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 from diffusers.utils.torch_utils import randn_tensor
 
-from src.models.unet.diffusers_wrappers import CDTSDEUNet
+from src.models.unet import CDTSDEUNet
 from src.schedulers.cdtsde import CDTSDEScheduler
 
 

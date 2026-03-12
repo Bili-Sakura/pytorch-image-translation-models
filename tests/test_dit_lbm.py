@@ -167,7 +167,7 @@ class TestLBMPipelineImports:
 class TestBDBMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from src.models.unet.diffusers_wrappers import BDBMUNet
+        from src.models.unet import BDBMUNet
         from src.schedulers.bdbm import BDBMScheduler
         from src.pipelines.bdbm import BDBMPipeline
 
@@ -179,7 +179,7 @@ class TestBDBMPipeline:
         return BDBMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from src.models.unet.diffusers_wrappers import BDBMUNet
+        from src.models.unet import BDBMUNet
 
         unet = BDBMUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -221,7 +221,7 @@ class TestBDBMPipeline:
 class TestDBIMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from src.models.unet.diffusers_wrappers import DBIMUNet
+        from src.models.unet.adm import DBIMUNet
         from src.schedulers.dbim import DBIMScheduler
         from src.pipelines.dbim import DBIMPipeline
 
@@ -233,7 +233,7 @@ class TestDBIMPipeline:
         return DBIMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from src.models.unet.diffusers_wrappers import DBIMUNet
+        from src.models.unet.adm import DBIMUNet
 
         unet = DBIMUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -266,7 +266,7 @@ class TestDBIMPipeline:
 class TestCDTSDEPipeline:
     @pytest.fixture
     def pipeline(self):
-        from src.models.unet.diffusers_wrappers import CDTSDEUNet
+        from src.models.unet import CDTSDEUNet
         from src.schedulers.cdtsde import CDTSDEScheduler
         from src.pipelines.cdtsde import CDTSDEPipeline
 
@@ -278,7 +278,7 @@ class TestCDTSDEPipeline:
         return CDTSDEPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from src.models.unet.diffusers_wrappers import CDTSDEUNet
+        from src.models.unet import CDTSDEUNet
 
         unet = CDTSDEUNet(
             image_size=32, in_channels=3, model_channels=32,
@@ -311,7 +311,7 @@ class TestCDTSDEPipeline:
 class TestLBMPipeline:
     @pytest.fixture
     def pipeline(self):
-        from src.models.unet.diffusers_wrappers import LBMUNet
+        from src.models.unet import LBMUNet
         from src.schedulers.lbm import LBMScheduler
         from src.pipelines.lbm import LBMPipeline
 
@@ -323,7 +323,7 @@ class TestLBMPipeline:
         return LBMPipeline(unet=unet, scheduler=scheduler)
 
     def test_unet_forward(self):
-        from src.models.unet.diffusers_wrappers import LBMUNet
+        from src.models.unet import LBMUNet
 
         unet = LBMUNet(
             image_size=32, in_channels=3, model_channels=32,

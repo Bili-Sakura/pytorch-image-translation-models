@@ -1,8 +1,6 @@
-"""UNet model components and diffusers-compatible wrappers."""
+"""UNet architectures by model family: ADM, EDM, VDM++, RIN, SID, SiD2."""
 
-from src.models.unet.i2sb_unet import I2SBUNet
-from src.models.unet.unet_2d import create_model
-from src.models.unet.diffusers_wrappers import (
+from src.models.unet.adm import (
     BBDMUNet,
     BDBMUNet,
     BiBBDMUNet,
@@ -11,8 +9,11 @@ from src.models.unet.diffusers_wrappers import (
     DDBMUNet,
     DDIBUNet,
     I2SBDiffusersUNet,
+    I2SBUNet,
     LBMUNet,
+    create_model,
 )
+from src.models.unet.sid2 import SiD2UNet
 
 __all__ = [
     "I2SBUNet",

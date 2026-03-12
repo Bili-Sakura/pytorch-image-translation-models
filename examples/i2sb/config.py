@@ -32,6 +32,7 @@ class TaskConfig:
     attention_resolutions: str = "32,16,8"
 
     # --- training ---
+    loss_type: str = "mse"  # mse | min_snr | sid2 | edm (one-line choice)
     train_batch_size: int = 8
     learning_rate: float = 1e-4
     num_train_epochs: int = 100

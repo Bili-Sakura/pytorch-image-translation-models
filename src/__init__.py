@@ -4,7 +4,7 @@ A library for multi-modal image translation with diffusion bridges,
 GANs, and transformer backbones.
 """
 
-__version__ = "0.2.9"
+__version__ = "0.3.0"
 
 from src.data import PairedImageDataset, UnpairedImageDataset, default_transforms, get_transforms
 from src.inference import ImageTranslator
@@ -20,6 +20,7 @@ from src.metrics import (
 from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
 from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchability
 from src.models import BBDMUNet, BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
+from src.models import FCDM, FCDM_MODELS, FCDMImageCond, FCDM_S, FCDM_B, FCDM_L, FCDM_XL
 from src.models import UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
 from src.models import LocalDiffusionUNet, ConditionEncoder
 from src.models import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
@@ -61,6 +62,9 @@ from src.pipelines import (
     ECSIPipeline,
     ECSIPipelineOutput,
     load_ecsi_pipeline,
+    FCDMPipeline,
+    FCDMPipelineOutput,
+    FCDMImageCondPipeline,
 )
 from src.schedulers import (
     BBDMScheduler,
@@ -81,10 +85,13 @@ from src.schedulers import (
     I2SBSchedulerOutput,
     LBMScheduler,
     LBMSchedulerOutput,
+    SiD2Scheduler,
     UNSBScheduler,
     UNSBSchedulerOutput,
     LocalDiffusionScheduler,
     LocalDiffusionSchedulerOutput,
+    FCDMScheduler,
+    FCDMSchedulerOutput,
 )
 
 __all__ = [
@@ -120,6 +127,14 @@ __all__ = [
     "DDIBUNet",
     "I2SBDiffusersUNet",
     "LBMUNet",
+    # Models — FCDM
+    "FCDM",
+    "FCDM_S",
+    "FCDM_B",
+    "FCDM_L",
+    "FCDM_XL",
+    "FCDMImageCond",
+    "FCDM_MODELS",
     # Schedulers
     "BBDMScheduler",
     "BBDMSchedulerOutput",
@@ -139,10 +154,13 @@ __all__ = [
     "I2SBSchedulerOutput",
     "LBMScheduler",
     "LBMSchedulerOutput",
+    "SiD2Scheduler",
     "UNSBScheduler",
     "UNSBSchedulerOutput",
     "LocalDiffusionScheduler",
     "LocalDiffusionSchedulerOutput",
+    "FCDMScheduler",
+    "FCDMSchedulerOutput",
     # Pipelines
     "BBDMPipeline",
     "BBDMPipelineOutput",
@@ -177,6 +195,9 @@ __all__ = [
     "ECSIPipeline",
     "ECSIPipelineOutput",
     "load_ecsi_pipeline",
+    "FCDMPipeline",
+    "FCDMPipelineOutput",
+    "FCDMImageCondPipeline",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",

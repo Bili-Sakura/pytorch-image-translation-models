@@ -14,8 +14,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from src.models.unet.diffusers_wrappers import I2SBDiffusersUNet
-from src.models.unet.i2sb_unet import I2SBUNet
+from src.models.unet import I2SBDiffusersUNet, I2SBUNet
 from src.schedulers.i2sb import I2SBScheduler
 
 

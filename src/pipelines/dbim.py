@@ -27,7 +27,7 @@ from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 from diffusers.utils.torch_utils import randn_tensor
 
-from src.models.unet.diffusers_wrappers import DBIMUNet
+from src.models.unet import DBIMUNet
 from src.schedulers.dbim import DBIMScheduler
 
 

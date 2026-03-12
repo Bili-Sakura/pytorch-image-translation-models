@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-12
+
+### Added
+
+- **Unified diffusion loss** (`src/losses/diffusion.py`): single `DiffusionLoss` module supporting ε-prediction, x0-prediction, v-prediction, EDM preconditioning, and SiD2 sigmoid weighting. Loss types: `mse` (plain), `min_snr` (SNR weighting), `sid2` (SiD2 continuous/discrete), `edm`.
+- **`get_diffusion_loss(loss_type, prediction_type, **kwargs)`**: one-line factory for diffusion loss used across local_diffusion, I2SB, and other methods.
+- **SiD2 cosine log-SNR** (`cosine_interpolated_logsnr`): exact schedule from SiD2 Appendix B for continuous t ∈ [0,1].
+- **Target override**: `DiffusionLoss` accepts precomputed `target=` for bridge methods (e.g. I2SB with custom labels).
+- **`loss_norm`**: optional `"l1"` or `"mse"` pixel loss for E3Diff-style training.
+
+### Changed
+
+- **Local Diffusion** (`examples/local_diffusion`): now uses `DiffusionLoss` via `loss_type` config (`mse` | `min_snr` | `sid2` | `edm`). Replaced `scheduler.compute_loss` with unified loss.
+- **I2SB** (`examples/i2sb`): now uses `DiffusionLoss` with `target=` override for bridge labels. Added `loss_type` to `TaskConfig`.
+- Exported `get_diffusion_loss` from `src.losses`.
+
+## [0.2.10] - 2026-03-12
+
+### Added
+
+- **SiD2 UNet** *(new)* (`src/models/unet/sid2.py`): Residual U-ViT backbone for Simpler Diffusion v2 (Hoogeboom et al., CVPR 2025). Uses diffusers `ResnetBlock2D` and `BasicTransformerBlock` with a single level-wise residual skip. `SiD2UNet`, `SiD2ResBlock2D`, `SiD2TransformerBlock` exported from `src.models.unet`.
+
 ## [0.2.9] - 2026-03-12
 
 ### Added
@@ -198,7 +220,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.9...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.3.0
+[0.2.10]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.10
 [0.2.9]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.9
 [0.2.8]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.8
 [0.2.7]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.7

@@ -17,8 +17,7 @@ from examples.i2sb.config import (
     sar2ir_config,
     sar2rgb_config,
 )
-from src.models.unet import I2SBUNet
-from src.models.unet.unet_2d import create_model
+from src.models.unet import I2SBUNet, create_model
 from src.schedulers import I2SBScheduler, I2SBSchedulerOutput
 from src.pipelines.i2sb import I2SBPipeline, I2SBPipelineOutput
 
@@ -258,6 +257,9 @@ class TestTrainerSignature:
 
     def test_compute_training_loss(self):
         from examples.i2sb.trainer import I2SBTrainer
+
+        cfg = sar2eo_config()
+        trainer = I2SBTrainer(cfg)
         model = create_model(
             image_size=32,
             in_channels=1,
@@ -269,6 +271,6 @@ class TestTrainerSignature:
         scheduler = I2SBScheduler(interval=100, beta_max=0.3)
         x0 = torch.randn(2, 1, 32, 32)
         x_T = torch.randn(2, 1, 32, 32)
-        loss = I2SBTrainer.compute_training_loss(model, scheduler, x0, x_T)
+        loss = trainer.compute_training_loss(model, scheduler, x0, x_T)
         assert loss.ndim == 0  # scalar loss
         assert loss.requires_grad

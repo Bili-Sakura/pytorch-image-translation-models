@@ -16,6 +16,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from src.data.datasets import PairedImageDataset
+from src.losses import get_diffusion_loss
 from src.models.local_diffusion import create_unet
 from src.schedulers.local_diffusion import LocalDiffusionScheduler
 
@@ -68,6 +69,15 @@ class LocalDiffusionTrainer:
             min_snr_gamma=config.min_snr_gamma,
         )
 
+        # Loss (one-line choice: mse | min_snr | sid2 | edm)
+        self.loss_fn = get_diffusion_loss(
+            loss_type=config.loss_type,
+            prediction_type=config.objective,
+            sid2_bias=getattr(config, "sid2_bias", -3.0),
+            sigma_data=getattr(config, "sigma_data", 0.5),
+            loss_norm=getattr(config, "loss_norm", "mse"),
+        )
+
         # Optimizer
         self.optimizer = torch.optim.Adam(
             self.model.parameters(),
@@ -118,19 +128,14 @@ class LocalDiffusionTrainer:
         # Model prediction
         model_output = self.model(x_t, source, t)
 
-        # Select target based on objective
-        if cfg.objective == "pred_noise":
-            loss_target = noise
-        elif cfg.objective == "pred_x0":
-            loss_target = target
-        elif cfg.objective == "pred_v":
-            loss_target = (
-                self.scheduler._extract(self.scheduler.sqrt_alphas_cumprod, t, target.shape) * noise
-                - self.scheduler._extract(self.scheduler.sqrt_one_minus_alphas_cumprod, t, target.shape) * target
-            )
-
-        # Compute loss
-        loss = self.scheduler.compute_loss(model_output, loss_target, t)
+        # Compute loss (unified DiffusionLoss)
+        loss = self.loss_fn(
+            model_output,
+            clean_images=target,
+            noise=noise,
+            timesteps_or_sigma=t,
+            scheduler=self.scheduler,
+        )
 
         self.optimizer.zero_grad()
         loss.backward()
