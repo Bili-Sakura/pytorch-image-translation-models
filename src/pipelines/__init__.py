@@ -19,6 +19,7 @@ from src.pipelines.pix2pixhd import (
     load_pix2pixhd_pipeline,
 )
 from src.pipelines.stargan import StarGANPipeline, StarGANPipelineOutput, load_stargan_pipeline
+from src.pipelines.ecsi import ECSIPipeline, ECSIPipelineOutput, load_ecsi_pipeline
 
 __all__ = [
     "BBDMPipeline",
@@ -53,4 +54,7 @@ __all__ = [
     "StarGANPipeline",
     "StarGANPipelineOutput",
     "load_stargan_pipeline",
+    "ECSIPipeline",
+    "ECSIPipelineOutput",
+    "load_ecsi_pipeline",
 ]

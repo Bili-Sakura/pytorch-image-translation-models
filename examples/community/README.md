@@ -36,6 +36,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
 | [`openearthmap_sar/`](openearthmap_sar/) | [Park et al., ECCV 2020](https://arxiv.org/abs/2007.15651) | CUT models for SAR ↔ optical image translation with anti-aliased ResNet generator (opt2sar, sar2opt, seman2opt, seman2sar, etc.) |
 | [`sar2optical/`](sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation, adapted from yuuIind/SAR2Optical |
+| [`mdt/`](mdt/) | [Bosch Research, NeurIPS 2025](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT) | LDDBM: Latent diffusion bridge for super-resolution and multi-view→3D |
 
 ---
 
@@ -228,3 +229,31 @@ gen = SAR2OpticalGenerator(c_in=3, c_out=3)
 pipeline = SAR2OpticalPipeline(generator=gen)
 out = pipeline(source_image=torch.randn(1, 3, 256, 256), output_type="pt")
 ```
+
+---
+
+### MDT / LDDBM
+
+**Paper:** *Towards General Modality Translation with Contrastive and Predictive Latent Diffusion Bridge* (Bosch Research, NeurIPS 2025 submission)
+
+**Source:** [boschresearch/Multimodal-Distribution-Translation-MDT](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT)
+
+**Architecture:** Latent diffusion bridge with KL-VAE encoders/decoders and a transformer-based bridge. Supports super-resolution (16→128) and multi-view to 3D.
+
+**Prerequisites:** Install the MDT repo first: `git clone ... && pip install -e .`
+
+**Checkpoint format:** Each component uses `config.json` + `diffusion_pytorch_model.safetensors` in subfolders (`encoder_x/`, `encoder_y/`, `decoder_x/`, `bridge/`). Convert raw .pt via `python -m examples.community.mdt.convert_pt_to_mdt /path/to/output --encoder-x ... --encoder-y ... --decoder-x ... --bridge ...`
+
+**Quick start:**
+
+```python
+from examples.community.mdt import load_mdt_community_pipeline
+
+pipe = load_mdt_community_pipeline(
+    checkpoint_dir="/path/to/mdt-checkpoints",
+    task="sr_16_to_128",
+    device="cuda",
+)
+out = pipe(source_image=lr_image, num_inference_steps=40, output_type="pil")
+```
+

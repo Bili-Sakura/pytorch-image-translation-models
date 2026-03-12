@@ -39,6 +39,9 @@ from src.pipelines import (
     DDBMPipelineOutput,
     DDIBPipeline,
     DDIBPipelineOutput,
+    ECSIPipeline,
+    ECSIPipelineOutput,
+    load_ecsi_pipeline,
     I2SBPipeline,
     I2SBPipelineOutput,
     LBMPipeline,
@@ -55,6 +58,9 @@ from src.pipelines import (
     StarGANPipeline,
     StarGANPipelineOutput,
     load_stargan_pipeline,
+    ECSIPipeline,
+    ECSIPipelineOutput,
+    load_ecsi_pipeline,
 )
 from src.schedulers import (
     BBDMScheduler,
@@ -168,6 +174,9 @@ __all__ = [
     "StarGANPipeline",
     "StarGANPipelineOutput",
     "load_stargan_pipeline",
+    "ECSIPipeline",
+    "ECSIPipelineOutput",
+    "load_ecsi_pipeline",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",

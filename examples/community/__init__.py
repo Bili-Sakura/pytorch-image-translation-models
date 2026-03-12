@@ -27,4 +27,5 @@ Available community pipelines:
 * ``e3diff/`` – E3Diff (Qin et al., IEEE GRSL 2024)
 * ``openearthmap_sar`` – OpenEarthMap-SAR CUT models for SAR ↔ optical translation (Park et al., ECCV 2020)
 * ``sar2optical`` – Pix2Pix cGAN SAR → optical translation (Isola et al., CVPR 2017; yuuIind/SAR2Optical)
+* ``mdt`` – MDT / LDDBM latent diffusion bridge for general modality translation (Bosch Research, NeurIPS 2025)
 """
