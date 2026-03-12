@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-03-12
+
+### Added
+
+- **MDT/LDDBM community pipeline** (`examples/community/mdt/`): Latent diffusion bridge for general modality translation (Bosch Research, NeurIPS 2025 submission). Compatible with [Multimodal-Distribution-Translation-MDT](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT).
+  - `MDTPipeline`, `MDTPipelineOutput`, `load_mdt_community_pipeline`.
+  - `convert_pt_to_mdt.py` for converting raw `.pt` checkpoints to the project layout (config.json + safetensors per component).
+  - Supports super-resolution (16×16 → 128×128) and multi-view→3D (ShapeNet) tasks.
+
 ## [0.2.8] - 2026-03-11
 
 ### Added
@@ -189,7 +198,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.9...HEAD
+[0.2.9]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.9
 [0.2.8]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.8
 [0.2.7]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.7
 [0.2.6]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.6
