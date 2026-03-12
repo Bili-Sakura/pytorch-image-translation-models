@@ -18,12 +18,14 @@ def load_bbdm_community_pipeline(
     pretrained_model_name_or_path: str | Path,
     *,
     subfolder: str = "unet",
-    device: str | Union[str, "torch.device"] = "cpu",
+    device: str | Union[str, "torch.device"] = None,
     torch_dtype: "torch.dtype | None" = None,
 ) -> BBDMPipeline:
     """Load BBDM pipeline for OpenAI-style BBDM checkpoints."""
     import torch
 
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
     path = Path(pretrained_model_name_or_path)
     unet = OpenAIBBDMUNet.from_pretrained(path, subfolder=subfolder, device=device)
     if torch_dtype is not None:

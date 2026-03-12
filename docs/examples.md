@@ -5,6 +5,41 @@ Extended usage examples for all supported methods. For a minimal quick start, se
 Unless noted otherwise, examples default to `device="cuda"`. If you only have CPU, replace `"cuda"` with `"cpu"`.
 Pipelines also support `pipeline.to("cuda")` (or `"cpu"`).
 
+## DiffuseIT (Community)
+
+```python
+from examples.community.diffuseit import load_diffuseit_community_pipeline
+from PIL import Image
+
+pipe = load_diffuseit_community_pipeline(
+    "/path/to/DiffuseIT-ckpt/imagenet256-uncond",
+    diffuseit_src_path="projects/DiffuseIT",
+)
+pipe.to("cuda")
+
+source = Image.open("source.png").convert("RGB")
+
+# Text-guided: source domain text -> target prompt
+out = pipe(
+    source_image=source,
+    prompt="Black Leopard",
+    source="Lion",
+    use_range_restart=True,
+    use_noise_aug_all=True,
+    output_type="pil",
+)
+out.images[0].save("translated.png")
+
+# Image-guided: target style reference image
+out = pipe(
+    source_image=source,
+    target_image=Image.open("style_ref.png").convert("RGB"),
+    use_colormatch=True,
+    use_noise_aug_all=True,
+    output_type="pil",
+)
+```
+
 ## GAN-based translation (Pix2Pix)
 
 ```python

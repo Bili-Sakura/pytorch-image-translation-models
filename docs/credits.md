@@ -2,6 +2,7 @@
 
 ## Reference papers
 
+- [DiffuseIT: Diffusion-based Image Translation using Disentangled Style and Content Representation (ICLR 2023)](https://arxiv.org/abs/2209.15264)
 - [I2SB: Image-to-Image Schrödinger Bridge (ICML 2023)](https://openreview.net/forum?id=WH2Cy3eQd0)
 - [DDBM: Denoising Diffusion Bridge Models (ICLR 2024)](https://openreview.net/forum?id=FKksTayvGo)
 - [DDIB: Dual Diffusion Implicit Bridges (ICLR 2023)](https://openreview.net/forum?id=5HLoTvVGDe)

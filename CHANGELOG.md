@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-03-11
+
+### Added
+
+- **L1 and L2 metrics** for paired image evaluation: `compute_l1` (MAE) and `compute_l2` (MSE) in `src/metrics/paired/l1_l2.py`. Integrated into `PairedImageMetricEvaluator` and metric registry.
+- **DiffuseIT community pipeline** (`examples/community/diffuseit/`): diffusion-based image translation (Kwon & Ye, ICLR 2023) with text-guided and image-guided modes. Compatible with [BiliSakura/DiffuseIT-ckpt](https://huggingface.co/BiliSakura/DiffuseIT-ckpt).
+  - `DiffuseITPipeline`, `DiffuseITPipelineOutput`, `load_diffuseit_community_pipeline`.
+  - `convert_ckpt_to_diffuseit.py` for converting raw DiffuseIT checkpoints to the BiliSakura layout.
+- **CDTSDE community pipeline** (`examples/community/cdtsde/`): ControlLDM for solar defect identification. `convert_ckpt_to_cdtsde.py` for raw `.ckpt` conversion; `load_cdtsde_community_pipeline` for inference.
+- **DDIB community pipeline** (`examples/community/ddib/`): dual source/target UNets for OpenAI/guided_diffusion-style checkpoints. `OpenAIDDIBUNet`, `load_ddib_community_pipeline`, `convert_pt_to_ddib.py`.
+
+### Changed
+
+- **DiffuseIT moved to community**: DiffuseIT is now a community pipeline under `examples/community/diffuseit/` instead of `examples/baselines/diffuseit/`. Removed `examples/baselines/` structure.
+- Updated README, docs (`examples.md`, `features.md`, `package-structure.md`, `checkpoint-layouts.md`), and community catalog to reflect DiffuseIT, CDTSDE, and DDIB as integrated pipelines.
+
 ## [0.2.7] - 2026-03-11
 
 ### Added
@@ -173,7 +189,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.7...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.8
 [0.2.7]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.7
 [0.2.6]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.6
 [0.2.5]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.5

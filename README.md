@@ -41,26 +41,39 @@ Examples default to `device="cuda"`. If your environment is CPU-only, replace `"
 ```python
 from PIL import Image
 
-# Baseline method (UNSB) - one-stop load
+# Baseline method (UNSB)
 from src.pipelines.unsb import UNSBPipeline
-
-pipe = UNSBPipeline.from_pretrained(
-    "path/to/UNSB-ckpt/horse2zebra", # https://huggingface.co/BiliSakura/UNSB-ckpt
+unsb = UNSBPipeline.from_pretrained(
+    "path/to/UNSB-ckpt/horse2zebra",  # https://huggingface.co/BiliSakura/UNSB-ckpt
     subfolder="generator",
     scheduler_num_timesteps=5,
     scheduler_tau=0.01,
 )
-pipe.to("cuda")
+unsb.to("cuda")
+unsb_out = unsb(source_image=source, output_type="pil")
+unsb_out.images[0].save("unsb_output.png")
 
-source = Image.open("/path/to/source.png").convert("RGB")
-out = pipe(source_image=source, output_type="pil")
-out.images[0].save("unsb_output.png")
+# Community method (DiffuseIT) - text/image-guided diffusion translation
+from examples.community.diffuseit import load_diffuseit_community_pipeline
 
-from examples.community.e3diff import E3DiffPipeline
-# Community method (E3Diff) - one-stop load
-e3diff = E3DiffPipeline.from_pretrained(
-    "path/to/E3Diff-ckpt/SEN12 ", # https://huggingface.co/BiliSakura/E3Diff-ckpt
+pipe = load_diffuseit_community_pipeline(
+    "/root/worksapce/models/BiliSakura/DiffuseIT-ckpt/imagenet256-uncond",
+    diffuseit_src_path="projects/DiffuseIT",
 )
+pipe.to("cuda")
+out = pipe(
+    source_image=source,
+    prompt="Black Leopard",
+    source="Lion",
+    use_range_restart=True,
+    use_noise_aug_all=True,
+    output_type="pil",
+)
+out.images[0].save("diffuseit_output.png")
+
+# Community method (E3Diff)
+from examples.community.e3diff import E3DiffPipeline
+e3diff = E3DiffPipeline.from_pretrained("path/to/E3Diff-ckpt/SEN12")
 e3diff.to("cuda")
 community_out = e3diff(source_image=source, num_inference_steps=50, output_type="pil")
 community_out.images[0].save("e3diff_output.png")
