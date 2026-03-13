@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Peak Signal-to-Noise Ratio (PSNR) — classic pixel-level metric."""
 
 from __future__ import annotations

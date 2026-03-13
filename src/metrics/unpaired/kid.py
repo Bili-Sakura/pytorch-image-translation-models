@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """KID — Kernel Inception Distance (Binkowski et al., ICLR 2018)."""
 
 from __future__ import annotations

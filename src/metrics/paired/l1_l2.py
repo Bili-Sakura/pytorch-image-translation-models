@@ -1,3 +1,4 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 """L1 and L2 (MAE/MSE) — pixel-level error metrics."""
 
 from __future__ import annotations

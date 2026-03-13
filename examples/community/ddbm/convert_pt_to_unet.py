@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: alexzhou907/DDBM (Zhou et al., ICLR 2024).
 """Convert raw DDBM .pt checkpoint to unet/ format (safetensors + config.json).
 
 Usage:

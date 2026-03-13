@@ -1,3 +1,5 @@
+# Credits: SAMScore (Li et al., IEEE TAI 2025), https://github.com/Kent0n-Li/SAMScore.
+#
 """SAMScore — Content Structural Similarity for Image Translation (Li et al., IEEE TAI 2025)."""
 
 from __future__ import annotations

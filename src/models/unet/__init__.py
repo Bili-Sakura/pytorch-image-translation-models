@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """UNet architectures by model family: ADM, EDM, VDM++, RIN, SID, SiD2."""
 
 from src.models.unet.adm import (

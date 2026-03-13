@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: xuekt98/BBDM (Li et al., CVPR 2023).
 """Convert original BBDM checkpoints to community ``unet/`` layout.
 
 Usage:

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: CDTSDE/PSCDE (solar defect identification, projects/CDTSDE).
 """Convert raw CDTSDE/PSCDE .ckpt checkpoints to standard diffusers layout.
 
 Supports ControlLDM checkpoints from projects/CDTSDE (e.g. solar defect PSCDE).

@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Paired (reference-based) image quality metrics.
 
 Paired metrics compare generated output to a reference image. Used for image

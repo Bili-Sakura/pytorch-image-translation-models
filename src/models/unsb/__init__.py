@@ -1,3 +1,5 @@
+# Credits: UNSB from Kim et al. "Unpaired Image-to-Image Translation via Neural Schrödinger Bridge" ICLR 2024.
+#
 """UNSB (Unpaired Neural Schrödinger Bridge) model components."""
 
 from src.models.unsb.unsb_model import (

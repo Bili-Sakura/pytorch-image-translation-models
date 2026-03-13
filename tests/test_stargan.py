@@ -1,3 +1,5 @@
+# Credits: StarGAN from Choi et al. "Unified Generative Adversarial Networks for Multi-Domain Image-to-Image Translation" CVPR 2018.
+
 """Tests for native StarGAN integration."""
 
 import torch

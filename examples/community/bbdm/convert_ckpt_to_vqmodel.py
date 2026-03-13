@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: xuekt98/BBDM (Li et al., CVPR 2023).
 """Convert legacy BBDM VQGAN checkpoints to Diffusers VQModel layout.
 
 Usage:

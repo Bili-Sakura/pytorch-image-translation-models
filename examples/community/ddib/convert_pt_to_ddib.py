@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: DDIB (Su et al., ICLR 2023) https://github.com/suxuann/ddib
 """Convert raw DDIB .pt checkpoints to BiliSakura format (source_unet/ + target_unet/).
 
 Supports:

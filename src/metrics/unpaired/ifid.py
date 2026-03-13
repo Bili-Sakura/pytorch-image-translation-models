@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """iFID — Making Reconstruction FID Predictive of Diffusion Generation FID (2026)."""
 
 from __future__ import annotations

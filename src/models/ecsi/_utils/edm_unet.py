@@ -4,7 +4,9 @@
 # Attribution-NonCommercial-ShareAlike 4.0 International License.
 # You should have received a copy of the license along with this
 # work. If not, see http://creativecommons.org/licenses/by-nc-sa/4.0/
-
+#
+# Credits: ECSI (https://github.com/szhan311/ECSI), EDM (Karras et al.).
+#
 """Model architectures and preconditioning schemes used in the paper
 "Elucidating the Design Space of Diffusion-Based Generative Models"."""
 

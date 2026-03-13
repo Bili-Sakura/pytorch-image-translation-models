@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Noise schedulers for diffusion bridge models."""
 
 from src.schedulers.bbdm import BBDMScheduler, BBDMSchedulerOutput

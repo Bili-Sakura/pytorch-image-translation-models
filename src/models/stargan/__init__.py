@@ -1,3 +1,5 @@
+# Credits: StarGAN (Choi et al., CVPR 2018) - https://github.com/yunjey/stargan
+
 """StarGAN model architectures.
 
 Adapted from the official implementation:

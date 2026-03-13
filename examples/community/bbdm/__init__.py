@@ -1,4 +1,5 @@
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: xuekt98/BBDM (Li et al., CVPR 2023).
 
 """BBDM community pipeline for OpenAI-style checkpoints.
 

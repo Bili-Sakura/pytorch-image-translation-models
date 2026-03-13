@@ -1,3 +1,5 @@
+# Credits: ECSI (https://github.com/szhan311/ECSI) - neural network utilities.
+#
 """
 Various utilities for neural networks.
 """

@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Unpaired image metric evaluator — unified interface for distribution-based metrics."""
 
 from __future__ import annotations

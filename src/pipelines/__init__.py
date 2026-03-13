@@ -1,3 +1,4 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 """Inference pipelines for image translation models."""
 
 from src.pipelines.bbdm import BBDMPipeline, BBDMPipelineOutput

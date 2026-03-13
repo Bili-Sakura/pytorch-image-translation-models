@@ -1,3 +1,5 @@
+# Credits: pix2pixHD from Wang et al. "High-Resolution Image Synthesis and Semantic Manipulation with Conditional GANs" CVPR 2018.
+#
 """pix2pixHD generator architectures.
 
 Implements the core generator used in NVIDIA pix2pixHD:

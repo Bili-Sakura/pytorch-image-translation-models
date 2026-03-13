@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """IS — Inception Score (Salimans et al., NeurIPS 2016)."""
 
 from __future__ import annotations

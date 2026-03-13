@@ -1,3 +1,5 @@
+# Credits: ECSI (https://github.com/szhan311/ECSI) - FP16 utilities.
+#
 """Helpers for 16-bit precision (ECSI)."""
 
 from __future__ import annotations

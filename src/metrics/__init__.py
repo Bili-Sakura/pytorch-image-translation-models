@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Evaluation metrics for image translation quality.
 
 Metrics are classified by whether they require paired reference images:

@@ -1,3 +1,4 @@
+# Credits: pix2pix (Isola et al., CVPR 2017) - https://github.com/phillipi/pix2pix
 """Training loop for paired image translation (Pix2Pix-style)."""
 
 from __future__ import annotations
