@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+
 """Tests for LPIPS and DISTS (require additional deps)."""
 
 import pytest

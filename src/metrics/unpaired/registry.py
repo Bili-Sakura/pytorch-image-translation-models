@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Registry of unpaired (distribution-based) image metrics."""
 
 from __future__ import annotations

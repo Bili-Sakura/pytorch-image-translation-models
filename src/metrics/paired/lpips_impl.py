@@ -1,3 +1,5 @@
+# Credits: LPIPS (Zhang et al., CVPR 2018). Built on open-source implementations.
+#
 """LPIPS — Learned Perceptual Image Patch Similarity (Zhang et al., CVPR 2018)."""
 
 from __future__ import annotations

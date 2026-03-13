@@ -1,3 +1,5 @@
+# Credits: Built on pix2pix (Isola et al., CVPR 2017) and open-source libraries.
+#
 """ResNet generator architecture."""
 
 from __future__ import annotations

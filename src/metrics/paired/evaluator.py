@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Paired image metric evaluator — unified interface for reference-based metrics."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """SFD — Simplified Fréchet Distance (Kim et al., Sensors 2020)."""
 
 from __future__ import annotations

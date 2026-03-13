@@ -1,3 +1,5 @@
+# Credits: StarGAN (Choi et al., CVPR 2018) - https://github.com/yunjey/stargan
+#
 """StarGAN single-pass inference pipeline and checkpoint loader."""
 
 from __future__ import annotations

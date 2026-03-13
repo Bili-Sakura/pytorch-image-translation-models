@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """FWD — Fréchet Wavelet Distance (Veeramacheneni et al., ICLR 2025)."""
 
 from __future__ import annotations

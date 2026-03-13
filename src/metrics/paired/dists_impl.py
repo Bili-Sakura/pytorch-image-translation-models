@@ -1,3 +1,4 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 """DISTS — Deep Image Structure and Texture Similarity (Ding et al., IEEE TPAMI 2022)."""
 
 from __future__ import annotations

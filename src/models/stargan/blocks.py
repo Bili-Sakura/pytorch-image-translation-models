@@ -1,3 +1,5 @@
+# Credits: StarGAN (Choi et al., CVPR 2018) - https://github.com/yunjey/stargan
+
 """Reusable blocks for StarGAN models."""
 
 from __future__ import annotations

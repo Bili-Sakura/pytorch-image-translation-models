@@ -1,3 +1,5 @@
+# Credits: StarGAN (Choi et al., CVPR 2018) - https://github.com/yunjey/stargan
+
 """StarGAN generator architecture."""
 
 from __future__ import annotations

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: Bosch Research LDDBM (Multimodal-Distribution-Translation-MDT).
 """Convert raw MDT .pt checkpoints to project format (config.json + safetensors per subfolder).
 
 Usage:
