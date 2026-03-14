@@ -28,4 +28,6 @@ Available community pipelines:
 * ``openearthmap_sar`` – OpenEarthMap-SAR CUT models for SAR ↔ optical translation (Park et al., ECCV 2020)
 * ``sar2optical`` – Pix2Pix cGAN SAR → optical translation (Isola et al., CVPR 2017; yuuIind/SAR2Optical)
 * ``diffuseit/`` – DiffuseIT (Kwon & Ye, ICLR 2023)
+* ``syndiff/`` – SynDiff (Özbey et al., IEEE TMI 2023) – unsupervised medical image translation with adversarial diffusion
+* ``selfrdb/`` – SelfRDB (Arslan et al., Medical Image Analysis 2024) – self-consistent recursive diffusion bridge for medical synthesis
 """

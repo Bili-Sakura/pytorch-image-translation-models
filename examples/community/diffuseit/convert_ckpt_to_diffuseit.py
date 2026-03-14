@@ -114,13 +114,13 @@ def main():
     parser.add_argument(
         "--raw-root",
         type=str,
-        default="/root/worksapce/models/raw/DiffuseIT-ckpt-raw",
-        help="Path to raw checkpoint directory",
+        required=True,
+        help="Path to raw checkpoint directory (e.g. DiffuseIT-ckpt-raw with 256x256_diffusion_uncond.pt, ffhq_10m.pt)",
     )
     parser.add_argument(
         "--output-root",
         type=str,
-        default="/root/worksapce/models/BiliSakura/DiffuseIT-ckpt",
+        required=True,
         help="Output root (e.g. BiliSakura/DiffuseIT-ckpt)",
     )
     parser.add_argument(

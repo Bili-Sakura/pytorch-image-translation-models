@@ -57,8 +57,7 @@ unsb_out.images[0].save("unsb_output.png")
 from examples.community.diffuseit import load_diffuseit_community_pipeline
 
 pipe = load_diffuseit_community_pipeline(
-    "/root/worksapce/models/BiliSakura/DiffuseIT-ckpt/imagenet256-uncond",
-    diffuseit_src_path="projects/DiffuseIT",
+    "/path/to/BiliSakura/DiffuseIT-ckpt/imagenet256-uncond",
 )
 pipe.to("cuda")
 out = pipe(

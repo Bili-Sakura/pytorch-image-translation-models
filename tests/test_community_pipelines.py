@@ -746,3 +746,93 @@ class TestLDDBMPipeline:
             load_lddbm_pipeline("/tmp/nonexistent-lddbm-checkpoints", device="cpu")
         assert "encoder_x" in str(exc_info.value) or "missing" in str(exc_info.value).lower() or "no such file" in str(exc_info.value).lower()
 
+
+# ---------------------------------------------------------------------------
+# SynDiff (ICON Lab, IEEE TMI 2023)
+# ---------------------------------------------------------------------------
+
+
+class TestSynDiffPipeline:
+    """Tests for the SynDiff community pipeline."""
+
+    def test_syndiff_imports(self):
+        from examples.community.syndiff import (
+            SynDiffPipeline,
+            SynDiffPipelineOutput,
+            load_syndiff_community_pipeline,
+        )
+
+        assert SynDiffPipeline is not None
+        assert SynDiffPipelineOutput is not None
+        assert callable(load_syndiff_community_pipeline)
+
+    def test_load_syndiff_nonexistent_checkpoint_raises(self):
+        """load_syndiff_community_pipeline raises when checkpoint dir is missing."""
+        from examples.community.syndiff import load_syndiff_community_pipeline
+
+        with pytest.raises(FileNotFoundError):
+            load_syndiff_community_pipeline(
+                "/tmp/nonexistent-syndiff-exp",
+                device="cpu",
+            )
+
+
+# ---------------------------------------------------------------------------
+# SelfRDB (ICON Lab, Medical Image Analysis 2024)
+# ---------------------------------------------------------------------------
+
+
+class TestSelfRDBPipeline:
+    """Tests for the SelfRDB community pipeline."""
+
+    def test_selfrdb_imports(self):
+        from examples.community.selfrdb import (
+            SelfRDBPipeline,
+            SelfRDBPipelineOutput,
+            load_selfrdb_community_pipeline,
+        )
+
+        assert SelfRDBPipeline is not None
+        assert SelfRDBPipelineOutput is not None
+        assert callable(load_selfrdb_community_pipeline)
+
+    def test_load_selfrdb_nonexistent_checkpoint_raises(self):
+        """load_selfrdb_community_pipeline raises when checkpoint file is missing."""
+        from examples.community.selfrdb import load_selfrdb_community_pipeline
+
+        with pytest.raises(FileNotFoundError):
+            load_selfrdb_community_pipeline(
+                "/tmp/nonexistent-selfrdb.ckpt",
+                device="cpu",
+            )
+
+
+# ---------------------------------------------------------------------------
+# DiffuseIT (Kwon & Ye, ICLR 2023) – bundled implementation, no external repo
+# ---------------------------------------------------------------------------
+
+
+class TestDiffuseITPipeline:
+    """Tests for the DiffuseIT community pipeline."""
+
+    def test_diffuseit_imports(self):
+        from examples.community.diffuseit import (
+            DiffuseITPipeline,
+            DiffuseITPipelineOutput,
+            load_diffuseit_community_pipeline,
+        )
+
+        assert DiffuseITPipeline is not None
+        assert DiffuseITPipelineOutput is not None
+        assert callable(load_diffuseit_community_pipeline)
+
+    def test_load_diffuseit_nonexistent_checkpoint_raises(self):
+        """load_diffuseit_community_pipeline raises when checkpoint or bundled source is missing."""
+        from examples.community.diffuseit import load_diffuseit_community_pipeline
+
+        with pytest.raises((FileNotFoundError, RuntimeError, OSError)):
+            load_diffuseit_community_pipeline(
+                "/tmp/nonexistent-diffuseit-ckpt",
+                device="cpu",
+            )
+

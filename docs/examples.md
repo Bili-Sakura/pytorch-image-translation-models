@@ -13,7 +13,6 @@ from PIL import Image
 
 pipe = load_diffuseit_community_pipeline(
     "/path/to/DiffuseIT-ckpt/imagenet256-uncond",
-    diffuseit_src_path="projects/DiffuseIT",
 )
 pipe.to("cuda")
 

@@ -4,12 +4,14 @@
 
 **Source:** [cyclomon/DiffuseIT](https://github.com/cyclomon/DiffuseIT)
 
+**Self-contained:** Uses vendored implementation in `_vendor/DiffuseIT`. No external repo or clone needed.
+
 ## Converting from raw checkpoints
 
 ```bash
 python -m examples.community.diffuseit.convert_ckpt_to_diffuseit \
-  --raw-root /root/worksapce/models/raw/DiffuseIT-ckpt-raw \
-  --output-root /root/worksapce/models/BiliSakura/DiffuseIT-ckpt
+  --raw-root /path/to/DiffuseIT-ckpt-raw \
+  --output-root /path/to/BiliSakura/DiffuseIT-ckpt
 # Outputs: imagenet256-uncond/, ffhq-256/, id_model/
 ```
 
@@ -19,8 +21,7 @@ python -m examples.community.diffuseit.convert_ckpt_to_diffuseit \
 from examples.community.diffuseit import load_diffuseit_community_pipeline
 
 pipe = load_diffuseit_community_pipeline(
-    "/root/worksapce/models/BiliSakura/DiffuseIT-ckpt/imagenet256-uncond",
-    diffuseit_src_path="projects/DiffuseIT",
+    "/path/to/BiliSakura/DiffuseIT-ckpt/imagenet256-uncond",
 )
 pipe.to("cuda")
 

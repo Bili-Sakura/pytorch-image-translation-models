@@ -3,7 +3,7 @@
 
 """DiffuseIT community pipeline for diffusion-based image translation."""
 
-from examples.community.diffuseit.pipeline import (
+from .pipeline import (
     DiffuseITPipeline,
     DiffuseITPipelineOutput,
     load_diffuseit_community_pipeline,

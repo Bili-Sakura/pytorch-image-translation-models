@@ -41,6 +41,8 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
 | [`diffuseit/`](diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
 | [`alignflow/`](alignflow/) | [Grover et al., AAAI 2020](https://arxiv.org/abs/1905.12892) | CycleFlow & Flow2Flow: unpaired translation via normalizing flows with cycle-consistent learning from multiple domains |
+| [`syndiff/`](syndiff/) | [Özbey et al., IEEE TMI 2023](https://arxiv.org/abs/2207.08208) | Unsupervised medical image translation with adversarial diffusion models (T1↔T2, T1↔PD) |
+| [`selfrdb/`](selfrdb/) | [Arslan et al., Med. Image Anal. 2024](https://arxiv.org/abs/2405.06789) | Self-consistent recursive diffusion bridge for multi-modal medical image synthesis |
 
 ---
 
@@ -120,7 +122,7 @@ out = pipe(source_image=image, num_inference_steps=250, output_type="pil")
 
 **Paper:** *Diffusion-based Image Translation using Disentangled Style and Content Representation* (Kwon & Ye, ICLR 2023)
 
-**Architecture:** Guided diffusion (OpenAI-style) with CLIP text guidance and VIT content/style losses. Supports text-guided and image-guided translation. Requires DiffuseIT repo cloned (for CLIP, model_vit, etc.).
+**Architecture:** Guided diffusion (OpenAI-style) with CLIP text guidance and VIT content/style losses. Supports text-guided and image-guided translation. **Self-contained:** no manual clone needed; DiffuseIT source is auto-fetched on first use.
 
 **Converting from raw .pt:**
 
@@ -137,7 +139,6 @@ from examples.community.diffuseit import load_diffuseit_community_pipeline
 
 pipe = load_diffuseit_community_pipeline(
     "/path/to/DiffuseIT-ckpt/imagenet256-uncond",
-    diffuseit_src_path="projects/DiffuseIT",
 )
 pipe.to("cuda")
 # Text-guided
@@ -180,6 +181,51 @@ cfg = AlignFlowConfig(
 )
 trainer = AlignFlowTrainer(cfg)
 trainer.train(cfg.root_a, cfg.root_b)
+```
+
+---
+
+### SynDiff (Community)
+
+**Paper:** *Unsupervised Medical Image Translation With Adversarial Diffusion Models* (Özbey et al., IEEE TMI 2023)
+
+**Architecture:** NCSN++ adversarial diffusion generators for unsupervised medical image translation (e.g. T1↔T2, T1↔PD). Requires the [SynDiff](https://github.com/icon-lab/SynDiff) repo cloned locally.
+
+**Quick start:**
+
+```python
+from examples.community.syndiff import load_syndiff_community_pipeline
+
+pipe = load_syndiff_community_pipeline(
+    checkpoint_dir="/path/to/output/exp_syndiff",
+    syndiff_src_path="/path/to/SynDiff",
+    exp_name="exp_syndiff",
+    which_epoch=50,
+    direction="contrast1_to_contrast2",  # or contrast2_to_contrast1
+    device="cuda",
+)
+out = pipe(source_image=source_tensor, num_inference_steps=4, output_type="pil")
+```
+
+---
+
+### SelfRDB (Community)
+
+**Paper:** *Self-Consistent Recursive Diffusion Bridge for Medical Image Translation* (Arslan et al., Medical Image Analysis 2024)
+
+**Architecture:** Diffusion bridge with soft-prior and self-consistent recursion. Requires the [SelfRDB](https://github.com/icon-lab/SelfRDB) repo cloned locally. Supports IXI, BRATS, CT checkpoints from the [Model Zoo](https://github.com/icon-lab/SelfRDB#-model-zoo).
+
+**Quick start:**
+
+```python
+from examples.community.selfrdb import load_selfrdb_community_pipeline
+
+pipe = load_selfrdb_community_pipeline(
+    checkpoint_path="/path/to/ixi_t1_t2.ckpt",
+    selfrdb_src_path="/path/to/SelfRDB",
+    device="cuda",
+)
+out = pipe(source_image=source_tensor, output_type="pil")
 ```
 
 ---

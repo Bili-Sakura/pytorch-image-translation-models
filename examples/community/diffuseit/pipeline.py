@@ -22,28 +22,19 @@ from PIL import Image
 from diffusers import DiffusionPipeline
 from diffusers.utils import BaseOutput
 
-def _ensure_diffuseit_path(diffuseit_src_path: Optional[str | Path]) -> Path:
-    """Resolve DiffuseIT source path."""
-    if diffuseit_src_path is not None:
-        path = Path(diffuseit_src_path)
-        if path.exists():
-            return path.resolve()
-        raise FileNotFoundError(f"DiffuseIT source not found: {path}")
+# Bundled DiffuseIT implementation (no external repo dependency)
+_BUNDLED_DIFFUSEIT = Path(__file__).resolve().parent / "_vendor" / "DiffuseIT"
 
-    candidates = [
-        Path(__file__).resolve().parents[4] / "DiffuseIT",
-        Path.cwd().parent / "DiffuseIT",
-        Path.cwd() / "projects" / "DiffuseIT",
-        Path.cwd() / "DiffuseIT",
-    ]
-    for p in candidates:
-        if p.exists() and (p / "optimization" / "image_editor.py").exists():
-            return p.resolve()
 
-    raise FileNotFoundError(
-        "DiffuseIT source not found. Clone from https://github.com/cyclomon/DiffuseIT "
-        "and set diffuseit_src_path"
-    )
+def _get_diffuseit_path() -> Path:
+    """Return bundled DiffuseIT path. No external repo or clone needed."""
+    path = _BUNDLED_DIFFUSEIT.resolve()
+    if not (path / "optimization" / "image_editor.py").exists():
+        raise FileNotFoundError(
+            f"Bundled DiffuseIT not found at {path}. "
+            "Ensure examples/community/diffuseit/_vendor/DiffuseIT contains the full DiffuseIT source."
+        )
+    return path
 
 
 def _setup_id_model(ckpt_dir: Path, diffuseit_path: Path) -> None:
@@ -134,7 +125,6 @@ class DiffuseITPipeline(DiffusionPipeline):
         cls,
         pretrained_model_name_or_path: str | Path,
         *,
-        diffuseit_src_path: Optional[str | Path] = None,
         use_ffhq: bool = False,
         image_size: int = 256,
         timestep_respacing: str = "100",
@@ -146,11 +136,12 @@ class DiffuseITPipeline(DiffusionPipeline):
 
         Expects path like ``/path/to/DiffuseIT-ckpt/imagenet256-uncond`` with
         ``unet/config.json``, ``diffusion_pytorch_model.pt`` (from convert_ckpt_to_diffuseit).
+        Uses bundled DiffuseIT implementation; no external repo required.
         """
         ckpt_path = Path(pretrained_model_name_or_path)
-        diffuseit_path = _ensure_diffuseit_path(diffuseit_src_path)
+        diffuseit_path = _get_diffuseit_path()
 
-        # If ckpt_path is BiliSakura layout (not DiffuseIT repo), setup checkpoint
+        # BiliSakura layout: setup checkpoint for the bundled editor
         if (ckpt_path / "unet" / "config.json").exists() or (
             ckpt_path / "diffusion_pytorch_model.pt"
         ).exists():
@@ -159,8 +150,6 @@ class DiffuseITPipeline(DiffusionPipeline):
             )
             if use_ffhq:
                 _setup_id_model(ckpt_path, diffuseit_path)
-        elif (ckpt_path / "optimization" / "image_editor.py").exists():
-            diffuseit_path = ckpt_path.resolve()
 
         import sys
         diffuseit_str = str(diffuseit_path)
@@ -339,16 +328,16 @@ def _timestep_respacing_to_steps(respacing: str, total: int) -> list:
 def load_diffuseit_community_pipeline(
     checkpoint_path: str | Path,
     *,
-    diffuseit_src_path: Optional[str | Path] = None,
     use_ffhq: bool = False,
     image_size: int = 256,
     device: str = "cuda",
     **kwargs,
 ) -> DiffuseITPipeline:
-    """Load DiffuseIT community pipeline from BiliSakura checkpoint."""
+    """Load DiffuseIT community pipeline from BiliSakura checkpoint.
+    Uses bundled implementation; no external DiffuseIT repo required.
+    """
     return DiffuseITPipeline.from_pretrained(
         checkpoint_path,
-        diffuseit_src_path=diffuseit_src_path,
         use_ffhq=use_ffhq,
         image_size=image_size,
         device=device,
