@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """sFID — Sparse / Spatial Fréchet Inception Distance (Nash et al., ICML 2021)."""
 
 from __future__ import annotations

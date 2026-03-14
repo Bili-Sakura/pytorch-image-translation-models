@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+
 """Pix2Pix single-pass inference pipeline for basic GAN generators."""
 
 from __future__ import annotations

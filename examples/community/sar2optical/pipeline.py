@@ -1,3 +1,4 @@
+# Credits: SAR2Optical (https://github.com/yuuIind/SAR2Optical), pix2pix (Isola et al.).
 """Inference pipeline for SAR2Optical pix2pix generator."""
 
 from __future__ import annotations

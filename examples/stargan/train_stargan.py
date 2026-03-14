@@ -1,3 +1,4 @@
+# Credits: StarGAN (Choi et al., CVPR 2018) - https://github.com/yunjey/stargan
 """StarGAN training utilities."""
 
 from __future__ import annotations

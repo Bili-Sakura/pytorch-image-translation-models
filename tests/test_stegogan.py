@@ -1,4 +1,5 @@
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: Adapted from StegoGAN (Wu et al., CVPR 2024).
 
 """Tests for the StegoGAN model components and pipeline."""
 

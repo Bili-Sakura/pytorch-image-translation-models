@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Loss functions for image translation tasks."""
 
 from src.losses.adversarial import GANLoss

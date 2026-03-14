@@ -1,3 +1,4 @@
+# Credits: SAR2Optical (https://github.com/yuuIind/SAR2Optical), pix2pix (Isola et al.).
 """Training config and harness for SAR2Optical pix2pix cGAN."""
 
 from __future__ import annotations

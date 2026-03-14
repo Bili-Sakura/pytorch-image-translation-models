@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """P&R — Improved Precision and Recall (Kynkäänniemi et al., NeurIPS 2019)."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# Credits: pix2pixHD (Wang et al., CVPR 2018) - High-Resolution Image Synthesis and Semantic Manipulation with Conditional GANs.
+#
 """pix2pixHD single-pass inference pipeline and checkpoint loader."""
 
 from __future__ import annotations

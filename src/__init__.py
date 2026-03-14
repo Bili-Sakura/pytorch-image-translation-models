@@ -1,3 +1,4 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 """PyTorch image-to-image translation models.
 
 A library for multi-modal image translation with diffusion bridges,

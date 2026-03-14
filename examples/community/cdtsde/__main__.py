@@ -1,4 +1,5 @@
 # Copyright (c) 2026 EarthBridge Team.
+# Credits: CDTSDE/PSCDE (solar defect identification, projects/CDTSDE).
 """CLI for CDTSDE inference.
 
 Usage:

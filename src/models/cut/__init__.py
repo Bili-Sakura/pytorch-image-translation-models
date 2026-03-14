@@ -1,3 +1,5 @@
+# Credits: CUT from Park et al. "Contrastive Learning for Unpaired Image-to-Image Translation" ECCV 2020.
+#
 """CUT (Contrastive Unpaired Translation) model components."""
 
 from src.models.cut.cut_model import (

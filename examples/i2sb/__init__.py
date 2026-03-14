@@ -1,3 +1,4 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 """I2SB example: configuration and training."""
 
 from examples.i2sb.config import (

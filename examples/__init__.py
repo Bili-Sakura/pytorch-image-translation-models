@@ -1,3 +1,4 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 """Example scripts for training and inference with image translation models.
 
 Subpackages

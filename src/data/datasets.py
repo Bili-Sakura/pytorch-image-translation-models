@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Image datasets for paired and unpaired translation tasks."""
 
 from __future__ import annotations

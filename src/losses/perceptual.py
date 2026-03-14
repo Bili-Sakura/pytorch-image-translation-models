@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Perceptual and feature-matching loss functions."""
 
 from __future__ import annotations

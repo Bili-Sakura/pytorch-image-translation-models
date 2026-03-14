@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Unpaired (distribution-based) image quality metrics.
 
 Unpaired metrics compare distributions of real vs. generated samples.

@@ -16,7 +16,11 @@
 - [CUT: Contrastive Unpaired Translation (ECCV 2020)](https://link.springer.com/chapter/10.1007/978-3-030-58545-7_19)
 - [UNSB: Unpaired Image-to-Image Translation via Neural Schrödinger Bridge (ICLR 2024)](https://openreview.net/forum?id=uQBW7ELXfO)
 - [Local Diffusion: Tackling Structural Hallucination in Image Translation with Local Diffusion (ECCV 2024 Oral)](https://arxiv.org/abs/2407.17578)
+- [pix2pix: Image-to-Image Translation with Conditional Adversarial Networks (CVPR 2017)](https://arxiv.org/abs/1611.07004)
+- [pix2pixHD: High-Resolution Image Synthesis and Semantic Manipulation with Conditional GANs (CVPR 2018)](https://arxiv.org/abs/1711.11585)
 - [CycleGAN (ICCV 2017)](https://openaccess.thecvf.com/content_iccv_2017/html/Zhu_Unpaired_Image-To-Image_Translation_ICCV_2017_paper.html)
 - [img2img-turbo (2024)](https://doi.org/10.48550/arXiv.2403.12036)
 - [FCDM: Reviving ConvNeXt for Efficient Convolutional Diffusion Models (CVPR 2026)](https://github.com/star-kwon/FCDM)
 - [MDT: Towards General Modality Translation with Contrastive and Predictive Latent Diffusion Bridge (NeurIPS 2025)](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT) — Berman et al.
+- [EDM: Elucidating the Design Space of Diffusion-Based Generative Models (NeurIPS 2022)](https://arxiv.org/abs/2206.00364)
+- [SAR2Optical: SAR-to-Optical Image Translation (yuuIind)](https://github.com/yuuIind/SAR2Optical)

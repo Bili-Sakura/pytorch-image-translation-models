@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """CMMD — Metric Maximum Mean Discrepancy (Jayasumana et al., CVPR 2024)."""
 
 from __future__ import annotations

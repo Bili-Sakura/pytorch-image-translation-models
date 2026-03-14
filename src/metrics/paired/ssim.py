@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """Structural Similarity Index (SSIM) — classic pixel-level metric."""
 
 from __future__ import annotations

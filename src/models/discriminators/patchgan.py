@@ -1,3 +1,5 @@
+# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+#
 """PatchGAN discriminator architecture."""
 
 from __future__ import annotations

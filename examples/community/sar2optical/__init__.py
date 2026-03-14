@@ -1,3 +1,4 @@
+# Credits: SAR2Optical (https://github.com/yuuIind/SAR2Optical), pix2pix (Isola et al.).
 """SAR2Optical community pipeline (pix2pix-style SAR-to-optical translation).
 
 Adapted from:
