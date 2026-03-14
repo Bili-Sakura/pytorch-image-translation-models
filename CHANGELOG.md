@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **`src/inference/`**: ImageTranslator moved to `src/pipelines/pix2pix.py`; import via `from src.pipelines import ImageTranslator` or `from src import ImageTranslator`.
+- **`examples/inference/`**: Unified inference script removed; use `src.pipelines` directly (e.g. `from src.pipelines import DDBMPipeline` and load from pretrained checkpoints).
+
+### Changed
+- **MDT renamed to LDDBM**: Built-in pipeline moved from `examples/community/mdt/` to `examples/lddbm/` as a main training example (not community).
+  - `src/models/mdt/` → `src/models/lddbm/`
+  - `src/pipelines/mdt.py` → `src/pipelines/lddbm.py`
+  - `LDDBMPipeline`, `LDDBMPipelineOutput`, `load_lddbm_pipeline` in `src.pipelines.lddbm`
+  - Training: `examples/lddbm/train_lddbm.py`, `LDDBMConfig`, `LDDBMTrainer`
+  - Convert raw .pt: `python -m examples.lddbm.convert_pt_to_lddbm`
+
 ## [0.3.0] - 2026-03-12
 
 ### Added

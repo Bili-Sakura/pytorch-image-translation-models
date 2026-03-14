@@ -88,6 +88,7 @@ All information regarding per-method checkpoint folder conventions required by `
 | [Checkpoint layouts](docs/checkpoint-layouts.md) | Provides detailed checkpoint folder structures, naming conventions, and requirements for each pipeline and the `from_pretrained(...)` API. |
 | [Features](docs/features.md) | Documents supported models, schedulers, pipelines, data types, training methods, and evaluation metrics. |
 | [Metrics README](src/metrics/README.md) | One-stop usage for paired/unpaired metrics and custom HuggingFace/local checkpoints. |
+| [Datasets](docs/datasets.md) | Common image-to-image translation datasets (pix2pix, CycleGAN) with paper and download links. |
 | [Examples](docs/examples.md) | Extended usage patterns and code snippets for pipelines such as I2SB, DDBM, UNSB, and Local Diffusion. |
 | [Package structure](docs/package-structure.md) | Overview of the codebase organization, modules, and directories. |
 | [Credits](docs/credits.md) | Citations for reference papers and third-party contributions. |

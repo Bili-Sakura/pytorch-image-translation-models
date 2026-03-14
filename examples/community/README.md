@@ -36,10 +36,11 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
 | [`openearthmap_sar/`](openearthmap_sar/) | [Park et al., ECCV 2020](https://arxiv.org/abs/2007.15651) | CUT models for SAR ↔ optical image translation with anti-aliased ResNet generator (opt2sar, sar2opt, seman2opt, seman2sar, etc.) |
 | [`sar2optical/`](sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation, adapted from yuuIind/SAR2Optical |
-| [`mdt/`](mdt/) | [Bosch Research, NeurIPS 2025](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT) | LDDBM: Latent diffusion bridge for super-resolution and multi-view→3D |
+| [`lddbm/`](../lddbm/) | [Bosch Research, NeurIPS 2025](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT) | LDDBM: Latent diffusion bridge for super-resolution (16→128); training in `examples/lddbm/` |
 | [`ddib/`](ddib/) | [Su et al., ICLR 2023](https://github.com/suxuann/ddib) | DDIB for OpenAI/guided_diffusion-style checkpoints; dual source/target UNets |
 | [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
 | [`diffuseit/`](diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
+| [`alignflow/`](alignflow/) | [Grover et al., AAAI 2020](https://arxiv.org/abs/1905.12892) | CycleFlow & Flow2Flow: unpaired translation via normalizing flows with cycle-consistent learning from multiple domains |
 
 ---
 
@@ -143,6 +144,42 @@ pipe.to("cuda")
 out = pipe(source_image=img, prompt="Black Leopard", source="Lion", output_type="pil")
 # Image-guided
 out = pipe(source_image=img, target_image=style_ref, use_colormatch=True, output_type="pil")
+```
+
+---
+
+### AlignFlow (Community)
+
+**Paper:** *AlignFlow: Cycle Consistent Learning from Multiple Domains via Normalizing Flows* (Grover et al., AAAI 2020)
+
+**Source:** [ermongroup/alignflow](https://github.com/ermongroup/alignflow)
+
+**Architecture:** Unpaired image-to-image translation using normalizing flows (RealNVP) with cycle consistency. Supports:
+- **CycleFlow**: Single invertible flow as generator; cycle-consistency guaranteed by invertibility.
+- **Flow2Flow**: Two flows (src↔latent, tgt↔latent) with shared latent space; hybrid GAN-MLE objective.
+
+**Quick start:**
+
+```python
+from examples.community.alignflow import load_alignflow_pipeline, AlignFlowConfig, AlignFlowTrainer
+
+# Inference
+pipe = load_alignflow_pipeline(
+    "/path/to/alignflow-checkpoint",
+    model_name="CycleFlow",
+    device="cuda",
+)
+out = pipe(source_image=image, output_type="pil")
+
+# Training
+cfg = AlignFlowConfig(
+    model="CycleFlow",
+    root_a="data/domain_a",
+    root_b="data/domain_b",
+    save_dir="checkpoints/alignflow",
+)
+trainer = AlignFlowTrainer(cfg)
+trainer.train(cfg.root_a, cfg.root_b)
 ```
 
 ---
@@ -327,17 +364,17 @@ out = pipeline(source_image=torch.randn(1, 3, 256, 256), output_type="pt")
 
 **Architecture:** Latent diffusion bridge with KL-VAE encoders/decoders and a transformer-based bridge. Supports super-resolution (16→128) and multi-view to 3D.
 
-**Prerequisites:** Install the MDT repo first: `git clone ... && pip install -e .`
+**Location:** Built-in pipeline and training in `examples/lddbm/` (no community package).
 
-**Checkpoint format:** Each component uses `config.json` + `diffusion_pytorch_model.safetensors` in subfolders (`encoder_x/`, `encoder_y/`, `decoder_x/`, `bridge/`). Convert raw .pt via `python -m examples.community.mdt.convert_pt_to_mdt /path/to/output --encoder-x ... --encoder-y ... --decoder-x ... --bridge ...`
+**Checkpoint format:** Each component uses `config.json` + `diffusion_pytorch_model.safetensors` in subfolders (`encoder_x/`, `encoder_y/`, `decoder_x/`, `bridge/`). Convert raw .pt via `python -m examples.lddbm.convert_pt_to_lddbm /path/to/output --encoder-x ... --encoder-y ... --decoder-x ... --bridge ...`
 
 **Quick start:**
 
 ```python
-from examples.community.mdt import load_mdt_community_pipeline
+from examples.lddbm import load_lddbm_pipeline
 
-pipe = load_mdt_community_pipeline(
-    checkpoint_dir="/path/to/mdt-checkpoints",
+pipe = load_lddbm_pipeline(
+    checkpoint_dir="/path/to/lddbm-checkpoints",
     task="sr_16_to_128",
     device="cuda",
 )

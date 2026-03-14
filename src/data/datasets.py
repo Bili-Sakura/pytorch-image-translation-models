@@ -48,20 +48,34 @@ class PairedImageDataset(Dataset):
 
     def __init__(
         self,
-        root: str | Path,
+        root: str | Path | None = None,
         source_dir: str = "source",
         target_dir: str = "target",
+        root_source: str | Path | None = None,
+        root_target: str | Path | None = None,
         transform: Callable | None = None,
         source_transform: Callable | None = None,
         target_transform: Callable | None = None,
+        transform_source: Callable | None = None,
+        transform_target: Callable | None = None,
         extensions: set[str] | None = None,
     ) -> None:
-        self.root = Path(root)
-        self.source_root = self.root / source_dir
-        self.target_root = self.root / target_dir
+        if root_source is not None and root_target is not None:
+            self.source_root = Path(root_source)
+            self.target_root = Path(root_target)
+            self.root = self.source_root.parent
+        else:
+            if root is None:
+                raise ValueError("Provide either root or (root_source, root_target)")
+            self.root = Path(root)
+            self.source_root = self.root / source_dir
+            self.target_root = self.root / target_dir
+
+        src_tf = source_transform or transform_source
+        tgt_tf = target_transform or transform_target
         self.transform = transform
-        self.source_transform = source_transform
-        self.target_transform = target_transform
+        self.source_transform = src_tf
+        self.target_transform = tgt_tf
 
         exts = extensions or self.EXTENSIONS
 

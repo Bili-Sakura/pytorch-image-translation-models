@@ -8,6 +8,9 @@ Metrics are classified by whether they require paired reference images:
 - **Unpaired** (distribution-based): Compare distributions of real vs. generated
   samples. Use :class:`~src.metrics.unpaired.UnpairedImageMetricEvaluator`.
 
+- **Conditional diversity** (VS, AFD): Measure diversity among multiple outputs
+  per source. Use :class:`~src.metrics.conditional.ConditionalDiversityMetricEvaluator`.
+
 Example (paired metrics):
     >>> from src.metrics import PairedImageMetricEvaluator
     >>> evaluator = PairedImageMetricEvaluator(metrics=["psnr", "ssim", "lpips"])
@@ -29,6 +32,12 @@ from src.metrics.unpaired import (
     compute_sfd,
 )
 
+from src.metrics.conditional import (
+    ConditionalDiversityMetricEvaluator,
+    compute_vs,
+    compute_afd,
+)
+
 __all__ = [
     "PairedImageMetricEvaluator",
     "compute_psnr",
@@ -42,4 +51,7 @@ __all__ = [
     "compute_is",
     "compute_kid",
     "compute_sfd",
+    "ConditionalDiversityMetricEvaluator",
+    "compute_vs",
+    "compute_afd",
 ]

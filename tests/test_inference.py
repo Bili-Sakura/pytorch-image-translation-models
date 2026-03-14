@@ -1,9 +1,9 @@
-"""Tests for the inference predictor."""
+"""Tests for the Pix2Pix / ImageTranslator pipeline."""
 
 import torch
 from PIL import Image
 
-from src.inference.predictor import ImageTranslator
+from src.pipelines.pix2pix import ImageTranslator
 from src.models.generators import UNetGenerator
 
 

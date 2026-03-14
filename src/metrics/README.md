@@ -50,6 +50,26 @@ scores = evaluator(real_images, fake_images)
 # → {"fid": 12.3, "kid": 0.02, "is": 8.5}
 ```
 
+### Conditional Diversity Metrics (VS, AFD)
+
+Measure diversity among multiple outputs generated from each source image (conditional generation evaluation):
+
+```python
+from src.metrics import ConditionalDiversityMetricEvaluator
+
+evaluator = ConditionalDiversityMetricEvaluator(
+    metrics=["vs", "afd"],
+    device="cuda",
+)
+# generated_groups: list of (L, C, H, W) — L samples per source, or (M, L, C, H, W) tensor
+generated_groups = [torch.rand(5, 3, 256, 256).cuda() for _ in range(10)]  # 10 sources, 5 samples each
+scores = evaluator(generated_groups)
+# → {"vs": 3.2, "afd": 42.1}
+```
+
+- **VS (Vendi Score)** [Friedman & Dieng, TMLR 2023](https://github.com/vertaix/Vendi-Score): effective number of unique feature patterns (eigenvalue entropy). Higher = more diverse.
+- **AFD (Average Feature Distance)** [Zhang et al., NeurIPS 2025](https://github.com/szhan311/ECSI): mean pairwise L2 distance in Inception feature space. Higher = more diverse.
+
 ### Available Metrics
 
 ```python

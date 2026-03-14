@@ -25,6 +25,12 @@ from src.pipelines.fcdm import (
     FCDMPipelineOutput,
     FCDMImageCondPipeline,
 )
+from src.pipelines.lddbm import (
+    LDDBMPipeline,
+    LDDBMPipelineOutput,
+    load_lddbm_pipeline,
+)
+from src.pipelines.pix2pix import ImageTranslator
 
 __all__ = [
     "BBDMPipeline",
@@ -65,4 +71,8 @@ __all__ = [
     "FCDMPipeline",
     "FCDMPipelineOutput",
     "FCDMImageCondPipeline",
+    "LDDBMPipeline",
+    "LDDBMPipelineOutput",
+    "load_lddbm_pipeline",
+    "ImageTranslator",
 ]

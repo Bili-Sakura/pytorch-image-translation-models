@@ -59,14 +59,13 @@ src/                                 # ← Core library (single source of truth)
 │   └── local_diffusion.py          # LocalDiffusionPipeline
 │   └── pix2pixhd.py                # Pix2PixHDPipeline, load_pix2pixhd_pipeline
 │   └── stargan.py                  # StarGANPipeline, load_stargan_pipeline
+│   └── pix2pix.py                 # ImageTranslator (Pix2Pix single-pass)
 ├── data/
 │   ├── datasets.py                 # PairedImageDataset, UnpairedImageDataset
 │   └── transforms.py               # get_transforms, default_transforms
 ├── losses/
 │   ├── adversarial.py              # GANLoss
 │   └── perceptual.py               # PerceptualLoss
-├── inference/
-│   └── predictor.py                # ImageTranslator
 └── metrics/
     ├── paired/                     # Reference-based metrics
     │   ├── evaluator.py            # PairedImageMetricEvaluator
@@ -100,7 +99,5 @@ examples/                            # ← Training/inference scripts (import fr
 ├── pix2pix/                         # Pix2Pix paired translation (Pix2PixTrainer)
 ├── stegogan/                        # StegoGAN unpaired translation (StegoGANTrainer)
 ├── stargan/                         # StarGAN multi-domain translation (StarGANTrainer)
-├── cut/                             # CUT contrastive unpaired translation (CUTTrainer)
-└── inference/
-    └── run_inference.py            # Unified inference script for all methods
+└── cut/                            # CUT contrastive unpaired translation (CUTTrainer)
 ```

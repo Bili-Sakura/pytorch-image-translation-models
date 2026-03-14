@@ -47,6 +47,12 @@ from src.models.fcdm import (
     FCDMImageCond,
     FCDM_MODELS,
 )
+from src.models.lddbm import (
+    ModalityTranslationBridge,
+    create_bridge,
+    create_decoder,
+    create_encoder,
+)
 
 __all__ = [
     "UNetGenerator",
@@ -88,4 +94,8 @@ __all__ = [
     "FCDM_XL",
     "FCDMImageCond",
     "FCDM_MODELS",
+    "ModalityTranslationBridge",
+    "create_bridge",
+    "create_decoder",
+    "create_encoder",
 ]
