@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from src.models.ecsi._utils.edm_unet import SongUNet
+from src.models.ecsi._utils.edm_unet import EDM
 from src.models.ecsi._utils.unet import UNetModel
 from src.models.ecsi.diffusion import KarrasDenoiser
 
@@ -33,7 +33,7 @@ def create_model(
     use_new_attention_order: bool = False,
     attention_type: str = "default",
     condition_mode: str | None = None,
-) -> UNetModel | SongUNet:
+) -> UNetModel | EDM:
     """Create ECSI UNet (ADM or EDM)."""
     if channel_mult == "":
         channel_mult_map = {
@@ -74,7 +74,7 @@ def create_model(
             condition_mode=condition_mode,
         )
     if unet_type == "edm":
-        return SongUNet(
+        return EDM(
             img_resolution=image_size,
             in_channels=in_channels,
             out_channels=in_channels * 2 if learn_sigma else in_channels,

@@ -15,7 +15,9 @@ from src.models.unet.adm import (
     LBMUNet,
     create_model,
 )
+from src.models.unet.edm import EDMUNet
 from src.models.unet.sid2 import SiD2UNet
+from src.models.unet.vdmpp import VDMppUNet
 
 __all__ = [
     "I2SBUNet",
@@ -27,6 +29,8 @@ __all__ = [
     "DBIMUNet",
     "DDBMUNet",
     "DDIBUNet",
+    "EDMUNet",
     "I2SBDiffusersUNet",
     "LBMUNet",
+    "VDMppUNet",
 ]

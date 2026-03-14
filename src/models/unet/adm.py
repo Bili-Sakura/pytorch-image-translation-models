@@ -343,7 +343,7 @@ def _from_pretrained_ema_fallback(cls, pretrained_model_name_or_path, **kwargs):
 
 
 class DDBMUNet(ModelMixin, ConfigMixin):
-    """ADM UNet wrapper for DDBM calling convention ``(x, timestep, xT=…)``."""
+    """ADM, EDM, or VDM++ UNet wrapper for DDBM calling convention ``(x, timestep, xT=…)``."""
 
     @register_to_config
     def __init__(
@@ -356,28 +356,68 @@ class DDBMUNet(ModelMixin, ConfigMixin):
         dropout: float = 0.0,
         condition_mode: Optional[str] = "concat",
         channel_mult: Optional[Tuple[int, ...]] = None,
+        arch: str = "adm",
     ) -> None:
         super().__init__()
         self.in_channels = in_channels
         self.condition_mode = condition_mode
+        self.arch = arch
 
         if channel_mult is None:
             channel_mult = _channel_mult_for_resolution(image_size)
 
         unet_in_channels = in_channels * 2 if condition_mode == "concat" else in_channels
-        block_out_channels = tuple(model_channels * m for m in channel_mult)
-        down_block_types, up_block_types = _build_block_types(channel_mult, attention_resolutions)
 
-        self.unet = UNet2DModel(
-            sample_size=image_size,
-            in_channels=unet_in_channels,
-            out_channels=in_channels,
-            block_out_channels=block_out_channels,
-            down_block_types=down_block_types,
-            up_block_types=up_block_types,
-            layers_per_block=num_res_blocks,
-            dropout=dropout,
-        )
+        if arch == "adm":
+            block_out_channels = tuple(model_channels * m for m in channel_mult)
+            down_block_types, up_block_types = _build_block_types(
+                channel_mult, attention_resolutions
+            )
+            self.unet = UNet2DModel(
+                sample_size=image_size,
+                in_channels=unet_in_channels,
+                out_channels=in_channels,
+                block_out_channels=block_out_channels,
+                down_block_types=down_block_types,
+                up_block_types=up_block_types,
+                layers_per_block=num_res_blocks,
+                dropout=dropout,
+            )
+        elif arch == "edm":
+            from src.models.unet.edm import EDMUNet
+
+            attn_res = (16,) if 16 <= image_size else (image_size // 4,)
+            self.unet = EDMUNet(
+                img_resolution=image_size,
+                in_channels=unet_in_channels,
+                out_channels=in_channels,
+                model_channels=model_channels,
+                channel_mult=channel_mult,
+                num_blocks=num_res_blocks,
+                attn_resolutions=attn_res,
+                dropout=dropout,
+                embedding_type="fourier",
+                channel_mult_noise=2,
+                encoder_type="residual",
+                decoder_type="standard",
+                resample_filter=(1, 3, 3, 1),
+                condition_mode=condition_mode,
+            )
+        elif arch == "vdmpp":
+            from src.models.unet.vdmpp import VDMppUNet
+
+            self.unet = VDMppUNet(
+                in_channels=unet_in_channels,
+                out_channels=in_channels,
+                model_channels=model_channels,
+                num_layers=num_res_blocks,
+                dropout=dropout,
+                with_fourier_features=True,
+                with_attention=True,
+                condition_mode=condition_mode,
+            )
+        else:
+            raise ValueError(f"Unknown arch: {arch}")
 
     def forward(
         self,
@@ -385,9 +425,13 @@ class DDBMUNet(ModelMixin, ConfigMixin):
         timestep: torch.Tensor,
         xT: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        if self.condition_mode == "concat" and xT is not None:
-            x = torch.cat([x, xT], dim=1)
-        return self.unet(x, timestep).sample
+        if self.arch == "adm":
+            if self.condition_mode == "concat" and xT is not None:
+                x = torch.cat([x, xT], dim=1)
+            return self.unet(x, timestep).sample
+        else:
+            # EDM, VDM++: pass xT for concat inside backbone
+            return self.unet(x, timestep, xT=xT)
 
     @classmethod
     def from_pretrained(cls, pretrained_model_name_or_path, **kwargs):
