@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-03-14
+
+### Changed
+- **ECSI model refactor**: Replaced SongUNet with EDM in the ECSI model creation function.
+- **DDBMUNet**: Updated to support multiple architectures (ADM, EDM, VDM++) with conditional logic for model selection.
+- **EDMUNet**: Introduced EDMUNet implementation, migrating from ECSI's previous structure.
+- **VDM++**: Enhanced architecture with detailed comments and references for clarity.
+- **Module exports**: Updated `__init__.py` to include new EDM and VDM++ models.
+
 ## [0.4.0] - 2026-03-14
 
 ### Added
@@ -238,7 +247,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.4.1
 [0.4.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.4.0
 [0.3.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.3.0
 [0.2.10]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.10
