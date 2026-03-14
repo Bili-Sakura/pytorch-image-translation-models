@@ -1,14 +1,14 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 #
-# VDM++ (Variational Diffusion Models) placeholder.
+# VDM++ placeholder: ELBO-based diffusion objectives with simple data augmentation.
 #
 # Reference:
-#   Kingma, D. P., Salimans, T., Poole, B., & Ho, J. (2021).
-#   Variational Diffusion Models.
-#   In Advances in Neural Information Processing Systems 34 (NeurIPS 2021).
+#   Kingma, D., & Gao, R. (2023).
+#   Understanding Diffusion Objectives as the ELBO with Simple Data Augmentation.
+#   In Neural Information Processing Systems (Vol. 36, pp. 65484–65516).
 
-"""VDM++ UNet – placeholder for Variational Diffusion Models architecture."""
+"""VDM++ UNet – placeholder for diffusion models with ELBO objectives and simple data augmentation."""
 
 from __future__ import annotations
 

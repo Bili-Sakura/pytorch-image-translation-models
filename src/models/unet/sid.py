@@ -1,14 +1,14 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 #
-# SID (Simpler Diffusion) placeholder.
+# SID (Simple Diffusion) placeholder.
 #
 # Reference:
-#   Hoogeboom, E., Mensink, T., Heek, J., Lamerigts, K., Gao, R., & Salimans, T. (2024).
-#   Simpler Diffusion: Pixel-space diffusion models for high-resolution image generation.
-#   See SiD2 (CVPR 2025) for the full Simpler Diffusion family.
+#   Hoogeboom, E., Heek, J., & Salimans, T. (2023).
+#   Simple Diffusion: End-to-end Diffusion for High Resolution Images.
+#   https://arxiv.org/abs/2301.11093
 
-"""SID UNet – placeholder for Simpler Diffusion architecture."""
+"""SID UNet – placeholder for Simple Diffusion architecture."""
 
 from __future__ import annotations
 

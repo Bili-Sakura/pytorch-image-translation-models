@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-14
+
+### Added
+- **`docs/datasets.md`**: Documentation for commonly used image-to-image translation datasets.
+
 ### Removed
 - **`src/inference/`**: ImageTranslator moved to `src/pipelines/pix2pix.py`; import via `from src.pipelines import ImageTranslator` or `from src import ImageTranslator`.
 - **`examples/inference/`**: Unified inference script removed; use `src.pipelines` directly (e.g. `from src.pipelines import DDBMPipeline` and load from pretrained checkpoints).
@@ -18,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `LDDBMPipeline`, `LDDBMPipelineOutput`, `load_lddbm_pipeline` in `src.pipelines.lddbm`
   - Training: `examples/lddbm/train_lddbm.py`, `LDDBMConfig`, `LDDBMTrainer`
   - Convert raw .pt: `python -m examples.lddbm.convert_pt_to_lddbm`
+- Updated `README.md` with datasets section and package structure changes.
 
 ## [0.3.0] - 2026-03-12
 
@@ -232,7 +238,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Packaging via `pyproject.toml` with optional dependency groups (`training`, `metrics`, `dev`, `all`).
 - GitHub Actions workflow for automated PyPI publishing on tagged releases.
 
-[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Bili-Sakura/pytorch-image-translation-models/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.4.0
 [0.3.0]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.3.0
 [0.2.10]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.10
 [0.2.9]: https://github.com/Bili-Sakura/pytorch-image-translation-models/releases/tag/v0.2.9
