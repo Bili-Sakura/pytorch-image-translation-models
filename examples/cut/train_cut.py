@@ -129,16 +129,14 @@ class CUTTrainer:
         self.nce_layers = nce_layers
 
         # Optimizers
-        self.optimizer_G = torch.optim.Adam(
-            self.netG.parameters(),
-            lr=config.lr,
-            betas=(config.beta1, config.beta2),
-        )
-        self.optimizer_D = torch.optim.Adam(
-            self.netD.parameters(),
-            lr=config.lr,
-            betas=(config.beta1, config.beta2),
-        )
+        betas = (config.beta1, config.beta2)
+        opt_cls = torch.optim.AdamW if config.optimizer.lower() == "adamw" else torch.optim.Adam
+        opt_kw = dict(lr=config.lr, betas=betas)
+        if opt_cls == torch.optim.AdamW:
+            opt_kw["weight_decay"] = 0.01
+
+        self.optimizer_G = opt_cls(self.netG.parameters(), **opt_kw)
+        self.optimizer_D = opt_cls(self.netD.parameters(), **opt_kw)
         self.optimizer_F = None  # Created after first forward (netF lazy init)
 
     def build_dataset(
@@ -158,11 +156,11 @@ class CUTTrainer:
     def _ensure_optimizer_F(self):
         """Create optimizer_F after netF is initialized (first forward)."""
         if self.optimizer_F is None and self.netF.mlp_init:
-            self.optimizer_F = torch.optim.Adam(
-                self.netF.parameters(),
-                lr=self.config.lr,
-                betas=(self.config.beta1, self.config.beta2),
-            )
+            opt_cls = torch.optim.AdamW if self.config.optimizer.lower() == "adamw" else torch.optim.Adam
+            opt_kw = dict(lr=self.config.lr, betas=(self.config.beta1, self.config.beta2))
+            if opt_cls == torch.optim.AdamW:
+                opt_kw["weight_decay"] = 0.01
+            self.optimizer_F = opt_cls(self.netF.parameters(), **opt_kw)
 
     def train_step(self, real_A: torch.Tensor, real_B: torch.Tensor) -> dict:
         """Single training step. Inputs in [0,1]; scale to [-1,1] internally."""

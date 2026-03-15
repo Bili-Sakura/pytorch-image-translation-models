@@ -53,6 +53,7 @@ class TrainingConfig:
     save_interval: int = 10
     log_interval: int = 100
     device: str = "cuda"
+    optimizer: str = "adamw"  # "adamw" | "adam"
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -95,16 +96,14 @@ class Pix2PixTrainer:
         self.l1_loss = nn.L1Loss()
         self.perceptual_loss = perceptual_loss.to(self.device) if perceptual_loss else None
 
-        self.optimizer_g = torch.optim.Adam(
-            self.generator.parameters(),
-            lr=self.config.lr_g,
-            betas=(self.config.beta1, 0.999),
-        )
-        self.optimizer_d = torch.optim.Adam(
-            self.discriminator.parameters(),
-            lr=self.config.lr_d,
-            betas=(self.config.beta1, 0.999),
-        )
+        betas = (self.config.beta1, 0.999)
+        opt_cls = torch.optim.AdamW if self.config.optimizer.lower() == "adamw" else torch.optim.Adam
+        opt_kw = dict(betas=betas)
+        if opt_cls == torch.optim.AdamW:
+            opt_kw["weight_decay"] = 0.01
+
+        self.optimizer_g = opt_cls(self.generator.parameters(), lr=self.config.lr_g, **opt_kw)
+        self.optimizer_d = opt_cls(self.discriminator.parameters(), lr=self.config.lr_d, **opt_kw)
 
     # ------------------------------------------------------------------
     # Training steps

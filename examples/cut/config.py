@@ -98,6 +98,7 @@ class CUTConfig:
 
     # Training
     lr: float = 2e-4
+    optimizer: str = "adamw"  # "adamw" | "adam"
     beta1: float = 0.5
     beta2: float = 0.999
     epochs: int = 200
@@ -110,3 +111,16 @@ class CUTConfig:
     save_every: int = 10
     log_every: int = 100
     resume_from: Optional[str] = None
+
+    # Extended training (4th-MAVIC-T style)
+    max_train_steps: Optional[int] = None
+    gradient_accumulation_steps: int = 1
+    checkpointing_steps: Optional[int] = None
+    checkpoints_total_limit: int = 1
+    validation_steps: Optional[int] = None
+    mixed_precision: str = "no"
+    dataloader_num_workers: int = 0
+    seed: Optional[int] = 42
+
+    # Alias: output_dir for 4th-MAVIC-T style scripts (save_dir takes precedence)
+    output_dir: Optional[str] = None

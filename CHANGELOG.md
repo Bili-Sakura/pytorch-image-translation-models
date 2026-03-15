@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-03-15
+
+### Added
+- **`src/training/`** — training utilities for image-to-image translation:
+  - `BaseTrainingConfig`: shared config fields (output_dir, checkpointing_steps, checkpoints_total_limit, max_train_steps, mixed_precision, dataloader_num_workers, seed, etc.).
+  - `rotate_checkpoints(output_dir, total_limit)`: prune oldest checkpoints when exceeding limit.
+  - `add_training_args(parser, skip=())`: add common CLI args for training scripts (4th-MAVIC-T style).
+- **CUT config extensions** (`examples/cut/config.py`): `max_train_steps`, `gradient_accumulation_steps`, `checkpointing_steps`, `checkpoints_total_limit`, `validation_steps`, `mixed_precision`, `dataloader_num_workers`, `seed`.
+
 ## [0.4.1] - 2026-03-14
 
 ### Changed

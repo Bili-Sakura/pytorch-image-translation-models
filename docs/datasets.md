@@ -11,32 +11,43 @@ Commonly used image-to-image translation datasets from the pix2pix and CycleGAN 
 
 ---
 
-## All Datasets
+## Paired Datasets (pix2pix)
 
-| Dataset | Type | Description | Samples | Classes | Resolution | Size | Download |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| **facades** | paired | CMP Facade: labels ↔ photos | 400 | 12 | 256×256 | 29M | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/facades.tar.gz) |
-| **maps** | paired | Google Maps ↔ aerial imagery | 1,096 | — | 256×256 | 239M | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/maps.tar.gz) |
-| **cityscapes** | paired | Urban street segmentation | 2,975 | 30+ | 256×256 | 99M | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/cityscapes.tar.gz) |
-| **edges2shoes** | paired | Edge maps ↔ shoe photos | 50,025 | — | 256×256 | ~2G | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/edges2shoes.tar.gz) |
-| **edges2handbags** | paired | Edge maps ↔ handbag photos | 137,000 | — | 256×256 | ~8G | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/edges2handbags.tar.gz) |
-| **horse2zebra** | unpaired | Horses ↔ zebras (ImageNet) | 939 + 1,177 | 2 domains | 256×256 | 111M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/horse2zebra.zip) |
-| **apple2orange** | unpaired | Apples ↔ oranges (ImageNet) | 996 + 1,020 | 2 domains | 256×256 | 75M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/apple2orange.zip) |
-| **summer2winter_yosemite** | unpaired | Summer ↔ winter (Yosemite) | 1,273 + 854 | 2 domains | 256×256 | 126M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/summer2winter_yosemite.zip) |
-| **maps** | unpaired | Google Maps ↔ aerial imagery | 1,096 | 2 domains | 256×256 | 1.4G | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/maps.zip) |
-| **facades** | unpaired | Labels ↔ photos | 400 | 12 | 256×256 | 34M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/facades.zip) |
-| **cityscapes** | unpaired | Labels ↔ photos | 2,975 | 30+ | 256×256 | 58M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/cityscapes.zip) |
-| **ae_photos** | unpaired | Artistic / architectural | — | 2 domains | 256×256 | 10M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/ae_photos.zip) |
-| **grumpifycat** | unpaired | Cat faces ↔ Grumpy Cat | ~214 | 2 domains | 256×256 | 19M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/grumpifycat.zip) |
-| **iphone2dslr_flower** | unpaired | iPhone ↔ DSLR (flowers) | 1,813 + 3,316 | 2 domains | 256×256 | 324M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/iphone2dslr_flower.zip) |
-| **monet2photo** | unpaired | Monet paintings ↔ photos | 1,074 + 6,853 | 2 domains | 256×256 | 291M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/monet2photo.zip) |
-| **vangogh2photo** | unpaired | Van Gogh ↔ photos | 401 + 6,853 | 2 domains | 256×256 | 292M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/vangogh2photo.zip) |
-| **cezanne2photo** | unpaired | Cézanne ↔ photos | 584 + 6,853 | 2 domains | 256×256 | 267M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/cezanne2photo.zip) |
-| **ukiyoe2photo** | unpaired | Ukiyo-e ↔ photos | 1,433 + 6,853 | 2 domains | 256×256 | 279M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/ukiyoe2photo.zip) |
+
+| Dataset            | Description                  | Samples | Classes | Resolution | Size | Download                                                                              |
+| ------------------ | ---------------------------- | ------- | ------- | ---------- | ---- | ------------------------------------------------------------------------------------- |
+| **facades**        | CMP Facade: labels ↔ photos  | 400     | 12      | 256×256    | 29M  | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/facades.tar.gz)        |
+| **maps**           | Google Maps ↔ aerial imagery | 1,096   | —       | 256×256    | 239M | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/maps.tar.gz)           |
+| **cityscapes**     | Urban street segmentation    | 2,975   | 30+     | 256×256    | 99M  | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/cityscapes.tar.gz)     |
+| **edges2shoes**    | Edge maps ↔ shoe photos      | 50,025  | —       | 256×256    | ~2G  | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/edges2shoes.tar.gz)    |
+| **edges2handbags** | Edge maps ↔ handbag photos   | 137,000 | —       | 256×256    | ~8G  | [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/edges2handbags.tar.gz) |
+
+
+## Unpaired Datasets (CycleGAN)
+
+
+| Dataset                    | Description                  | Samples       | Classes   | Resolution | Size | Download                                                                                    |
+| -------------------------- | ---------------------------- | ------------- | --------- | ---------- | ---- | ------------------------------------------------------------------------------------------- |
+| **horse2zebra**            | Horses ↔ zebras (ImageNet)   | 939 + 1,177   | 2 domains | 256×256    | 111M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/horse2zebra.zip)            |
+| **apple2orange**           | Apples ↔ oranges (ImageNet)  | 996 + 1,020   | 2 domains | 256×256    | 75M  | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/apple2orange.zip)           |
+| **summer2winter_yosemite** | Summer ↔ winter (Yosemite)   | 1,273 + 854   | 2 domains | 256×256    | 126M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/summer2winter_yosemite.zip) |
+| **maps**                   | Google Maps ↔ aerial imagery | 1,096         | 2 domains | 256×256    | 1.4G | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/maps.zip)                   |
+| **facades**                | Labels ↔ photos              | 400           | 12        | 256×256    | 34M  | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/facades.zip)                |
+| **cityscapes**             | Labels ↔ photos              | 2,975         | 30+       | 256×256    | 58M  | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/cityscapes.zip)             |
+| **ae_photos**              | Artistic / architectural     | —             | 2 domains | 256×256    | 10M  | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/ae_photos.zip)              |
+| **grumpifycat**            | Cat faces ↔ Grumpy Cat       | ~214          | 2 domains | 256×256    | 19M  | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/grumpifycat.zip)            |
+| **iphone2dslr_flower**     | iPhone ↔ DSLR (flowers)      | 1,813 + 3,316 | 2 domains | 256×256    | 324M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/iphone2dslr_flower.zip)     |
+| **monet2photo**            | Monet paintings ↔ photos     | 1,074 + 6,853 | 2 domains | 256×256    | 291M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/monet2photo.zip)            |
+| **vangogh2photo**          | Van Gogh ↔ photos            | 401 + 6,853   | 2 domains | 256×256    | 292M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/vangogh2photo.zip)          |
+| **cezanne2photo**          | Cézanne ↔ photos             | 584 + 6,853   | 2 domains | 256×256    | 267M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/cezanne2photo.zip)          |
+| **ukiyoe2photo**           | Ukiyo-e ↔ photos             | 1,433 + 6,853 | 2 domains | 256×256    | 279M | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/ukiyoe2photo.zip)           |
+
 
 **Full catalog:** [pix2pix](https://efrosgans.eecs.berkeley.edu/pix2pix/datasets/) | [CycleGAN](http://efrosgans.eecs.berkeley.edu/cyclegan/datasets/)
 
-**Also on Hugging Face:** [horse2zebra](https://huggingface.co/datasets/huggan/horse2zebra) | [apple2orange](https://huggingface.co/datasets/huggan/apple2orange)
+**Also on Hugging Face (paired):** [cityscapes](https://huggingface.co/datasets/huggan/cityscapes) | [night2day](https://huggingface.co/datasets/huggan/night2day) | [edges2shoes](https://huggingface.co/datasets/huggan/edges2shoes) | [facades](https://huggingface.co/datasets/huggan/facades) | [maps](https://huggingface.co/datasets/huggan/maps)
+
+**Also on Hugging Face (unpaired):** [vangogh2photo](https://huggingface.co/datasets/huggan/vangogh2photo) | [horse2zebra](https://huggingface.co/datasets/huggan/horse2zebra) | [selfie2anime](https://huggingface.co/datasets/huggan/selfie2anime) | [summer2winter_yosemite](https://huggingface.co/datasets/huggan/summer2winter_yosemite)
 
 ---
 
@@ -45,3 +56,4 @@ Commonly used image-to-image translation datasets from the pix2pix and CycleGAN 
 - **Paired vs. unpaired:** pix2pix uses aligned `(input, target)` pairs; CycleGAN provides separate domain folders.
 - **Format:** pix2pix datasets: `*.tar.gz`; CycleGAN datasets: `*.zip`.
 - **Citation:** See [Credits](credits.md) when using these datasets.
+
