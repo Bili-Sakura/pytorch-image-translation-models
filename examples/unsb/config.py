@@ -107,6 +107,7 @@ class UNSBConfig:
 
     # Training
     lr: float = 2e-4
+    optimizer: str = "adamw"  # "adamw" | "adam"
     beta1: float = 0.5
     beta2: float = 0.999
     epochs: int = 200
