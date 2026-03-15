@@ -17,6 +17,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from src.data.datasets import PairedImageDataset
+from src.utils.config_yaml import save_config_yaml
 from src.models.lddbm import (
     ModalityTranslationBridge,
     create_bridge,
@@ -166,11 +167,17 @@ class LDDBMTrainer:
                         logs.get("reconstruction_loss", 0.0))
 
             if (epoch + 1) % cfg.save_every == 0:
-                self.save_checkpoint(cfg.save_dir, epoch + 1)
+                self.save_checkpoint(cfg.save_dir, epoch + 1, global_step=global_step)
 
         logger.info("LDDBM training complete. Checkpoints saved to %s", cfg.save_dir)
 
-    def save_checkpoint(self, save_dir: str, epoch: int) -> None:
+    def save_checkpoint(
+        self,
+        save_dir: str,
+        epoch: int,
+        *,
+        global_step: int | None = None,
+    ) -> None:
         from safetensors.torch import save_file
 
         path = Path(save_dir) / f"checkpoint-epoch-{epoch}"
@@ -185,8 +192,41 @@ class LDDBMTrainer:
             subdir = path / name
             subdir.mkdir(exist_ok=True)
             save_file(comp.state_dict(), subdir / "diffusion_pytorch_model.safetensors")
+        save_config_yaml(
+            self.config,
+            path / "config.yaml",
+            extra={"epoch": epoch, "global_step": global_step if global_step is not None else epoch},
+        )
 
-        logger.info("Saved checkpoint to %s", path)
+        training_state = {
+            "optimizer": self.optimizer.state_dict(),
+            "epoch": epoch,
+            "global_step": global_step if global_step is not None else epoch,
+        }
+        torch.save(training_state, path / "training_state.pt")
+        logger.info("Saved checkpoint to %s (with optimizer state)", path)
+
+    def load_checkpoint(self, path: str | Path) -> dict:
+        """Load checkpoint and restore model + optimizer for resume."""
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+        from safetensors.torch import load_file
+        for name, comp in [
+            ("encoder_x", self.mtb.encoder_x),
+            ("encoder_y", self.mtb.encoder_y),
+            ("decoder_x", self.mtb.decoder_x),
+            ("bridge", self.mtb.bridge_model),
+        ]:
+            sd_path = path / name / "diffusion_pytorch_model.safetensors"
+            if sd_path.exists():
+                comp.load_state_dict(load_file(str(sd_path), device=str(self.device)), strict=True)
+        train_state_path = path / "training_state.pt"
+        if train_state_path.exists():
+            ckpt = torch.load(train_state_path, map_location=self.device, weights_only=False)
+            self.optimizer.load_state_dict(ckpt["optimizer"])
+            return {"epoch": ckpt.get("epoch", 0), "global_step": ckpt.get("global_step", 0)}
+        return {"epoch": 0, "global_step": 0}
 
 
 if __name__ == "__main__":

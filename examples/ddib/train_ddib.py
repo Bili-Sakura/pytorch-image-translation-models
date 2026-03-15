@@ -14,6 +14,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from src.data.datasets import PairedImageDataset
+from src.utils.config_yaml import save_config_yaml
 from src.models.unet import DDIBUNet
 from src.schedulers.ddib import DDIBScheduler
 
@@ -133,7 +134,22 @@ class DDIBTrainer:
         )
 
         global_step = 0
-        for epoch in range(cfg.epochs):
+        start_epoch = 0
+        if cfg.resume_from:
+            resume_path = Path(cfg.resume_from)
+            if str(cfg.resume_from).lower() == "latest":
+                resume_path = Path(cfg.save_dir) / "latest"
+            elif not resume_path.is_absolute():
+                resume_path = Path(cfg.save_dir) / cfg.resume_from
+            if resume_path.exists():
+                resumed = self.load_checkpoint(resume_path)
+                start_epoch = resumed.get("epoch", 0)
+                global_step = resumed.get("global_step", 0)
+                logger.info("Resumed from %s: epoch=%d, global_step=%d", resume_path, start_epoch, global_step)
+            else:
+                logger.warning("Resume path does not exist, starting from scratch: %s", resume_path)
+
+        for epoch in range(start_epoch, cfg.epochs):
             self.source_unet.train()
             self.target_unet.train()
             pbar = tqdm(dataloader, desc=f"Epoch {epoch + 1}/{cfg.epochs}")
@@ -150,17 +166,82 @@ class DDIBTrainer:
                                 global_step, logs["loss_source"], logs["loss_target"])
 
             if (epoch + 1) % cfg.save_every == 0:
-                self.save_checkpoint(cfg.save_dir, epoch + 1)
+                ckpt_name = f"checkpoint-epoch-{epoch + 1}"
+                self.save_checkpoint(cfg.save_dir, epoch + 1, global_step=global_step)
+                self._update_latest_symlink(cfg.save_dir, ckpt_name)
 
         logger.info("DDIB training complete. Checkpoints saved to %s", cfg.save_dir)
 
-    def save_checkpoint(self, save_dir: str, epoch: int) -> None:
+    def save_checkpoint(
+        self,
+        save_dir: str,
+        epoch: int,
+        *,
+        global_step: int | None = None,
+    ) -> None:
+        """Save model weights, scheduler, and optimizer states for resume."""
         path = Path(save_dir) / f"checkpoint-epoch-{epoch}"
         path.mkdir(parents=True, exist_ok=True)
         self.source_unet.save_pretrained(path / "source_unet")
         self.target_unet.save_pretrained(path / "target_unet")
         self.scheduler.save_pretrained(path / "scheduler")
-        logger.info("Saved checkpoint to %s", path)
+        # Training state for resume (optimizer, epoch, global_step)
+        training_state = {
+            "optimizer_source": self.opt_source.state_dict(),
+            "optimizer_target": self.opt_target.state_dict(),
+            "epoch": epoch,
+            "global_step": global_step if global_step is not None else epoch,
+        }
+        torch.save(training_state, path / "training_state.pt")
+        save_config_yaml(
+            self.config,
+            path / "config.yaml",
+            extra={"epoch": epoch, "global_step": global_step if global_step is not None else epoch},
+        )
+        logger.info("Saved checkpoint to %s (with optimizer states)", path)
+
+    def load_checkpoint(self, path: str | Path) -> dict:
+        """Load checkpoint and restore model + optimizer states for resume.
+
+        Returns a dict with keys: "epoch", "global_step" for the caller to restore
+        training loop.
+        """
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+        if not (path / "source_unet").exists():
+            raise FileNotFoundError(f"Invalid checkpoint dir (expected source_unet/): {path}")
+
+        # Load models
+        self.source_unet = self.source_unet.from_pretrained(path / "source_unet").to(self.device)
+        self.target_unet = self.target_unet.from_pretrained(path / "target_unet").to(self.device)
+        sched_path = path / "scheduler"
+        if sched_path.exists():
+            self.scheduler = self.scheduler.from_pretrained(str(sched_path))
+
+        # Load optimizer states
+        train_state_path = path / "training_state.pt"
+        if train_state_path.exists():
+            ckpt = torch.load(train_state_path, map_location=self.device, weights_only=False)
+            self.opt_source.load_state_dict(ckpt["optimizer_source"])
+            self.opt_target.load_state_dict(ckpt["optimizer_target"])
+            logger.info(
+                "Loaded checkpoint from %s (epoch=%s, global_step=%s)",
+                path, ckpt.get("epoch"), ckpt.get("global_step"),
+            )
+            return {
+                "epoch": ckpt.get("epoch", 0),
+                "global_step": ckpt.get("global_step", 0),
+            }
+
+        logger.info("Loaded checkpoint from %s (no training_state.pt, optimizers reset)", path)
+        try:
+            if path.name.startswith("checkpoint-epoch-"):
+                n = int(path.name.replace("checkpoint-epoch-", ""))
+                return {"epoch": n, "global_step": n}
+        except ValueError:
+            pass
+        return {"epoch": 0, "global_step": 0}
 
 
 if __name__ == "__main__":
@@ -172,7 +253,13 @@ if __name__ == "__main__":
     parser.add_argument("--save-dir", type=str, default="./checkpoints/ddib")
     parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--batch-size", type=int, default=16)
+    parser.add_argument("--resume", type=str, default=None, help='Resume from "latest" or path (e.g. checkpoint-epoch-50)')
     args = parser.parse_args()
-    config = DDIBConfig(save_dir=args.save_dir, epochs=args.epochs, batch_size=args.batch_size)
+    config = DDIBConfig(
+        save_dir=args.save_dir,
+        epochs=args.epochs,
+        batch_size=args.batch_size,
+        resume_from=args.resume,
+    )
     trainer = DDIBTrainer(config)
     trainer.train(args.source, args.target)

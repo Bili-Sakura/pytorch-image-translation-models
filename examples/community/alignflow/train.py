@@ -15,6 +15,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from src.data.datasets import UnpairedImageDataset
+from src.utils.config_yaml import save_config_yaml
 
 from .config import AlignFlowConfig
 from .models import CycleFlow, Flow2Flow
@@ -95,6 +96,7 @@ class AlignFlowTrainer:
             drop_last=True,
         )
 
+        global_step = 0
         for epoch in range(cfg.epochs):
             self.model.train()
             pbar = tqdm(dataloader, desc=f"Epoch {epoch + 1}/{cfg.epochs}")
@@ -103,12 +105,13 @@ class AlignFlowTrainer:
                 real_a = batch["A"]
                 real_b = batch["B"]
                 logs = self.train_step(real_a, real_b)
+                global_step += 1
                 pbar.set_postfix(logs)
 
-                if (pbar.n * (epoch + 1)) % cfg.log_every == 0:
+                if global_step % cfg.log_every == 0:
                     logger.info(
                         "step %d | loss_g=%.4f loss_d=%.4f",
-                        pbar.n + epoch * len(dataloader),
+                        global_step,
                         logs.get("loss_g", 0),
                         logs.get("loss_d", 0),
                     )
@@ -116,18 +119,26 @@ class AlignFlowTrainer:
             self.model.on_epoch_end()
 
             if (epoch + 1) % cfg.save_every == 0:
-                self.save_checkpoint(cfg.save_dir, epoch + 1)
+                self.save_checkpoint(cfg.save_dir, epoch + 1, global_step=global_step)
 
         logger.info("AlignFlow training complete. Checkpoints saved to %s", cfg.save_dir)
 
-    def save_checkpoint(self, save_dir: str, epoch: int) -> None:
+    def save_checkpoint(
+        self,
+        save_dir: str,
+        epoch: int,
+        *,
+        global_step: int | None = None,
+    ) -> None:
         """Save model checkpoint and config."""
         path = Path(save_dir) / f"checkpoint-epoch-{epoch}"
         path.mkdir(parents=True, exist_ok=True)
-        state = {"model": self.model.state_dict(), "epoch": epoch}
+        step = global_step if global_step is not None else epoch
+        state = {"model": self.model.state_dict(), "epoch": epoch, "global_step": step}
         torch.save(state, path / "alignflow.pt")
-        import json
-        from dataclasses import asdict
-        with open(path / "config.json", "w", encoding="utf-8") as f:
-            json.dump(asdict(self.config), f, indent=2)
+        save_config_yaml(
+            self.config,
+            path / "config.yaml",
+            extra={"epoch": epoch, "global_step": step},
+        )
         logger.info("Saved checkpoint to %s", path)

@@ -17,6 +17,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from src.data.datasets import UnpairedImageDataset
+from src.utils.config_yaml import save_config_yaml
 from src.training import create_optimizer
 from src.models.cut import (
     create_generator,
@@ -320,13 +321,24 @@ class CUTTrainer:
                     )
 
             if (epoch + 1) % cfg.save_every == 0:
-                self.save_checkpoint(cfg.save_dir, epoch + 1)
+                self.save_checkpoint(cfg.save_dir, epoch + 1, global_step=global_step)
 
         logger.info("CUT training complete. Checkpoints saved to %s", cfg.save_dir)
 
-    def save_checkpoint(self, save_dir: str, epoch: int) -> None:
-        """Save generator, discriminator, and feature network."""
-        path = Path(save_dir) / f"checkpoint-epoch-{epoch}"
+    def save_checkpoint(
+        self,
+        save_dir: str,
+        epoch_or_step: int,
+        *,
+        global_step: int | None = None,
+        scaler: torch.amp.GradScaler | None = None,
+    ) -> None:
+        """Save generator, discriminator, feature network, and optimizer states for resume.
+
+        Layout: generator/, discriminator/, feature_network/ (HF style) +
+        training_state.pt (optimizer_G, optimizer_D, optimizer_F, epoch, global_step).
+        """
+        path = Path(save_dir) / f"checkpoint-epoch-{epoch_or_step}"
         path.mkdir(parents=True, exist_ok=True)
 
         # Diffusers-style layout for from_pretrained
@@ -348,4 +360,110 @@ class CUTTrainer:
             feat_path / "diffusion_pytorch_model.safetensors",
         )
 
-        logger.info("Saved checkpoint to %s", path)
+        # Training state for resume (optimizer states, epoch, global_step)
+        step = global_step if global_step is not None else epoch_or_step
+        training_state = {
+            "optimizer_G": self.optimizer_G.state_dict(),
+            "optimizer_D": self.optimizer_D.state_dict(),
+            "epoch": epoch_or_step,
+            "global_step": step,
+        }
+        if self.optimizer_F is not None:
+            training_state["optimizer_F"] = self.optimizer_F.state_dict()
+        if scaler is not None:
+            training_state["scaler"] = scaler.state_dict()
+        torch.save(training_state, path / "training_state.pt")
+
+        save_config_yaml(
+            self.config,
+            path / "config.yaml",
+            extra={"epoch": epoch_or_step, "global_step": step},
+        )
+        logger.info("Saved checkpoint to %s (with optimizer states)", path)
+
+    def load_checkpoint(
+        self,
+        path: str | Path,
+        *,
+        dummy_batch: dict[str, torch.Tensor] | None = None,
+    ) -> dict:
+        """Load checkpoint and restore model + optimizer states for resume.
+
+        Returns a dict with keys: "epoch", "global_step" for the caller to restore
+        training loop. If dummy_batch is None, creates one (needed to init netF's
+        lazy MLP before loading optimizer_F).
+        """
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+        # Resolve "latest" to output_dir/latest
+        if path.name == "latest" and path.is_dir():
+            pass
+        elif path.is_dir() and (path / "generator").exists():
+            pass
+        else:
+            raise FileNotFoundError(f"Invalid checkpoint dir (expected generator/): {path}")
+
+        from safetensors.torch import load_file
+
+        # Load models
+        gen_path = path / "generator"
+        if gen_path.exists():
+            self.netG = self.netG.from_pretrained(gen_path).to(self.device)
+        disc_path = path / "discriminator" / "diffusion_pytorch_model.safetensors"
+        if disc_path.exists():
+            self.netD.load_state_dict(
+                load_file(str(disc_path), device=str(self.device)),
+                strict=True,
+            )
+        feat_path = path / "feature_network" / "diffusion_pytorch_model.safetensors"
+        if feat_path.exists():
+            # netF has lazy MLP: run one forward to create it before load_state_dict
+            if not self.netF.mlp_init:
+                cfg = self.config
+                if dummy_batch is not None:
+                    real_A = dummy_batch.get("A", dummy_batch.get("source"))
+                    real_B = dummy_batch.get("B", dummy_batch.get("target"))
+                else:
+                    res = cfg.resolution
+                    real_A = torch.randn(1, cfg.input_nc, res, res, device=self.device) * 2 - 1
+                    real_B = torch.randn(1, cfg.output_nc, res, res, device=self.device) * 2 - 1
+                with torch.no_grad():
+                    fake_B = self.netG(real_A)
+                    fake_B_for_enc = _adapt_for_encoder(
+                        fake_B, cfg.output_nc, cfg.input_nc
+                    )
+                    feat_init = self.netG(fake_B_for_enc, self.nce_layers, encode_only=True)
+                    self.netF(feat_init, cfg.num_patches, None)
+                self._ensure_optimizer_F()
+            self.netF.load_state_dict(
+                load_file(str(feat_path), device=str(self.device)),
+                strict=True,
+            )
+
+        # Load optimizer states
+        train_state_path = path / "training_state.pt"
+        if train_state_path.exists():
+            ckpt = torch.load(train_state_path, map_location=self.device, weights_only=False)
+            self.optimizer_G.load_state_dict(ckpt["optimizer_G"])
+            self.optimizer_D.load_state_dict(ckpt["optimizer_D"])
+            if "optimizer_F" in ckpt and self.optimizer_F is not None:
+                self.optimizer_F.load_state_dict(ckpt["optimizer_F"])
+            logger.info(
+                "Loaded checkpoint from %s (epoch=%s, global_step=%s)",
+                path, ckpt.get("epoch"), ckpt.get("global_step"),
+            )
+            return {
+                "epoch": ckpt.get("epoch", 0),
+                "global_step": ckpt.get("global_step", 0),
+            }
+
+        logger.info("Loaded checkpoint from %s (no training_state.pt, optimizers reset)", path)
+        # Infer epoch from path (e.g. checkpoint-epoch-50 -> 50)
+        try:
+            if path.name.startswith("checkpoint-epoch-"):
+                n = int(path.name.replace("checkpoint-epoch-", ""))
+                return {"epoch": n, "global_step": n}
+        except ValueError:
+            pass
+        return {"epoch": 0, "global_step": 0}

@@ -13,6 +13,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from src.training import create_optimizer
+from src.utils.config_yaml import save_config_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -225,16 +226,34 @@ class Pix2PixTrainer:
         save_dir = Path(self.config.save_dir)
         save_dir.mkdir(parents=True, exist_ok=True)
 
+        global_step = 0
+        steps_per_epoch = len(dataloader)
         for epoch in range(1, self.config.epochs + 1):
             avg_losses = self.train_epoch(dataloader)
+            global_step += steps_per_epoch
             logger.info("Epoch %d/%d | %s", epoch, self.config.epochs, avg_losses)
 
             if epoch % self.config.save_interval == 0:
-                self.save_checkpoint(save_dir / f"checkpoint-epoch-{epoch}")
+                self.save_checkpoint(
+                    save_dir / f"checkpoint-epoch-{epoch}",
+                    epoch=epoch,
+                    global_step=global_step,
+                )
 
-        self.save_checkpoint(save_dir / "latest")
+        self.save_checkpoint(
+            save_dir / "latest",
+            epoch=self.config.epochs,
+            global_step=global_step,
+        )
 
-    def save_checkpoint(self, path: str | Path, *, use_hf_format: bool = True) -> None:
+    def save_checkpoint(
+        self,
+        path: str | Path,
+        *,
+        epoch: int | None = None,
+        global_step: int | None = None,
+        use_hf_format: bool = True,
+    ) -> None:
         """Save checkpoint in Hugging Face / diffusers style (config.json + safetensors).
 
         Layout: generator/config.json, generator/diffusion_pytorch_model.safetensors,
@@ -242,6 +261,18 @@ class Pix2PixTrainer:
         Optionally training_state.pt for optimizer (resume). Set use_hf_format=False for legacy .pt only.
         """
         path = Path(path)
+        # Infer epoch from path if not provided (e.g. checkpoint-epoch-10)
+        if epoch is None and path.name.startswith("checkpoint-epoch-"):
+            try:
+                epoch = int(path.name.replace("checkpoint-epoch-", ""))
+            except ValueError:
+                pass
+        extra = {}
+        if epoch is not None:
+            extra["epoch"] = epoch
+        if global_step is not None:
+            extra["global_step"] = global_step
+
         if use_hf_format and not str(path).endswith(".pt"):
             path.mkdir(parents=True, exist_ok=True)
             from safetensors.torch import save_file
@@ -276,6 +307,7 @@ class Pix2PixTrainer:
                 },
                 path / "training_state.pt",
             )
+            save_config_yaml(self.config, path / "config.yaml", extra=extra or None)
             logger.info("Checkpoint saved to %s (HF format)", path)
         else:
             torch.save(
@@ -288,6 +320,8 @@ class Pix2PixTrainer:
                 },
                 path if str(path).endswith(".pt") else path / "model.pt",
             )
+            if not str(path).endswith(".pt"):
+                save_config_yaml(self.config, path / "config.yaml", extra=extra or None)
             logger.info("Checkpoint saved to %s", path)
 
     def load_checkpoint(self, path: str | Path) -> None:

@@ -17,6 +17,7 @@ from tqdm import tqdm
 from examples.i2sb.config import TaskConfig
 from examples.i2sb.trainer import I2SBTrainer
 from src.data.datasets import PairedImageDataset
+from src.utils.config_yaml import save_config_yaml
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -92,6 +93,11 @@ def main():
             ckpt_path = Path(args.save_dir) / f"checkpoint-epoch-{epoch + 1}"
             ckpt_path.mkdir(parents=True, exist_ok=True)
             torch.save(model.state_dict(), ckpt_path / "model.pt")
+            save_config_yaml(
+                cfg,
+                ckpt_path / "config.yaml",
+                extra={"save_dir": args.save_dir, "epoch": epoch + 1, "global_step": global_step},
+            )
             logger.info("Saved checkpoint to %s", ckpt_path)
 
     logger.info("I2SB training complete. Checkpoints saved to %s", args.save_dir)

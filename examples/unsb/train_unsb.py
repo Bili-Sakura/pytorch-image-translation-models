@@ -17,6 +17,7 @@ from tqdm import tqdm
 
 from src.data.datasets import UnpairedImageDataset
 from src.training import create_optimizer
+from src.utils.config_yaml import save_config_yaml
 from src.models.unsb import (
     create_generator,
     create_discriminator,
@@ -440,12 +441,19 @@ class UNSBTrainer:
                     )
 
             if (epoch + 1) % cfg.save_every == 0:
-                self.save_checkpoint(cfg.save_dir, epoch + 1)
+                self.save_checkpoint(cfg.save_dir, epoch + 1, global_step=global_step)
 
         logger.info("UNSB training complete. Checkpoints saved to %s", cfg.save_dir)
 
-    def save_checkpoint(self, save_dir: str, epoch: int) -> None:
-        """Save all networks."""
+    def save_checkpoint(
+        self,
+        save_dir: str,
+        epoch: int,
+        *,
+        global_step: int | None = None,
+        scaler: torch.amp.GradScaler | None = None,
+    ) -> None:
+        """Save all networks and optimizer states for resume."""
         path = Path(save_dir) / f"checkpoint-epoch-{epoch}"
         path.mkdir(parents=True, exist_ok=True)
 
@@ -457,4 +465,99 @@ class UNSBTrainer:
             net_path.mkdir(exist_ok=True)
             save_file(net.state_dict(), net_path / "model.safetensors")
 
-        logger.info("Saved checkpoint to %s", path)
+        # Training state for resume (optimizer states, epoch, global_step)
+        training_state = {
+            "optimizer_G": self.optimizer_G.state_dict(),
+            "optimizer_D": self.optimizer_D.state_dict(),
+            "optimizer_E": self.optimizer_E.state_dict(),
+            "epoch": epoch,
+            "global_step": global_step if global_step is not None else epoch,
+        }
+        if self.optimizer_F is not None:
+            training_state["optimizer_F"] = self.optimizer_F.state_dict()
+        if scaler is not None:
+            training_state["scaler"] = scaler.state_dict()
+        torch.save(training_state, path / "training_state.pt")
+
+        from src.utils.config_yaml import save_config_yaml
+        save_config_yaml(
+            self.config,
+            path / "config.yaml",
+            extra={"epoch": epoch, "global_step": global_step if global_step is not None else epoch},
+        )
+
+        logger.info("Saved checkpoint to %s (with optimizer states)", path)
+
+    def load_checkpoint(
+        self,
+        path: str | Path,
+        *,
+        dummy_batch: dict[str, torch.Tensor] | None = None,
+    ) -> dict:
+        """Load checkpoint and restore model + optimizer states for resume.
+
+        Returns a dict with keys: "epoch", "global_step" for the caller to restore
+        training loop. If dummy_batch is None, creates one (needed to init netF's
+        lazy MLP before loading optimizer_F).
+        """
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+        if not (path / "generator").exists():
+            raise FileNotFoundError(f"Invalid checkpoint dir (expected generator/): {path}")
+
+        from safetensors.torch import load_file
+
+        for name, net in [("generator", self.netG), ("discriminator", self.netD),
+                          ("energy_net", self.netE), ("feature_network", self.netF)]:
+            net_path = path / name / "model.safetensors"
+            if net_path.exists():
+                net.load_state_dict(
+                    load_file(str(net_path), device=str(self.device)),
+                    strict=True,
+                )
+
+        # netF has lazy MLP: run one forward to create it before load_state_dict
+        if not self.netF.mlp_init and (path / "feature_network" / "model.safetensors").exists():
+            cfg = self.config
+            if dummy_batch is not None:
+                real_A = dummy_batch.get("A", dummy_batch.get("source"))
+                real_B = dummy_batch.get("B", dummy_batch.get("target"))
+            else:
+                res = cfg.resolution
+                real_A = torch.randn(1, cfg.input_nc, res, res, device=self.device) * 2 - 1
+                real_B = torch.randn(1, cfg.output_nc, res, res, device=self.device) * 2 - 1
+            with torch.no_grad():
+                # Minimal forward to init netF's MLP (UNSB uses time_idx and z)
+                t = torch.zeros(1, dtype=torch.long, device=self.device)
+                z = self.scheduler.sample_t(1).to(self.device)
+                _ = self.netG(real_A, t, z, self.nce_layers, encode_only=True)
+                self.netF(_, cfg.num_patches, None)
+            self._ensure_optimizer_F()
+
+        # Load optimizer states
+        train_state_path = path / "training_state.pt"
+        if train_state_path.exists():
+            ckpt = torch.load(train_state_path, map_location=self.device, weights_only=False)
+            self.optimizer_G.load_state_dict(ckpt["optimizer_G"])
+            self.optimizer_D.load_state_dict(ckpt["optimizer_D"])
+            self.optimizer_E.load_state_dict(ckpt["optimizer_E"])
+            if "optimizer_F" in ckpt and self.optimizer_F is not None:
+                self.optimizer_F.load_state_dict(ckpt["optimizer_F"])
+            logger.info(
+                "Loaded checkpoint from %s (epoch=%s, global_step=%s)",
+                path, ckpt.get("epoch"), ckpt.get("global_step"),
+            )
+            return {
+                "epoch": ckpt.get("epoch", 0),
+                "global_step": ckpt.get("global_step", 0),
+            }
+
+        logger.info("Loaded checkpoint from %s (no training_state.pt, optimizers reset)", path)
+        try:
+            if path.name.startswith("checkpoint-epoch-"):
+                n = int(path.name.replace("checkpoint-epoch-", ""))
+                return {"epoch": n, "global_step": n}
+        except ValueError:
+            pass
+        return {"epoch": 0, "global_step": 0}

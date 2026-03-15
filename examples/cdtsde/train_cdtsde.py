@@ -14,6 +14,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from src.data.datasets import PairedImageDataset
+from src.utils.config_yaml import save_config_yaml
 from src.models.unet import CDTSDEUNet
 from src.schedulers.cdtsde import CDTSDEScheduler
 
@@ -122,16 +123,47 @@ class CDTSDETrainer:
                     logger.info("step %d | loss=%.4f", global_step, logs["loss"])
 
             if (epoch + 1) % cfg.save_every == 0:
-                self.save_checkpoint(cfg.save_dir, epoch + 1)
+                self.save_checkpoint(cfg.save_dir, epoch + 1, global_step=global_step)
 
         logger.info("CDTSDE training complete. Checkpoints saved to %s", cfg.save_dir)
 
-    def save_checkpoint(self, save_dir: str, epoch: int) -> None:
+    def save_checkpoint(
+        self,
+        save_dir: str,
+        epoch: int,
+        *,
+        global_step: int | None = None,
+    ) -> None:
         path = Path(save_dir) / f"checkpoint-epoch-{epoch}"
         path.mkdir(parents=True, exist_ok=True)
         self.unet.save_pretrained(path / "unet")
         self.scheduler.save_pretrained(path / "scheduler")
-        logger.info("Saved checkpoint to %s", path)
+        save_config_yaml(
+            self.config, path / "config.yaml",
+            extra={"epoch": epoch, "global_step": global_step if global_step is not None else epoch},
+        )
+        training_state = {
+            "optimizer": self.optimizer.state_dict(),
+            "epoch": epoch,
+            "global_step": global_step if global_step is not None else epoch,
+        }
+        torch.save(training_state, path / "training_state.pt")
+        logger.info("Saved checkpoint to %s (with optimizer state)", path)
+
+    def load_checkpoint(self, path: str | Path) -> dict:
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+        self.unet = self.unet.from_pretrained(path / "unet").to(self.device)
+        sched_path = path / "scheduler"
+        if sched_path.exists():
+            self.scheduler = self.scheduler.from_pretrained(str(sched_path))
+        train_state_path = path / "training_state.pt"
+        if train_state_path.exists():
+            ckpt = torch.load(train_state_path, map_location=self.device, weights_only=False)
+            self.optimizer.load_state_dict(ckpt["optimizer"])
+            return {"epoch": ckpt.get("epoch", 0), "global_step": ckpt.get("global_step", 0)}
+        return {"epoch": 0, "global_step": 0}
 
 
 if __name__ == "__main__":

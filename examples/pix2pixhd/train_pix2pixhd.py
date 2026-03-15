@@ -17,6 +17,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from src.data.datasets import PairedImageDataset
+from src.utils.config_yaml import save_config_yaml
 from src.losses import GANLoss, PerceptualLoss
 from src.models.discriminators import PatchGANDiscriminator
 from src.models.pix2pixhd import Pix2PixHDGenerator
@@ -154,11 +155,17 @@ class Pix2PixHDTrainer:
                     logger.info("step %d | loss_d=%.4f loss_gan=%.4f loss_l1=%.4f", global_step, logs["loss_d"], logs["loss_gan"], logs["loss_l1"])
 
             if (epoch + 1) % cfg.save_every == 0:
-                self.save_checkpoint(cfg.save_dir, epoch + 1)
+                self.save_checkpoint(cfg.save_dir, epoch + 1, global_step=global_step)
 
         logger.info("Pix2PixHD training complete. Checkpoints saved to %s", cfg.save_dir)
 
-    def save_checkpoint(self, save_dir: str, epoch: int) -> None:
+    def save_checkpoint(
+        self,
+        save_dir: str,
+        epoch: int,
+        *,
+        global_step: int | None = None,
+    ) -> None:
         import json
         from safetensors.torch import save_file
 
@@ -180,7 +187,38 @@ class Pix2PixHDTrainer:
         disc_path = path / "discriminator"
         disc_path.mkdir(exist_ok=True)
         save_file(self.discriminator.state_dict(), disc_path / "diffusion_pytorch_model.safetensors")
-        logger.info("Saved checkpoint to %s", path)
+        save_config_yaml(
+            self.config,
+            path / "config.yaml",
+            extra={"epoch": epoch, "global_step": global_step if global_step is not None else epoch},
+        )
+
+        training_state = {
+            "optimizer_g": self.optimizer_g.state_dict(),
+            "optimizer_d": self.optimizer_d.state_dict(),
+            "epoch": epoch,
+            "global_step": global_step if global_step is not None else epoch,
+        }
+        torch.save(training_state, path / "training_state.pt")
+        logger.info("Saved checkpoint to %s (with optimizer state)", path)
+
+    def load_checkpoint(self, path: str | Path) -> dict:
+        """Load checkpoint and restore model + optimizer for resume."""
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {path}")
+        from safetensors.torch import load_file
+        gen_sd = load_file(str(path / "generator" / "diffusion_pytorch_model.safetensors"), device=str(self.device))
+        self.generator.load_state_dict(gen_sd, strict=True)
+        disc_sd = load_file(str(path / "discriminator" / "diffusion_pytorch_model.safetensors"), device=str(self.device))
+        self.discriminator.load_state_dict(disc_sd, strict=True)
+        train_state_path = path / "training_state.pt"
+        if train_state_path.exists():
+            ckpt = torch.load(train_state_path, map_location=self.device, weights_only=False)
+            self.optimizer_g.load_state_dict(ckpt["optimizer_g"])
+            self.optimizer_d.load_state_dict(ckpt["optimizer_d"])
+            return {"epoch": ckpt.get("epoch", 0), "global_step": ckpt.get("global_step", 0)}
+        return {"epoch": 0, "global_step": 0}
 
 
 if __name__ == "__main__":
