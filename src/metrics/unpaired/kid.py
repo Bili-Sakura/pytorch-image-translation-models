@@ -14,11 +14,13 @@ def compute_kid(
     subsets: int = 100,
     subset_size: int = 1000,
     device: torch.device | None = None,
+    batch_size: int = 64,
     **kwargs,
 ) -> float:
     """Compute Kernel Inception Distance (MMD with polynomial kernel).
 
     Uses torchmetrics for the classic Inception-based computation.
+    Processes images in batches to avoid CUDA OOM on large validation sets.
 
     Parameters
     ----------
@@ -30,6 +32,8 @@ def compute_kid(
         Number of subsets for mean/std over bootstrap.
     subset_size :
         Samples per subset.
+    batch_size :
+        Maximum images per batch for Inception forward.
 
     Returns
     -------
@@ -54,7 +58,18 @@ def compute_kid(
         subset_size=subset_size,
         normalize=True,
     ).to(dev)
-    kid.update(real_images, real=True)
-    kid.update(fake_images, real=False)
+
+    n_real = real_images.shape[0]
+    n_fake = fake_images.shape[0]
+    for i in range(0, n_real, batch_size):
+        batch = real_images[i : i + batch_size]
+        if batch.device != dev:
+            batch = batch.to(dev)
+        kid.update(batch, real=True)
+    for i in range(0, n_fake, batch_size):
+        batch = fake_images[i : i + batch_size]
+        if batch.device != dev:
+            batch = batch.to(dev)
+        kid.update(batch, real=False)
     kid_mean, _ = kid.compute()
     return kid_mean.item()
