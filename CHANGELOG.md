@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-03-15
+
+### Added
+- **Hugging Face Storage Buckets**: Sync checkpoints and TensorBoard logs to HF Storage Buckets (Xet) during training. Use `--push_to_bucket` and `--hf_bucket` in CUT and Pix2Pix trainers.
+- **Hub utilities** (`src/utils/training_utils.py`): `push_checkpoint_to_bucket`, `sync_tensorboard_to_bucket`, `push_checkpoint_to_hub` for checkpoint and log uploads.
+
+### Changed
+- **Dependencies**: Bump `huggingface_hub` to 1.7.1 and `hf-xet` to 1.4.2 for HF_BUCKET support.
+- **Checkpoint saving/loading**: Enhanced across CUT, Pix2Pix, and training scripts.
+- **LPIPS**: Refactored computation; updated default backbone.
+- **Metrics**: Refactored computation and argument parsing.
+- **BBDM**: Updated configuration and optimizer.
+- **Pix2Pix**: Improved checkpoint handling and dataset loading.
+- **Optimizer config**: Unified across training scripts.
+- **DataLoader**: Updated default `num_workers` in `argparse_utils`.
+
 ## [0.5.0] - 2026-03-15
 
 ### Added

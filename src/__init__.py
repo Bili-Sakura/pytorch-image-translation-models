@@ -5,7 +5,7 @@ A library for multi-modal image translation with diffusion bridges,
 GANs, and transformer backbones.
 """
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
 
 from src.data import PairedImageDataset, UnpairedImageDataset, default_transforms, get_transforms
 from src.pipelines import ImageTranslator
