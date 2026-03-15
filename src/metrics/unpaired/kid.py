@@ -42,6 +42,11 @@ def compute_kid(
     """
     from torchmetrics.image.kid import KernelInceptionDistance
 
+    n = min(real_images.shape[0], fake_images.shape[0])
+    if n <= 1:
+        return 0.0
+    subset_size = min(subset_size, n - 1)
+
     dev = device if device is not None else real_images.device
     kid = KernelInceptionDistance(
         feature=feature_dim,

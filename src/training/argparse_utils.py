@@ -60,19 +60,22 @@ def add_training_args(parser: argparse.ArgumentParser, skip: tuple[str, ...] = (
         default=2,
         help="Max checkpoints to retain (rotation)",
     )
-    parser.add_argument("--log_every", type=int, default=100, help="Log metrics every N steps")
-    parser.add_argument(
-        "--validation_steps",
-        type=int,
-        default=None,
-        help="Run validation every N steps",
-    )
-    parser.add_argument(
-        "--validation_epochs",
-        type=int,
-        default=None,
-        help="Run validation every N epochs",
-    )
+    if "log_every" not in skip:
+        parser.add_argument("--log_every", type=int, default=100, help="Log metrics every N steps")
+    if "validation_steps" not in skip:
+        parser.add_argument(
+            "--validation_steps",
+            type=int,
+            default=None,
+            help="Run validation every N steps",
+        )
+    if "validation_epochs" not in skip:
+        parser.add_argument(
+            "--validation_epochs",
+            type=int,
+            default=None,
+            help="Run validation every N epochs",
+        )
     parser.add_argument(
         "--log_with",
         type=str,

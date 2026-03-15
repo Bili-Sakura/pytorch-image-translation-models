@@ -39,6 +39,6 @@ def compute_is(
 
     dev = device if device is not None else fake_images.device
     is_metric = InceptionScore(splits=splits, normalize=True).to(dev)
-    is_metric.update(fake_images, real=False)
+    is_metric.update(fake_images)
     is_mean, _ = is_metric.compute()
     return is_mean.item()
