@@ -16,6 +16,7 @@ from torchvision import transforms
 from tqdm import tqdm
 
 from src.data.datasets import UnpairedImageDataset
+from src.training import create_optimizer
 from src.models.unsb import (
     create_generator,
     create_discriminator,
@@ -114,14 +115,32 @@ class UNSBTrainer:
 
         # Optimizers
         betas = (config.beta1, config.beta2)
-        opt_cls = torch.optim.AdamW if config.optimizer.lower() == "adamw" else torch.optim.Adam
-        opt_kw = dict(lr=config.lr, betas=betas)
-        if opt_cls == torch.optim.AdamW:
-            opt_kw["weight_decay"] = 0.01
+        weight_decay = config.weight_decay if config.optimizer.lower() in ("adamw", "prodigy", "muon") else 0.0
 
-        self.optimizer_G = opt_cls(self.netG.parameters(), **opt_kw)
-        self.optimizer_D = opt_cls(self.netD.parameters(), **opt_kw)
-        self.optimizer_E = opt_cls(self.netE.parameters(), **opt_kw)
+        self.optimizer_G = create_optimizer(
+            self.netG.parameters(),
+            optimizer_type=config.optimizer,
+            lr=config.lr,
+            weight_decay=weight_decay,
+            betas=betas,
+            prodigy_d0=config.prodigy_d0,
+        )
+        self.optimizer_D = create_optimizer(
+            self.netD.parameters(),
+            optimizer_type=config.optimizer,
+            lr=config.lr,
+            weight_decay=weight_decay,
+            betas=betas,
+            prodigy_d0=config.prodigy_d0,
+        )
+        self.optimizer_E = create_optimizer(
+            self.netE.parameters(),
+            optimizer_type=config.optimizer,
+            lr=config.lr,
+            weight_decay=weight_decay,
+            betas=betas,
+            prodigy_d0=config.prodigy_d0,
+        )
         self.optimizer_F = None  # Created after first forward (netF lazy init)
 
     def build_dataset(
@@ -141,11 +160,15 @@ class UNSBTrainer:
     def _ensure_optimizer_F(self):
         """Create optimizer_F after netF is initialized (first forward)."""
         if self.optimizer_F is None and self.netF.mlp_init:
-            opt_cls = torch.optim.AdamW if self.config.optimizer.lower() == "adamw" else torch.optim.Adam
-            opt_kw = dict(lr=self.config.lr, betas=(self.config.beta1, self.config.beta2))
-            if opt_cls == torch.optim.AdamW:
-                opt_kw["weight_decay"] = 0.01
-            self.optimizer_F = opt_cls(self.netF.parameters(), **opt_kw)
+            weight_decay = self.config.weight_decay if self.config.optimizer.lower() in ("adamw", "prodigy", "muon") else 0.0
+            self.optimizer_F = create_optimizer(
+                self.netF.parameters(),
+                optimizer_type=self.config.optimizer,
+                lr=self.config.lr,
+                weight_decay=weight_decay,
+                betas=(self.config.beta1, self.config.beta2),
+                prodigy_d0=self.config.prodigy_d0,
+            )
 
     def train_step(
         self,

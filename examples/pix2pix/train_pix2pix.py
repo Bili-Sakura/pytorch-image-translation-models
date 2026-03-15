@@ -12,6 +12,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
+from src.training import create_optimizer
+
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +55,9 @@ class TrainingConfig:
     save_interval: int = 10
     log_interval: int = 100
     device: str = "cuda"
-    optimizer: str = "adamw"  # "adamw" | "adam"
+    optimizer: str = "adamw"  # "adamw" | "adam" | "prodigy" | "muon"
+    weight_decay: float = 0.01
+    prodigy_d0: float = 1e-6
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -97,13 +101,23 @@ class Pix2PixTrainer:
         self.perceptual_loss = perceptual_loss.to(self.device) if perceptual_loss else None
 
         betas = (self.config.beta1, 0.999)
-        opt_cls = torch.optim.AdamW if self.config.optimizer.lower() == "adamw" else torch.optim.Adam
-        opt_kw = dict(betas=betas)
-        if opt_cls == torch.optim.AdamW:
-            opt_kw["weight_decay"] = 0.01
-
-        self.optimizer_g = opt_cls(self.generator.parameters(), lr=self.config.lr_g, **opt_kw)
-        self.optimizer_d = opt_cls(self.discriminator.parameters(), lr=self.config.lr_d, **opt_kw)
+        weight_decay = self.config.weight_decay if self.config.optimizer.lower() in ("adamw", "prodigy", "muon") else 0.0
+        self.optimizer_g = create_optimizer(
+            self.generator.parameters(),
+            optimizer_type=self.config.optimizer,
+            lr=self.config.lr_g,
+            weight_decay=weight_decay,
+            betas=betas,
+            prodigy_d0=self.config.prodigy_d0,
+        )
+        self.optimizer_d = create_optimizer(
+            self.discriminator.parameters(),
+            optimizer_type=self.config.optimizer,
+            lr=self.config.lr_d,
+            weight_decay=weight_decay,
+            betas=betas,
+            prodigy_d0=self.config.prodigy_d0,
+        )
 
     # ------------------------------------------------------------------
     # Training steps

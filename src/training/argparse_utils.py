@@ -92,7 +92,8 @@ def add_training_args(parser: argparse.ArgumentParser, skip: tuple[str, ...] = (
         default=0,
         help="DataLoader num_workers",
     )
-    parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    if "seed" not in skip:
+        parser.add_argument("--seed", type=int, default=42, help="Random seed")
     if "device" not in skip:
         parser.add_argument("--device", type=str, default="cuda", help="Device to train on")
 

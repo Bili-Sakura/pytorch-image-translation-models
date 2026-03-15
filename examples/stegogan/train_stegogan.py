@@ -17,6 +17,7 @@ import torch
 import torch.nn as nn
 
 from src.losses.adversarial import GANLoss
+from src.training import create_optimizer
 from src.models.discriminators import PatchGANDiscriminator
 from src.models.stegogan.generators import (
     ResnetMaskV1Generator,
@@ -71,6 +72,12 @@ class StegoGANConfig:
         Adam beta1.
     epochs : int
         Number of training epochs.
+    optimizer : str
+        Optimizer type: ``"adamw"`` | ``"adam"`` | ``"prodigy"`` | ``"muon"``.
+    weight_decay : float
+        Weight decay for adamw/prodigy/muon.
+    prodigy_d0 : float
+        Prodigy d0 parameter (for optimizer_type=prodigy).
     """
 
     input_nc: int = 3
@@ -93,6 +100,9 @@ class StegoGANConfig:
     lr_D: float = 2e-4
     beta1: float = 0.5
     epochs: int = 100
+    optimizer: str = "adam"  # "adamw" | "adam" | "prodigy" | "muon"
+    weight_decay: float = 0.01
+    prodigy_d0: float = 1e-6
     device: str = "cpu"
     checkpoint_dir: str = "./checkpoints"
     save_every: int = 10
@@ -157,15 +167,23 @@ class StegoGANTrainer:
         self.criterion_idt = nn.L1Loss()
 
         # Optimizers
-        self.optimizer_G = torch.optim.Adam(
+        betas = (config.beta1, 0.999)
+        weight_decay = config.weight_decay if config.optimizer.lower() in ("adamw", "prodigy", "muon") else 0.0
+        self.optimizer_G = create_optimizer(
             itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()),
+            optimizer_type=config.optimizer,
             lr=config.lr_G,
-            betas=(config.beta1, 0.999),
+            weight_decay=weight_decay,
+            betas=betas,
+            prodigy_d0=config.prodigy_d0,
         )
-        self.optimizer_D = torch.optim.Adam(
+        self.optimizer_D = create_optimizer(
             itertools.chain(self.netD_A.parameters(), self.netD_B.parameters()),
+            optimizer_type=config.optimizer,
             lr=config.lr_D,
-            betas=(config.beta1, 0.999),
+            weight_decay=weight_decay,
+            betas=betas,
+            prodigy_d0=config.prodigy_d0,
         )
 
     def forward(
