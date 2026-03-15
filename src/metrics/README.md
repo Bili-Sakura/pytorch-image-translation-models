@@ -166,6 +166,113 @@ evaluator = UnpairedImageMetricEvaluator(
 
 ---
 
+## FID, KID, IS: Full Configuration
+
+This section documents the complete configuration of our FID, KID, and IS implementations for reproducibility and comparison with papers.
+
+### Backend
+
+| Component | Value |
+|-----------|-------|
+| **Library** | `torchmetrics` (image submodule) |
+| **Inception** | `torch-fidelity` (InceptionV3, pretrained on ImageNet) |
+| **Install** | `pip install torchmetrics torch-fidelity` or `pip install -e ".[metrics]"` |
+
+### Input Format
+
+| Requirement | Specification |
+|-------------|---------------|
+| **Shape** | `(N, C, H, W)` with `C=3` (RGB) |
+| **Value range** | `[0, 1]` (float) |
+| **Normalization** | `normalize=True` — images in [0, 1] are cast internally for Inception |
+| **Resize** | Images are resized to 299×299 inside the metric (Inception input size) |
+
+Convert from `[-1, 1]` to `[0, 1]` before calling: `(x * 0.5 + 0.5).clamp(0, 1)`.
+
+### FID (Fréchet Inception Distance)
+
+| Parameter | Default | Description |
+|-----------|---------|--------------|
+| `feature_dim` | `2048` | InceptionV3 feature layer (64, 192, 768, or 2048) |
+| `batch_size` | `64` | Max images per Inception forward pass (reduces GPU memory) |
+| `normalize` | `True` | Input in [0, 1]; set by implementation |
+| `feature_extractor_weights_path` | (torch-fidelity default) | Path to Inception weights for custom backbone |
+| `device` | from input | Device for computation |
+
+**Formula**: \( \text{FID} = \|\mu - \mu_w\|^2 + \text{tr}(\Sigma + \Sigma_w - 2(\Sigma \Sigma_w)^{1/2}) \) where \( \mathcal{N}(\mu, \Sigma) \) and \( \mathcal{N}(\mu_w, \Sigma_w) \) are Gaussians fit to real and fake Inception features.
+
+**Interpretation**: Lower is better. Compares distributions of real vs. generated images.
+
+**Override via evaluator**:
+```python
+evaluator = UnpairedImageMetricEvaluator(
+    metrics=["fid"],
+    feature_dim=2048,
+    batch_size=32,  # smaller if OOM
+)
+```
+
+### KID (Kernel Inception Distance)
+
+| Parameter | Default | Description |
+|-----------|---------|--------------|
+| `feature_dim` | `2048` | InceptionV3 feature layer |
+| `subsets` | `100` | Number of bootstrap subsets for mean/std |
+| `subset_size` | `1000` | Samples per subset (clamped to min(n-1, subset_size)) |
+| `batch_size` | `64` | Max images per Inception forward pass |
+| `normalize` | `True` | Input in [0, 1] |
+| `feature_extractor_weights_path` | (torch-fidelity default) | Path to Inception weights |
+
+**Interpretation**: Lower is better. MMD with polynomial kernel between real and fake feature distributions.
+
+**Override via evaluator**:
+```python
+evaluator = UnpairedImageMetricEvaluator(
+    metrics=["kid"],
+    subsets=100,
+    subset_size=1000,
+    batch_size=32,
+)
+```
+
+### IS (Inception Score)
+
+| Parameter | Default | Description |
+|-----------|---------|--------------|
+| `splits` | `10` | Number of splits for mean/std over the score |
+| `batch_size` | `64` | Max images per Inception forward pass |
+| `normalize` | `True` | Input in [0, 1] |
+| `feature_extractor_weights_path` | (torch-fidelity default) | Path to Inception weights |
+
+**Note**: Uses only `fake_images`; `real_images` are ignored.
+
+**Interpretation**: Higher is better. Measures quality and diversity of generated images.
+
+**Override via evaluator**:
+```python
+evaluator = UnpairedImageMetricEvaluator(
+    metrics=["is"],
+    splits=10,
+    batch_size=32,
+)
+```
+
+### Batched Processing
+
+All three metrics process images in batches (default 64) to avoid CUDA OOM. The implementation calls `update()` incrementally; results are mathematically equivalent to processing the full set at once.
+
+### Sample Size Sensitivity
+
+**FID and KID are highly sensitive to the number of samples.** Absolute values are not comparable across different sample sizes:
+
+- Fewer samples (e.g. 500–1000) → higher FID, noisier estimates
+- Papers often use 2k–50k samples; always match sample count when comparing to reported numbers
+- Different implementations (torchmetrics, clean-fid, TensorFlow) can yield 2–3× differences on the same data
+
+For reproducible comparisons, document: backend, sample count, dataset split, and image resolution.
+
+---
+
 ## Quick Reference: Custom Checkpoint kwargs
 
 | Metric   | Kwarg                        | Accepts                                              |
