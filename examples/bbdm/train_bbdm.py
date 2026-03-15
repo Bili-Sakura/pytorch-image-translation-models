@@ -18,6 +18,7 @@ from tqdm import tqdm
 from src.data.datasets import PairedImageDataset
 from src.models.unet import BBDMUNet
 from src.schedulers.bbdm import BBDMScheduler
+from src.training.optimizer_utils import create_optimizer
 
 from .config import BBDMConfig
 
@@ -58,10 +59,14 @@ class BBDMTrainer:
             objective=config.objective,
         )
 
-        self.optimizer = torch.optim.AdamW(
+        weight_decay = config.weight_decay if config.optimizer.lower() in ("adamw", "prodigy", "muon") else 0.0
+        self.optimizer = create_optimizer(
             self.unet.parameters(),
+            optimizer_type=config.optimizer,
             lr=config.lr,
+            weight_decay=weight_decay,
             betas=(config.beta1, config.beta2),
+            prodigy_d0=config.prodigy_d0,
         )
 
     def build_dataset(

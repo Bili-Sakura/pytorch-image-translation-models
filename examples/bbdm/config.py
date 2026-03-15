@@ -32,7 +32,10 @@ class BBDMConfig:
     objective: str = "grad"  # grad | noise | ysubx
 
     # Training
-    lr: float = 1e-4
+    optimizer: str = "prodigy"  # prodigy | adamw | adam | muon
+    lr: float = 1.0  # 1.0 for Prodigy; 1e-4 for AdamW
+    weight_decay: float = 0.01
+    prodigy_d0: float = 1e-6
     beta1: float = 0.9
     beta2: float = 0.999
     epochs: int = 200
