@@ -66,7 +66,7 @@ All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 ## Training
 
 - `Pix2PixTrainer` — Paired GAN training with checkpoint save/load
-- **HF Storage Buckets** — Sync checkpoints and TensorBoard logs to [Hugging Face Storage Buckets](storage-buckets.md) (CUT, pix2pix tutorials; requires `huggingface_hub` ≥ 1.5.0)
+- **HF Storage Buckets** — Sync checkpoints and TensorBoard logs to [Hugging Face Storage Buckets](storage-buckets.md) (CUT, pix2pix tutorials; requires `huggingface_hub` == 1.7.1, `hf-xet` == 1.4.2 for HF_BUCKET)
 - `StegoGANTrainer` — StegoGAN unpaired training with steganographic masking and consistency losses
 - `I2SBTrainer` — I2SB bridge model training (in `examples/i2sb/`)
 - `StarGANTrainer` — WGAN-GP + domain classification + reconstruction training for multi-domain translation (in ``examples/stargan/``)

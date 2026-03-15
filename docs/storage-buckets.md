@@ -8,11 +8,12 @@ This package integrates buckets into the CUT and Pix2Pix tutorial trainers so yo
 
 ## Requirements
 
-- **huggingface_hub** ≥ 1.5.0  
+- **huggingface_hub** == 1.7.1 (or ≥ 1.5.0 for basic bucket support)
+- **hf-xet** == 1.4.2 (for HF_BUCKET content-addressable storage)
 - **HF_TOKEN** set (or logged in via `huggingface-cli login`)
 
 ```bash
-pip install -U huggingface_hub
+pip install huggingface_hub==1.7.1 hf-xet==1.4.2
 # or
 pip install -e ".[training]"
 ```
