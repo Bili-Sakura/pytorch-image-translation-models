@@ -61,6 +61,7 @@ class PairedImageDataset(Dataset):
         transform_source: Callable | None = None,
         transform_target: Callable | None = None,
         extensions: set[str] | None = None,
+        filenames: list[str] | None = None,
     ) -> None:
         if root_source is not None and root_target is not None:
             self.source_root = Path(root_source)
@@ -81,12 +82,20 @@ class PairedImageDataset(Dataset):
 
         exts = extensions or self.EXTENSIONS
 
-        self.filenames = sorted(
-            f
-            for f in os.listdir(self.source_root)
-            if Path(f).suffix.lower() in exts
-            and (self.target_root / f).exists()
-        )
+        if filenames is not None:
+            self.filenames = [
+                f for f in filenames
+                if Path(f).suffix.lower() in exts
+                and (self.source_root / f).exists()
+                and (self.target_root / f).exists()
+            ]
+        else:
+            self.filenames = sorted(
+                f
+                for f in os.listdir(self.source_root)
+                if Path(f).suffix.lower() in exts
+                and (self.target_root / f).exists()
+            )
 
         if len(self.filenames) == 0:
             raise FileNotFoundError(
@@ -148,6 +157,8 @@ class UnpairedImageDataset(Dataset):
         transform_a: Callable | None = None,
         transform_b: Callable | None = None,
         extensions: set[str] | None = None,
+        filenames_a: list[str] | None = None,
+        filenames_b: list[str] | None = None,
     ) -> None:
         self.root_a = Path(root_a)
         self.root_b = Path(root_b)
@@ -156,12 +167,18 @@ class UnpairedImageDataset(Dataset):
 
         exts = extensions or self.EXTENSIONS
 
-        self.files_a = sorted(
-            f for f in os.listdir(self.root_a) if Path(f).suffix.lower() in exts
-        )
-        self.files_b = sorted(
-            f for f in os.listdir(self.root_b) if Path(f).suffix.lower() in exts
-        )
+        if filenames_a is not None:
+            self.files_a = [f for f in filenames_a if Path(f).suffix.lower() in exts and (self.root_a / f).exists()]
+        else:
+            self.files_a = sorted(
+                f for f in os.listdir(self.root_a) if Path(f).suffix.lower() in exts
+            )
+        if filenames_b is not None:
+            self.files_b = [f for f in filenames_b if Path(f).suffix.lower() in exts and (self.root_b / f).exists()]
+        else:
+            self.files_b = sorted(
+                f for f in os.listdir(self.root_b) if Path(f).suffix.lower() in exts
+            )
 
         if len(self.files_a) == 0:
             raise FileNotFoundError(f"No images found in {self.root_a}")

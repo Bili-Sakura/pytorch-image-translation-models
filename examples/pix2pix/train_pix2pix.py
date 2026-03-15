@@ -230,29 +230,86 @@ class Pix2PixTrainer:
             logger.info("Epoch %d/%d | %s", epoch, self.config.epochs, avg_losses)
 
             if epoch % self.config.save_interval == 0:
-                self.save_checkpoint(save_dir / f"epoch_{epoch}.pt")
+                self.save_checkpoint(save_dir / f"checkpoint-epoch-{epoch}")
 
-        self.save_checkpoint(save_dir / "latest.pt")
+        self.save_checkpoint(save_dir / "latest")
 
-    def save_checkpoint(self, path: str | Path) -> None:
-        """Save generator, discriminator, and optimizer states."""
-        torch.save(
-            {
-                "generator": self.generator.state_dict(),
-                "discriminator": self.discriminator.state_dict(),
-                "optimizer_g": self.optimizer_g.state_dict(),
-                "optimizer_d": self.optimizer_d.state_dict(),
-                "config": self.config,
-            },
-            path,
-        )
-        logger.info("Checkpoint saved to %s", path)
+    def save_checkpoint(self, path: str | Path, *, use_hf_format: bool = True) -> None:
+        """Save checkpoint in Hugging Face / diffusers style (config.json + safetensors).
+
+        Layout: generator/config.json, generator/diffusion_pytorch_model.safetensors,
+                discriminator/config.json, discriminator/diffusion_pytorch_model.safetensors.
+        Optionally training_state.pt for optimizer (resume). Set use_hf_format=False for legacy .pt only.
+        """
+        path = Path(path)
+        if use_hf_format and not str(path).endswith(".pt"):
+            path.mkdir(parents=True, exist_ok=True)
+            from safetensors.torch import save_file
+            import json
+
+            # Generator config (UNetGenerator)
+            gen_dir = path / "generator"
+            gen_dir.mkdir(exist_ok=True)
+            gen_cfg = {"in_channels": 3, "out_channels": 3, "base_filters": 64, "num_downs": 8, "use_dropout": True}
+            if hasattr(self.generator, "_config"):
+                gen_cfg.update(getattr(self.generator, "_config", {}))
+            with open(gen_dir / "config.json", "w", encoding="utf-8") as f:
+                json.dump(gen_cfg, f, indent=2)
+            save_file(self.generator.state_dict(), gen_dir / "diffusion_pytorch_model.safetensors")
+
+            # Discriminator config (PatchGANDiscriminator)
+            disc_dir = path / "discriminator"
+            disc_dir.mkdir(exist_ok=True)
+            disc_cfg = {"in_channels": 6, "base_filters": 64, "n_layers": 3}
+            if hasattr(self.discriminator, "_config"):
+                disc_cfg.update(getattr(self.discriminator, "_config", {}))
+            with open(disc_dir / "config.json", "w", encoding="utf-8") as f:
+                json.dump(disc_cfg, f, indent=2)
+            save_file(self.discriminator.state_dict(), disc_dir / "diffusion_pytorch_model.safetensors")
+
+            # Training state for resume (optional)
+            torch.save(
+                {
+                    "optimizer_g": self.optimizer_g.state_dict(),
+                    "optimizer_d": self.optimizer_d.state_dict(),
+                    "config": self.config,
+                },
+                path / "training_state.pt",
+            )
+            logger.info("Checkpoint saved to %s (HF format)", path)
+        else:
+            torch.save(
+                {
+                    "generator": self.generator.state_dict(),
+                    "discriminator": self.discriminator.state_dict(),
+                    "optimizer_g": self.optimizer_g.state_dict(),
+                    "optimizer_d": self.optimizer_d.state_dict(),
+                    "config": self.config,
+                },
+                path if str(path).endswith(".pt") else path / "model.pt",
+            )
+            logger.info("Checkpoint saved to %s", path)
 
     def load_checkpoint(self, path: str | Path) -> None:
-        """Load a training checkpoint."""
-        ckpt = torch.load(path, map_location=self.device, weights_only=False)
-        self.generator.load_state_dict(ckpt["generator"])
-        self.discriminator.load_state_dict(ckpt["discriminator"])
-        self.optimizer_g.load_state_dict(ckpt["optimizer_g"])
-        self.optimizer_d.load_state_dict(ckpt["optimizer_d"])
-        logger.info("Checkpoint loaded from %s", path)
+        """Load a training checkpoint. Supports HF format (dir with config + safetensors) or legacy .pt."""
+        path = Path(path)
+        if path.is_dir() and (path / "generator" / "config.json").exists():
+            from safetensors.torch import load_file
+            gen_state = load_file(str(path / "generator" / "diffusion_pytorch_model.safetensors"), device="cpu")
+            self.generator.load_state_dict(gen_state, strict=True)
+            disc_state = load_file(str(path / "discriminator" / "diffusion_pytorch_model.safetensors"), device="cpu")
+            self.discriminator.load_state_dict(disc_state, strict=True)
+            train_state = path / "training_state.pt"
+            if train_state.exists():
+                ckpt = torch.load(train_state, map_location=self.device, weights_only=False)
+                self.optimizer_g.load_state_dict(ckpt["optimizer_g"])
+                self.optimizer_d.load_state_dict(ckpt["optimizer_d"])
+            logger.info("Checkpoint loaded from %s (HF format)", path)
+        else:
+            ckpt_path = path if path.suffix == ".pt" else path / "model.pt"
+            ckpt = torch.load(ckpt_path, map_location=self.device, weights_only=False)
+            self.generator.load_state_dict(ckpt["generator"])
+            self.discriminator.load_state_dict(ckpt["discriminator"])
+            self.optimizer_g.load_state_dict(ckpt["optimizer_g"])
+            self.optimizer_d.load_state_dict(ckpt["optimizer_d"])
+            logger.info("Checkpoint loaded from %s", ckpt_path)

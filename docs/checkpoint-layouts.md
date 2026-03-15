@@ -4,6 +4,7 @@
 
 | Method | Expected layout (relative to method root) |
 | --- | --- |
+| `Pix2Pix` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors`, `discriminator/config.json`, `discriminator/diffusion_pytorch_model.safetensors`, optional `training_state.pt` |
 | `DDBM`, `BBDM`, `BDBM`, `BiBBDM`, `DBIM`, `CDTSDE`, `LBM` | `unet/config.json`, `unet/diffusion_pytorch_model.safetensors`, optional `scheduler/scheduler_config.json` |
 | `DDIB` | `source_unet/config.json`, `source_unet/diffusion_pytorch_model.safetensors`, `target_unet/config.json`, `target_unet/diffusion_pytorch_model.safetensors`, optional `scheduler/scheduler_config.json` |
 | `I2SB` | `unet/config.json`, `unet/diffusion_pytorch_model.safetensors`, optional `scheduler_config.json` (or `scheduler/scheduler_config.json`) |

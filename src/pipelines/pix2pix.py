@@ -57,27 +57,75 @@ class ImageTranslator:
     # ------------------------------------------------------------------
 
     @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "generator",
+        device: str = "cpu",
+        image_size: int = 256,
+        **kwargs,
+    ) -> "ImageTranslator":
+        """Load a translator from an HF-style checkpoint (config.json + safetensors).
+
+        Parameters
+        ----------
+        pretrained_model_name_or_path:
+            Path to checkpoint dir (e.g. ``checkpoint-epoch-10`` or ``latest``).
+        subfolder:
+            Subfolder containing generator (default ``generator``).
+        device:
+            Target device.
+        image_size:
+            Input image size.
+        **kwargs:
+            Extra keyword arguments forwarded to the constructor.
+        """
+        from src.models.generators import UNetGenerator
+        import json
+        from safetensors.torch import load_file
+
+        root = Path(pretrained_model_name_or_path)
+        gen_dir = root / subfolder
+        cfg_path = gen_dir / "config.json"
+        weights_path = gen_dir / "diffusion_pytorch_model.safetensors"
+        if not cfg_path.exists() or not weights_path.exists():
+            raise FileNotFoundError(
+                f"Expected {subfolder}/config.json and {subfolder}/diffusion_pytorch_model.safetensors in {root}"
+            )
+        with open(cfg_path, encoding="utf-8") as f:
+            cfg = json.load(f)
+        generator = UNetGenerator(**{k: v for k, v in cfg.items() if k in ("in_channels", "out_channels", "num_downs", "base_filters", "use_dropout")})
+        generator.load_state_dict(load_file(str(weights_path), device="cpu"), strict=True)
+        logger.info("Loaded generator from %s (HF format)", root)
+        return cls(generator, device=device, image_size=image_size, **kwargs)
+
+    @classmethod
     def from_checkpoint(
         cls,
         checkpoint_path: str | Path,
-        generator: nn.Module,
+        generator: nn.Module | None = None,
         device: str = "cpu",
         **kwargs,
     ) -> "ImageTranslator":
-        """Load a translator from a training checkpoint.
+        """Load a translator from a checkpoint. Supports HF format (dir) or legacy .pt.
 
         Parameters
         ----------
         checkpoint_path:
-            Path to a ``.pt`` checkpoint saved by
-            :class:`~examples.pix2pix.train_pix2pix.Pix2PixTrainer`.
+            Path to HF checkpoint dir or a ``.pt`` file.
         generator:
-            An **uninitialised** generator of the same architecture.
+            An uninitialised generator (only needed for legacy .pt).
         device:
             Target device.
         **kwargs:
             Extra keyword arguments forwarded to the constructor.
         """
+        path = Path(checkpoint_path)
+        if path.is_dir() and (path / "generator" / "config.json").exists():
+            return cls.from_pretrained(path, device=device, **kwargs)
+        if generator is None:
+            raise ValueError("generator must be provided when loading legacy .pt checkpoint")
         ckpt = torch.load(checkpoint_path, map_location=device, weights_only=False)
         generator.load_state_dict(ckpt["generator"])
         logger.info("Loaded generator from %s", checkpoint_path)
