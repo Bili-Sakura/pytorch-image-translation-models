@@ -89,7 +89,7 @@ def add_training_args(parser: argparse.ArgumentParser, skip: tuple[str, ...] = (
     parser.add_argument(
         "--dataloader_num_workers",
         type=int,
-        default=0,
+        default=4,
         help="DataLoader num_workers",
     )
     if "seed" not in skip:
