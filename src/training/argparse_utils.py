@@ -57,7 +57,7 @@ def add_training_args(parser: argparse.ArgumentParser, skip: tuple[str, ...] = (
     parser.add_argument(
         "--checkpoints_total_limit",
         type=int,
-        default=1,
+        default=2,
         help="Max checkpoints to retain (rotation)",
     )
     parser.add_argument("--log_every", type=int, default=100, help="Log metrics every N steps")
