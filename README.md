@@ -89,6 +89,7 @@ All information regarding per-method checkpoint folder conventions required by `
 | [Metrics README](src/metrics/README.md) | One-stop usage for paired/unpaired metrics and custom HuggingFace/local checkpoints. |
 | [Datasets](docs/datasets.md) | Common image-to-image translation datasets (pix2pix, CycleGAN) with paper and download links. |
 | [Examples](docs/examples.md) | Extended usage patterns and code snippets for pipelines such as I2SB, DDBM, UNSB, and Local Diffusion. |
+| [Storage Buckets](docs/storage-buckets.md) | Sync training checkpoints and TensorBoard logs to Hugging Face Storage Buckets (CUT, pix2pix tutorials). |
 | [Package structure](docs/package-structure.md) | Overview of the codebase organization, modules, and directories. |
 | [Credits](docs/credits.md) | Citations for reference papers and third-party contributions. |
 
