@@ -20,7 +20,8 @@ src/                                 # ← Core library (single source of truth)
 │   │   ├── sid.py                  # SID placeholder
 │   │   └── sid2.py                 # SiD2 placeholder
 │   ├── dit/
-│   │   └── sit.py                  # SiTBackbone (Diffusion Transformer)
+│   │   ├── sit.py                  # SiTBackbone (Diffusion Transformer)
+│   │   └── jit.py                  # JiTBackbone (Just image Transformer)
 │   └── stegogan/
 │       ├── generators.py           # ResnetMaskV1Generator, ResnetMaskV3Generator
 │       └── networks.py             # NetMatchability, mask_generate, ResnetBlock

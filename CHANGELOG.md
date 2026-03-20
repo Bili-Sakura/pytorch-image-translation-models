@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **JiT backbone** (`src/models/dit/jit.py`): `JiTBackbone` and `JIT_CONFIGS` — Just image Transformer adapted for the same DDBM/bridge calling convention as `SiTBackbone` (timestep + optional `xT` concat). Based on [LTH14/JiT](https://github.com/LTH14/JiT).
+
 ## [0.5.1] - 2026-03-15
 
 ### Added

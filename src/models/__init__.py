@@ -17,7 +17,7 @@ from src.models.unet import (
     LBMUNet,
     create_model,
 )
-from src.models.dit import SiTBackbone, SIT_CONFIGS
+from src.models.dit import JIT_CONFIGS, JiTBackbone, SiTBackbone, SIT_CONFIGS
 from src.models.stegogan import (
     ResnetMaskV1Generator,
     ResnetMaskV3Generator,
@@ -70,6 +70,8 @@ __all__ = [
     "DDIBUNet",
     "I2SBDiffusersUNet",
     "LBMUNet",
+    "JiTBackbone",
+    "JIT_CONFIGS",
     "SiTBackbone",
     "SIT_CONFIGS",
     "ResnetMaskV1Generator",

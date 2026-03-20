@@ -12,7 +12,7 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 - **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net in `adm.py` for Image-to-Image Schrödinger Bridge)
 - **UNSB** — `UNSBGenerator`, `UNSBDiscriminator`, `UNSBEnergyNet` (time-conditional networks for Unpaired Neural Schrödinger Bridge, ICLR 2024)
 - **Local Diffusion** — `LocalDiffusionUNet`, `ConditionEncoder` (conditional denoising U-Net with branch-and-fuse for hallucination suppression, ECCV 2024 Oral)
-- **DiT backbone** — `SiTBackbone` (Scalable Interpolant Transformer for diffusion bridges)
+- **DiT backbones** — `SiTBackbone` (Scalable Interpolant Transformer), `JiTBackbone` (Just image Transformer with bottleneck patch embed and RoPE; LTH14/JiT) for diffusion bridges
 - **FCDM** — `FCDM`, `FCDMImageCond` (ConvNeXt-based diffusion backbone for class-conditional and image-conditioned generation, CVPR 2026)
 
 ## Schedulers
