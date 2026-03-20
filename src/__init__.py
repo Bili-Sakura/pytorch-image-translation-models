@@ -18,7 +18,16 @@ from src.metrics import (
     compute_psnr,
     compute_ssim,
 )
-from src.models import I2SBUNet, PatchGANDiscriminator, ResNetGenerator, SIT_CONFIGS, SiTBackbone, UNetGenerator
+from src.models import (
+    I2SBUNet,
+    JIT_CONFIGS,
+    JiTBackbone,
+    PatchGANDiscriminator,
+    ResNetGenerator,
+    SIT_CONFIGS,
+    SiTBackbone,
+    UNetGenerator,
+)
 from src.models import ResnetMaskV1Generator, ResnetMaskV3Generator, NetMatchability
 from src.models import BBDMUNet, BDBMUNet, BiBBDMUNet, CDTSDEUNet, DBIMUNet, DDBMUNet, DDIBUNet, I2SBDiffusersUNet, LBMUNet
 from src.models import FCDM, FCDM_MODELS, FCDMImageCond, FCDM_S, FCDM_B, FCDM_L, FCDM_XL
@@ -101,6 +110,8 @@ __all__ = [
     "ResNetGenerator",
     "PatchGANDiscriminator",
     "I2SBUNet",
+    "JiTBackbone",
+    "JIT_CONFIGS",
     "SiTBackbone",
     "SIT_CONFIGS",
     "ResnetMaskV1Generator",

@@ -186,6 +186,26 @@ model = SiTBackbone(
 output = model(noisy_sample, timestep, xT=source_image)
 ```
 
+## DiT backbone (JiT) for diffusion bridges
+
+```python
+from src.models.dit import JiTBackbone, JIT_CONFIGS
+
+device = "cuda"
+depth, hidden_size, num_heads, bottleneck_dim, patch_size = JIT_CONFIGS["B/16"]
+model = JiTBackbone(
+    image_size=256,
+    patch_size=patch_size,
+    in_channels=3,
+    hidden_size=hidden_size,
+    depth=depth,
+    num_heads=num_heads,
+    bottleneck_dim=bottleneck_dim,
+    condition_mode="concat",
+).to(device)
+output = model(noisy_sample, timestep, xT=source_image)
+```
+
 ## UNSB unpaired translation (multi-step Schrödinger Bridge)
 
 ```python

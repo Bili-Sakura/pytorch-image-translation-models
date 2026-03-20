@@ -1,7 +1,7 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: Built on open-source libraries and papers acknowledged in README.md citations.
 
-"""Tests for DiT backbone (SiTBackbone), LBM scheduler, LBM pipeline,
+"""Tests for DiT backbones (SiTBackbone, JiTBackbone), LBM scheduler, LBM pipeline,
 and diffusers UNet wrappers (BDBM, DBIM, CDTSDE, LBM).
 
 All components are imported from ``src/`` (no duplicate code in examples/).
@@ -80,6 +80,74 @@ class TestSiTBackbone:
         xT = torch.randn(1, 1, 16, 16)
         out = model(x, t, xT=xT)
         assert out.shape == (1, 1, 16, 16)
+
+
+# ---------------------------------------------------------------------------
+# JiTBackbone tests
+# ---------------------------------------------------------------------------
+
+
+class TestJiTBackbone:
+    def test_output_shape_concat(self):
+        from src.models.dit.jit import JiTBackbone
+
+        model = JiTBackbone(
+            image_size=16,
+            patch_size=8,
+            in_channels=3,
+            hidden_size=64,
+            depth=2,
+            num_heads=4,
+            bottleneck_dim=32,
+            condition_mode="concat",
+        )
+        x = torch.randn(2, 3, 16, 16)
+        t = torch.tensor([0.5, 0.8])
+        xT = torch.randn(2, 3, 16, 16)
+        out = model(x, t, xT=xT)
+        assert out.shape == (2, 3, 16, 16)
+
+    def test_output_shape_unconditional(self):
+        from src.models.dit.jit import JiTBackbone
+
+        model = JiTBackbone(
+            image_size=16,
+            patch_size=8,
+            in_channels=3,
+            hidden_size=64,
+            depth=2,
+            num_heads=4,
+            bottleneck_dim=32,
+            condition_mode=None,
+        )
+        x = torch.randn(1, 3, 16, 16)
+        t = torch.tensor([1.0])
+        out = model(x, t)
+        assert out.shape == (1, 3, 16, 16)
+
+    def test_jit_configs(self):
+        from src.models.dit.jit import JIT_CONFIGS
+
+        assert "B/16" in JIT_CONFIGS
+        assert "L/16" in JIT_CONFIGS
+        depth, hidden, heads, bottleneck, ps = JIT_CONFIGS["B/16"]
+        assert depth == 12
+        assert hidden == 768
+        assert heads == 12
+        assert bottleneck == 128
+        assert ps == 16
+
+    def test_import_from_models(self):
+        from src.models import JIT_CONFIGS, JiTBackbone
+
+        assert JiTBackbone is not None
+        assert JIT_CONFIGS is not None
+
+    def test_import_from_top_level(self):
+        import src
+
+        assert hasattr(src, "JiTBackbone")
+        assert hasattr(src, "JIT_CONFIGS")
 
 
 # ---------------------------------------------------------------------------

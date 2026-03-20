@@ -337,5 +337,5 @@ class TestTopLevelExports:
 
     def test_all_models_in_src(self):
         import src
-        for name in ["SiTBackbone", "SIT_CONFIGS"]:
+        for name in ["JiTBackbone", "JIT_CONFIGS", "SiTBackbone", "SIT_CONFIGS"]:
             assert hasattr(src, name), f"src.{name} not found"
