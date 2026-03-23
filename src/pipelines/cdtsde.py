@@ -19,7 +19,7 @@ from PIL import Image
 from tqdm.auto import tqdm
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, pt_to_pil
 from diffusers.utils.torch_utils import randn_tensor
 
 from src.models.unet import CDTSDEUNet
@@ -206,23 +206,13 @@ class CDTSDEPipeline(DiffusionPipeline):
 
         images = x.clamp(-1.0, 1.0)
         if output_type == "pil":
-            images = self._convert_to_pil(images)
+            images = pt_to_pil(images)
         elif output_type == "np":
             images = self._convert_to_numpy(images)
 
         if not return_dict:
             return (images, nfe)
         return CDTSDEPipelineOutput(images=images, nfe=nfe)
-
-    @staticmethod
-    def _convert_to_pil(images: torch.Tensor) -> List[Image.Image]:
-        images = (images + 1.0) / 2.0
-        images = images.clamp(0, 1).cpu().permute(0, 2, 3, 1).numpy()
-        images = (images * 255).round().astype(np.uint8)
-        return [
-            Image.fromarray(img.squeeze(-1) if img.shape[-1] == 1 else img)
-            for img in images
-        ]
 
     @staticmethod
     def _convert_to_numpy(images: torch.Tensor) -> np.ndarray:

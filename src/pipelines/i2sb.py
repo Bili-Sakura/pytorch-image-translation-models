@@ -12,7 +12,8 @@ from typing import Any
 
 import numpy as np
 import torch
-from PIL import Image
+
+from diffusers.utils import numpy_to_pil
 
 from src.models.unet import I2SBDiffusersUNet, I2SBUNet
 from src.schedulers.i2sb import I2SBScheduler
@@ -158,14 +159,7 @@ class I2SBPipeline:
             return I2SBPipelineOutput(images=tensor.cpu().numpy(), nfe=nfe)
 
         if output_type == "pil":
-            images: list[Image.Image] = []
-            arr = tensor.clamp(0, 1).cpu()
-            for i in range(arr.shape[0]):
-                img_np = arr[i].permute(1, 2, 0).numpy()
-                img_np = (img_np * 255).astype(np.uint8)
-                if img_np.shape[2] == 1:
-                    img_np = img_np[:, :, 0]
-                images.append(Image.fromarray(img_np))
-            return I2SBPipelineOutput(images=images, nfe=nfe)
+            arr = tensor.clamp(0, 1).cpu().permute(0, 2, 3, 1).numpy()
+            return I2SBPipelineOutput(images=numpy_to_pil(arr), nfe=nfe)
 
         raise ValueError(f"Unknown output_type: {output_type!r}")

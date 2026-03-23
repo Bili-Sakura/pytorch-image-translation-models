@@ -14,7 +14,7 @@ import torch
 from PIL import Image
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, pt_to_pil
 
 from .config import AlignFlowConfig
 from .models import CycleFlow, Flow2Flow
@@ -183,10 +183,3 @@ class AlignFlowPipeline(DiffusionPipeline):
             return (images,)
         return AlignFlowPipelineOutput(images=images)
 
-    @staticmethod
-    def _to_pil(images: torch.Tensor) -> List[Image.Image]:
-        """Convert tensor in [-1, 1] to PIL."""
-        images = (images + 1) / 2
-        images = images.clamp(0, 1).cpu().permute(0, 2, 3, 1).numpy()
-        images = (images * 255).round().astype(np.uint8)
-        return [Image.fromarray(img) for img in images]

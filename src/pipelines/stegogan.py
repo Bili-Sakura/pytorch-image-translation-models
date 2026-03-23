@@ -17,6 +17,8 @@ import torch
 import torch.nn as nn
 from PIL import Image
 
+from diffusers.utils import pt_to_pil
+
 from src.models.stegogan.generators import (
     ResnetMaskV1Generator,
     ResnetMaskV3Generator,
@@ -208,16 +210,7 @@ class StegoGANPipeline:
             )
 
         if output_type == "pil":
-            images: list[Image.Image] = []
-            # Tanh output is in [-1, 1] — map to [0, 255]
-            arr = ((tensor + 1) / 2).clamp(0, 1).cpu()
-            for i in range(arr.shape[0]):
-                img_np = arr[i].permute(1, 2, 0).numpy()
-                img_np = (img_np * 255).astype(np.uint8)
-                if img_np.shape[2] == 1:
-                    img_np = img_np[:, :, 0]
-                images.append(Image.fromarray(img_np))
             np_masks = masks.cpu().numpy() if masks is not None else None
-            return StegoGANPipelineOutput(images=images, masks=np_masks)
+            return StegoGANPipelineOutput(images=pt_to_pil(tensor), masks=np_masks)
 
         raise ValueError(f"Unknown output_type: {output_type!r}")

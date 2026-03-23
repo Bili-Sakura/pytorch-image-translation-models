@@ -17,7 +17,7 @@ import torch
 from PIL import Image
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, pt_to_pil
 
 from src.models.cut import CUTGenerator
 
@@ -163,7 +163,7 @@ class CUTPipeline(DiffusionPipeline):
         images = fake.clamp(-1, 1)
 
         if output_type == "pil":
-            images = self._convert_to_pil(images)
+            images = pt_to_pil(images)
         elif output_type == "np":
             images = self._convert_to_numpy(images)
         # else: output_type == "pt", return tensor as-is
@@ -172,21 +172,6 @@ class CUTPipeline(DiffusionPipeline):
             return (images,)
 
         return CUTPipelineOutput(images=images)
-
-    @staticmethod
-    def _convert_to_pil(images: torch.Tensor) -> List[Image.Image]:
-        """Convert tensor in [-1, 1] to PIL images."""
-        images = (images + 1) / 2  # [-1, 1] → [0, 1]
-        images = images.clamp(0, 1)
-        images = images.cpu().permute(0, 2, 3, 1).numpy()
-        images = (images * 255).round().astype(np.uint8)
-        pil_images = []
-        for img in images:
-            if img.shape[2] == 1:
-                pil_images.append(Image.fromarray(img.squeeze(2), mode="L"))
-            else:
-                pil_images.append(Image.fromarray(img))
-        return pil_images
 
     @staticmethod
     def _convert_to_numpy(images: torch.Tensor) -> np.ndarray:

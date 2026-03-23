@@ -17,7 +17,7 @@ import torch
 from PIL import Image
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, numpy_to_pil
 
 from .model import NCSNpp
 from .diffusion import DiffusionBridge
@@ -127,25 +127,13 @@ class SelfRDBPipeline(DiffusionPipeline):
         nfe = self._diffusion.n_steps
 
         if output_type == "pil":
-            images = self._convert_to_pil(images)
+            images = numpy_to_pil(images.clamp(0, 1).cpu().permute(0, 2, 3, 1).numpy())
         elif output_type == "np":
             images = self._convert_to_numpy(images)
 
         if not return_dict:
             return (images, nfe)
         return SelfRDBPipelineOutput(images=images, nfe=nfe)
-
-    @staticmethod
-    def _convert_to_pil(images: torch.Tensor) -> List[Image.Image]:
-        images = images.clamp(0, 1).cpu().permute(0, 2, 3, 1).numpy()
-        images = (images * 255).round().astype(np.uint8)
-        pil_images = []
-        for img in images:
-            if img.shape[2] == 1:
-                pil_images.append(Image.fromarray(img.squeeze(2), mode="L"))
-            else:
-                pil_images.append(Image.fromarray(img))
-        return pil_images
 
     @staticmethod
     def _convert_to_numpy(images: torch.Tensor) -> np.ndarray:

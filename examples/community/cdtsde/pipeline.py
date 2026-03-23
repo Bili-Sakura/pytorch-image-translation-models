@@ -20,7 +20,7 @@ import torch
 from PIL import Image
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, numpy_to_pil
 
 
 def _ensure_cdtsde_path(cdtsde_src_path: Optional[str | Path]) -> Path:
@@ -303,11 +303,7 @@ class CDTSDECommunityPipeline(DiffusionPipeline):
         images = samples.clamp(0, 1)
 
         if output_type == "pil":
-            images_np = images.cpu().permute(0, 2, 3, 1).numpy()
-            images_out = [
-                Image.fromarray((img * 255).round().astype(np.uint8))
-                for img in images_np
-            ]
+            images_out = numpy_to_pil(images.cpu().permute(0, 2, 3, 1).numpy())
         elif output_type == "np":
             images_out = images.cpu().permute(0, 2, 3, 1).numpy()
         else:

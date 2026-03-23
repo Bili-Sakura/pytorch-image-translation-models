@@ -15,11 +15,10 @@ from pathlib import Path
 from typing import Any, Optional
 
 import torch
-from PIL import Image
 from tqdm.auto import tqdm
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, pt_to_pil
 
 from src.models.unet import BBDMUNet
 from src.schedulers.bbdm import BBDMScheduler
@@ -108,13 +107,8 @@ class BBDMPipeline(DiffusionPipeline):
     def _format_output(images: torch.Tensor, output_type: str) -> BBDMPipelineOutput:
         if output_type == "pt":
             return BBDMPipelineOutput(images=images)
+        if output_type == "pil":
+            return BBDMPipelineOutput(images=pt_to_pil(images))
         images_np = ((images + 1) * 127.5).clamp(0, 255).to(torch.uint8)
         images_np = images_np.permute(0, 2, 3, 1).cpu().numpy()
-        if output_type == "np":
-            return BBDMPipelineOutput(images=images_np)
-        pil_images: list[Image.Image] = []
-        for arr in images_np:
-            if arr.shape[2] == 1:
-                arr = arr.squeeze(2)
-            pil_images.append(Image.fromarray(arr))
-        return BBDMPipelineOutput(images=pil_images)
+        return BBDMPipelineOutput(images=images_np)

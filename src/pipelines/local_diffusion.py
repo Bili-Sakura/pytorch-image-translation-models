@@ -25,6 +25,8 @@ import numpy as np
 import torch
 from PIL import Image
 
+from diffusers.utils import pt_to_pil
+
 from src.models.local_diffusion import LocalDiffusionUNet
 from src.schedulers.local_diffusion import LocalDiffusionScheduler
 
@@ -238,7 +240,7 @@ class LocalDiffusionPipeline:
         images = images.clamp(clip_min, clip_max)
 
         if output_type == "pil":
-            images = self._convert_to_pil(images)
+            images = pt_to_pil(images)
         elif output_type == "np":
             images = self._convert_to_numpy(images)
 
@@ -374,21 +376,6 @@ class LocalDiffusionPipeline:
     # ------------------------------------------------------------------
     # Output conversion helpers
     # ------------------------------------------------------------------
-
-    @staticmethod
-    def _convert_to_pil(images: torch.Tensor) -> List[Image.Image]:
-        """Convert tensor in [-1, 1] to PIL images."""
-        images = (images + 1) / 2
-        images = images.clamp(0, 1)
-        images = images.cpu().permute(0, 2, 3, 1).numpy()
-        images = (images * 255).round().astype(np.uint8)
-        pil_images = []
-        for img in images:
-            if img.shape[2] == 1:
-                pil_images.append(Image.fromarray(img.squeeze(2), mode="L"))
-            else:
-                pil_images.append(Image.fromarray(img))
-        return pil_images
 
     @staticmethod
     def _convert_to_numpy(images: torch.Tensor) -> np.ndarray:

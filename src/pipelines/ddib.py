@@ -24,7 +24,7 @@ import torch
 from PIL import Image
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, pt_to_pil
 
 from src.models.unet import DDIBUNet
 from src.schedulers.ddib import DDIBScheduler
@@ -251,7 +251,7 @@ class DDIBPipeline(DiffusionPipeline):
         images = images.clamp(-1, 1)
 
         if output_type == "pil":
-            images = self._convert_to_pil(images)
+            images = pt_to_pil(images)
         elif output_type == "np":
             images = self._convert_to_numpy(images)
 
@@ -266,13 +266,6 @@ class DDIBPipeline(DiffusionPipeline):
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
-
-    @staticmethod
-    def _convert_to_pil(images: torch.Tensor) -> List[Image.Image]:
-        images = (images + 1) / 2
-        images = images.clamp(0, 1).cpu().permute(0, 2, 3, 1).numpy()
-        images = (images * 255).round().astype(np.uint8)
-        return [Image.fromarray(img) for img in images]
 
     @staticmethod
     def _convert_to_numpy(images: torch.Tensor) -> np.ndarray:

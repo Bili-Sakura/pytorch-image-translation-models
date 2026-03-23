@@ -20,11 +20,10 @@ from typing import Any, List, Optional, Union
 
 import numpy as np
 import torch
-from PIL import Image
 from tqdm.auto import tqdm
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, pt_to_pil
 
 from src.models.unet import BiBBDMUNet
 from src.schedulers.bibbdm import BiBBDMScheduler
@@ -178,13 +177,8 @@ class BiBBDMPipeline(DiffusionPipeline):
     def _format_output(images: torch.Tensor, output_type: str) -> BiBBDMPipelineOutput:
         if output_type == "pt":
             return BiBBDMPipelineOutput(images=images)
+        if output_type == "pil":
+            return BiBBDMPipelineOutput(images=pt_to_pil(images))
         images_np = ((images + 1) * 127.5).clamp(0, 255).to(torch.uint8)
         images_np = images_np.permute(0, 2, 3, 1).cpu().numpy()
-        if output_type == "np":
-            return BiBBDMPipelineOutput(images=images_np)
-        pil_images: list[Image.Image] = []
-        for arr in images_np:
-            if arr.shape[2] == 1:
-                arr = arr.squeeze(2)
-            pil_images.append(Image.fromarray(arr))
-        return BiBBDMPipelineOutput(images=pil_images)
+        return BiBBDMPipelineOutput(images=images_np)

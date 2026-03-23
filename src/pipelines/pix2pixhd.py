@@ -16,7 +16,7 @@ import torch.nn as nn
 from PIL import Image
 
 from diffusers import DiffusionPipeline
-from diffusers.utils import BaseOutput
+from diffusers.utils import BaseOutput, pt_to_pil
 
 from src.models.pix2pixhd import Pix2PixHDGenerator
 
@@ -125,26 +125,13 @@ class Pix2PixHDPipeline(DiffusionPipeline):
         images = self.generator(x).clamp(-1, 1)
 
         if output_type == "pil":
-            images = self._convert_to_pil(images)
+            images = pt_to_pil(images)
         elif output_type == "np":
             images = self._convert_to_numpy(images)
 
         if not return_dict:
             return (images,)
         return Pix2PixHDPipelineOutput(images=images)
-
-    @staticmethod
-    def _convert_to_pil(images: torch.Tensor) -> List[Image.Image]:
-        images = (images + 1) / 2
-        images = images.clamp(0, 1).cpu().permute(0, 2, 3, 1).numpy()
-        images = (images * 255).round().astype(np.uint8)
-        pil_images = []
-        for img in images:
-            if img.shape[2] == 1:
-                pil_images.append(Image.fromarray(img.squeeze(2), mode="L"))
-            else:
-                pil_images.append(Image.fromarray(img))
-        return pil_images
 
     @staticmethod
     def _convert_to_numpy(images: torch.Tensor) -> np.ndarray:

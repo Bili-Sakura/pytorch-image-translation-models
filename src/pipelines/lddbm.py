@@ -17,6 +17,8 @@ import torch
 from PIL import Image
 from safetensors.torch import load_file
 
+from diffusers.utils import pt_to_pil
+
 from src.models.lddbm import (
     ModalityTranslationBridge,
     create_bridge,
@@ -118,14 +120,6 @@ class LDDBMPipeline:
         if not return_dict:
             return (out,)
         return LDDBMPipelineOutput(images=out)
-
-    @staticmethod
-    def _to_pil(images: torch.Tensor) -> List[Image.Image]:
-        images = (images + 1) / 2
-        images = images.clamp(0, 1).cpu().permute(0, 2, 3, 1).numpy()
-        images = (images * 255).round().astype(np.uint8)
-        return [Image.fromarray(img) for img in images]
-
 
 def _make_sr_args(_checkpoint_dir: Path) -> SimpleNamespace:
     """Build a minimal args object for SR task (16→128)."""
