@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Mapping, Sequence
 
 DIFFUSIONROUTER_CLASS_NAMES: dict[int, str] = {
@@ -27,14 +27,8 @@ class DiffusionRouterConfig:
     num_classes: int = 4
     timestep_respacing: str = "1000"
     use_ddim: bool = True
-    class_names: Mapping[int, str] = None  # type: ignore[assignment]
-    chain: Sequence[int] = None  # type: ignore[assignment]
-
-    def __post_init__(self) -> None:
-        if self.class_names is None:
-            self.class_names = DIFFUSIONROUTER_CLASS_NAMES
-        if self.chain is None:
-            self.chain = DIFFUSIONROUTER_DEFAULT_CHAIN
+    class_names: Mapping[int, str] = field(default_factory=lambda: dict(DIFFUSIONROUTER_CLASS_NAMES))
+    chain: Sequence[int] = field(default_factory=lambda: tuple(DIFFUSIONROUTER_DEFAULT_CHAIN))
 
 
 def parse_class(value: int | str, class_names: Mapping[int, str]) -> int:
