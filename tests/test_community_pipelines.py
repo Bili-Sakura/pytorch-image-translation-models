@@ -836,3 +836,38 @@ class TestDiffuseITPipeline:
                 device="cpu",
             )
 
+
+# ---------------------------------------------------------------------------
+# DiffusionRouter (kvmduc)
+# ---------------------------------------------------------------------------
+
+
+class TestDiffusionRouterPipeline:
+    """Tests for the DiffusionRouter community pipeline."""
+
+    def test_diffusionrouter_imports(self):
+        from examples.community.diffusionrouter import (
+            DIFFUSIONROUTER_CLASS_NAMES,
+            DIFFUSIONROUTER_DEFAULT_CHAIN,
+            DiffusionRouterConfig,
+            DiffusionRouterPipeline,
+            DiffusionRouterPipelineOutput,
+            load_diffusionrouter_community_pipeline,
+        )
+
+        assert DIFFUSIONROUTER_CLASS_NAMES is not None
+        assert DIFFUSIONROUTER_DEFAULT_CHAIN is not None
+        assert DiffusionRouterConfig is not None
+        assert DiffusionRouterPipeline is not None
+        assert DiffusionRouterPipelineOutput is not None
+        assert callable(load_diffusionrouter_community_pipeline)
+
+    def test_load_diffusionrouter_nonexistent_checkpoint_raises(self):
+        """load_diffusionrouter_community_pipeline raises when checkpoint is missing."""
+        from examples.community.diffusionrouter import load_diffusionrouter_community_pipeline
+
+        with pytest.raises(FileNotFoundError):
+            load_diffusionrouter_community_pipeline(
+                "/tmp/nonexistent-diffusionrouter.pt",
+                device="cpu",
+            )

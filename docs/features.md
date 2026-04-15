@@ -84,6 +84,7 @@ Self-contained, single-file modules contributed by the community (inspired by [d
 | Pipeline | Paper | Description |
 |----------|-------|-------------|
 | [`diffuseit/`](../examples/community/diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
+| [`diffusionrouter/`](../examples/community/diffusionrouter/) | Universal Multi-Domain Translation via Diffusion Routers | Conditional diffusion translation with direct and multi-hop routed domain transfer |
 | [`parallel_gan/`](../examples/community/parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical with hierarchical latent features |
 | [`e3diff/`](../examples/community/e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion for one-step SAR-to-Optical |
 | [`sar2optical/`](../examples/community/sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation adapted from yuuIind/SAR2Optical |
