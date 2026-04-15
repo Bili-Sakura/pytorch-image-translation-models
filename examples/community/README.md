@@ -40,6 +40,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`ddib/`](ddib/) | [Su et al., ICLR 2023](https://github.com/suxuann/ddib) | DDIB for OpenAI/guided_diffusion-style checkpoints; dual source/target UNets |
 | [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
 | [`diffuseit/`](diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
+| [`diffusionrouter/`](diffusionrouter/) | Universal Multi-Domain Translation via Diffusion Routers | Conditional diffusion translation with explicit multi-hop routing across domains |
 | [`alignflow/`](alignflow/) | [Grover et al., AAAI 2020](https://arxiv.org/abs/1905.12892) | CycleFlow & Flow2Flow: unpaired translation via normalizing flows with cycle-consistent learning from multiple domains |
 | [`syndiff/`](syndiff/) | [Özbey et al., IEEE TMI 2023](https://arxiv.org/abs/2207.08208) | Unsupervised medical image translation with adversarial diffusion models (T1↔T2, T1↔PD) |
 | [`selfrdb/`](selfrdb/) | [Arslan et al., Med. Image Anal. 2024](https://arxiv.org/abs/2405.06789) | Self-consistent recursive diffusion bridge for multi-modal medical image synthesis |
@@ -145,6 +146,35 @@ pipe.to("cuda")
 out = pipe(source_image=img, prompt="Black Leopard", source="Lion", output_type="pil")
 # Image-guided
 out = pipe(source_image=img, target_image=style_ref, use_colormatch=True, output_type="pil")
+```
+
+---
+
+### DiffusionRouter (Community)
+
+**Paper:** *Universal Multi-Domain Translation via Diffusion Routers*
+
+**Source:** [kvmduc/DiffusionRouter](https://github.com/kvmduc/DiffusionRouter)
+
+**Architecture:** Class-conditional diffusion model with route-aware translation between domains. Supports direct translation and multi-hop routing (e.g., gray → color → edge → depth).
+
+**Quick start:**
+
+```python
+from examples.community.diffusionrouter import load_diffusionrouter_community_pipeline
+
+pipe = load_diffusionrouter_community_pipeline(
+    checkpoint_path="/path/to/model.pt",
+    diffusionrouter_src_path="/path/to/DiffusionRouter",
+    device="cuda",
+)
+out = pipe(
+    source_image=image,
+    context_class=1,   # source domain
+    target_class=3,    # target domain
+    via_seq="auto",
+    output_type="pil",
+)
 ```
 
 ---
@@ -426,4 +456,3 @@ pipe = load_lddbm_pipeline(
 )
 out = pipe(source_image=lr_image, num_inference_steps=40, output_type="pil")
 ```
-
