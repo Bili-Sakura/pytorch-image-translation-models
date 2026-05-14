@@ -3,6 +3,8 @@
 
 """Tests for community pipelines."""
 
+import sys
+
 import pytest
 import torch
 
@@ -939,3 +941,51 @@ class TestEGSDEPipeline:
 
         with pytest.raises(ValueError, match="Unknown EGSDE task"):
             load_egsde_community_pipeline(fake, task="unknown_task", device="cpu")
+
+
+# ---------------------------------------------------------------------------
+# CycleDiff (Zou et al., IEEE TIP 2026)
+# ---------------------------------------------------------------------------
+
+
+class TestCycleDiffIntegration:
+    """Tests for the CycleDiff community bridge (local checkout)."""
+
+    def test_cyclediff_imports(self):
+        from examples.community.cyclediff import (
+            CYCLEDIFF_REPO_URL,
+            inject_cyclediff_sys_path,
+            resolve_cyclediff_root,
+        )
+
+        assert CYCLEDIFF_REPO_URL.endswith("CycleDiff")
+        assert callable(resolve_cyclediff_root)
+        assert callable(inject_cyclediff_sys_path)
+
+    def test_resolve_cyclediff_explicit_missing_raises(self):
+        from examples.community.cyclediff import resolve_cyclediff_root
+
+        with pytest.raises(FileNotFoundError):
+            resolve_cyclediff_root("/tmp/nonexistent-cyclediff-checkout-xyz")
+
+    def test_resolve_and_inject_with_minimal_fake_tree(self, tmp_path):
+        from examples.community.cyclediff import inject_cyclediff_sys_path, resolve_cyclediff_root
+
+        (tmp_path / "train_uncond_ldm_cycle.py").write_text("# marker\n")
+        (tmp_path / "translation_uncond_ldm_cycle.py").write_text("# marker\n")
+        (tmp_path / "ddm").mkdir()
+        (tmp_path / "ddm" / "__init__.py").write_text("")
+        root = resolve_cyclediff_root(tmp_path)
+        assert root == tmp_path.resolve()
+        inject_cyclediff_sys_path(tmp_path)
+        assert str(tmp_path.resolve()) in sys.path
+
+    def test_train_main_runs_upstream_script_stub(self, tmp_path):
+        from examples.community.cyclediff.train import main
+
+        (tmp_path / "translation_uncond_ldm_cycle.py").write_text("# marker\n")
+        (tmp_path / "ddm").mkdir()
+        (tmp_path / "ddm" / "__init__.py").write_text("")
+        (tmp_path / "train_uncond_ldm_cycle.py").write_text("import sys\nsys.exit(0)\n")
+        rc = main(["--cyclediff-root", str(tmp_path), "train_uncond_ldm_cycle.py"])
+        assert rc == 0
