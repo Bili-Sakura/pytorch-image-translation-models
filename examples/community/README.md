@@ -40,6 +40,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`lddbm/`](../lddbm/) | [Bosch Research, NeurIPS 2025](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT) | LDDBM: Latent diffusion bridge for super-resolution (16→128); training in `examples/lddbm/` |
 | [`ddib/`](ddib/) | [Su et al., ICLR 2023](https://github.com/suxuann/ddib) | DDIB for OpenAI/guided_diffusion-style checkpoints; dual source/target UNets |
 | [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
+| [`cyclediff/`](cyclediff/) | [Zou et al., IEEE TIP 2026](https://arxiv.org/abs/2508.06625) | CycleDiff cycle latent diffusion for unpaired translation; requires local [CycleDiff](https://github.com/ZouShilong1024/CycleDiff) checkout |
 | [`diffuseit/`](diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
 | [`diffusionrouter/`](diffusionrouter/) | Universal Multi-Domain Translation via Diffusion Routers | Conditional diffusion translation with explicit multi-hop routing across domains |
 | [`alignflow/`](alignflow/) | [Grover et al., AAAI 2020](https://arxiv.org/abs/1905.12892) | CycleFlow & Flow2Flow: unpaired translation via normalizing flows with cycle-consistent learning from multiple domains |
@@ -117,6 +118,31 @@ out = pipe(source_image=image, num_inference_steps=250, output_type="pil")
 ```
 
 **Converting from raw .pt:** See [ddib/README.md](ddib/README.md). Raw ImageNet256 and Synthetic log2D checkpoints may require architecture-specific config adjustments.
+
+---
+
+### CycleDiff (Community)
+
+**Paper:** *CycleDiff: Cycle Diffusion Models for Unpaired Image-to-image Translation* (Zou et al., IEEE TIP 2026)
+
+**Source:** [ZouShilong1024/CycleDiff](https://github.com/ZouShilong1024/CycleDiff) — clone locally; training and inference use the upstream YAML configs and scripts under that repository.
+
+**Quick start:**
+
+```python
+from examples.community.cyclediff import resolve_cyclediff_root, inject_cyclediff_sys_path
+
+root = resolve_cyclediff_root("/path/to/CycleDiff")
+inject_cyclediff_sys_path(root)
+```
+
+```bash
+python -m examples.community.cyclediff.train \
+  --cyclediff-root /path/to/CycleDiff \
+  train_uncond_ldm_cycle.py --cfg ./configs/your_dataset/translation_C_disc_timestep_ode_2.yaml
+```
+
+See [cyclediff/README.md](cyclediff/README.md) for submodule setup, environment variable `CYCLEDIFF_ROOT`, and citation.
 
 ---
 
