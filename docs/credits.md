@@ -28,3 +28,4 @@
 | [LDDBM](https://neurips.cc/virtual/2025/poster/116815) — Towards General Modality Translation with Contrastive and Predictive Latent Diffusion Bridge (Berman et al.) | NeurIPS 2025 | [boschresearch/Multimodal-Distribution-Translation-MDT](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT) |
 | [FCDM](https://arxiv.org/abs/2603.09408) — Reviving ConvNeXt for Efficient Convolutional Diffusion Models | CVPR 2026 | [star-kwon/FCDM](https://github.com/star-kwon/FCDM) |
 | [SAR2Optical](https://github.com/yuuIind/SAR2Optical) — SAR-to-Optical Image Translation | — | [yuuIind/SAR2Optical](https://github.com/yuuIind/SAR2Optical) |
+| [SDEdit](https://arxiv.org/abs/2108.01073) — Guided Image Synthesis and Editing with Stochastic Differential Equations | ICLR 2022 | [ermongroup/SDEdit](https://github.com/ermongroup/SDEdit) |

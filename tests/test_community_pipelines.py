@@ -1043,3 +1043,57 @@ class TestCycleDiffusionIntegration:
         (tmp_path / "model" / "__init__.py").write_text("")
         rc = main(["--cycle-diffusion-root", str(tmp_path), "main.py"])
         assert rc == 0
+
+
+# ---------------------------------------------------------------------------
+# SDEdit (Meng et al., ICLR 2022)
+# ---------------------------------------------------------------------------
+
+
+class TestSDEditIntegration:
+    """Tests for the ermongroup/SDEdit community bridge (local checkout)."""
+
+    def test_sdedit_imports(self):
+        from examples.community.sdedit import (
+            SDEDIT_REPO_URL,
+            inject_sdedit_sys_path,
+            resolve_sdedit_root,
+        )
+
+        assert "ermongroup/SDEdit" in SDEDIT_REPO_URL
+        assert callable(resolve_sdedit_root)
+        assert callable(inject_sdedit_sys_path)
+
+    def test_resolve_sdedit_explicit_missing_raises(self):
+        from examples.community.sdedit import resolve_sdedit_root
+
+        with pytest.raises(FileNotFoundError):
+            resolve_sdedit_root("/tmp/nonexistent-sdedit-checkout-xyz")
+
+    def test_resolve_and_inject_with_minimal_fake_tree(self, tmp_path):
+        from examples.community.sdedit import inject_sdedit_sys_path, resolve_sdedit_root
+
+        (tmp_path / "main.py").write_text("# marker\n")
+        (tmp_path / "runners").mkdir()
+        (tmp_path / "runners" / "image_editing.py").write_text("# marker\n")
+        (tmp_path / "models").mkdir()
+        (tmp_path / "models" / "diffusion.py").write_text("# marker\n")
+        (tmp_path / "configs").mkdir()
+        (tmp_path / "configs" / "bedroom.yml").write_text("data:\n  dataset: dummy\n")
+        root = resolve_sdedit_root(tmp_path)
+        assert root == tmp_path.resolve()
+        inject_sdedit_sys_path(tmp_path)
+        assert str(tmp_path.resolve()) in sys.path
+
+    def test_train_main_runs_upstream_script_stub(self, tmp_path):
+        from examples.community.sdedit.train import main
+
+        (tmp_path / "main.py").write_text("import sys\nsys.exit(0)\n")
+        (tmp_path / "runners").mkdir()
+        (tmp_path / "runners" / "image_editing.py").write_text("# marker\n")
+        (tmp_path / "models").mkdir()
+        (tmp_path / "models" / "diffusion.py").write_text("# marker\n")
+        (tmp_path / "configs").mkdir()
+        (tmp_path / "configs" / "bedroom.yml").write_text("data:\n  dataset: dummy\n")
+        rc = main(["--sdedit-root", str(tmp_path), "main.py"])
+        assert rc == 0
