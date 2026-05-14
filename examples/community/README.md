@@ -41,6 +41,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`ddib/`](ddib/) | [Su et al., ICLR 2023](https://github.com/suxuann/ddib) | DDIB for OpenAI/guided_diffusion-style checkpoints; dual source/target UNets |
 | [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
 | [`cyclediff/`](cyclediff/) | [Zou et al., IEEE TIP 2026](https://arxiv.org/abs/2508.06625) | CycleDiff cycle latent diffusion for unpaired translation; requires local [CycleDiff](https://github.com/ZouShilong1024/CycleDiff) checkout |
+| [`cycle_diffusion/`](cycle_diffusion/) | [Wu & De la Torre, ICCV 2023](https://arxiv.org/abs/2210.05559) | CycleDiffusion zero-shot editing with stochastic diffusion models; requires local [humansensinglab/cycle-diffusion](https://github.com/humansensinglab/cycle-diffusion) checkout |
 | [`diffuseit/`](diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
 | [`diffusionrouter/`](diffusionrouter/) | Universal Multi-Domain Translation via Diffusion Routers | Conditional diffusion translation with explicit multi-hop routing across domains |
 | [`alignflow/`](alignflow/) | [Grover et al., AAAI 2020](https://arxiv.org/abs/1905.12892) | CycleFlow & Flow2Flow: unpaired translation via normalizing flows with cycle-consistent learning from multiple domains |
@@ -143,6 +144,32 @@ python -m examples.community.cyclediff.train \
 ```
 
 See [cyclediff/README.md](cyclediff/README.md) for submodule setup, environment variable `CYCLEDIFF_ROOT`, and citation.
+
+---
+
+### CycleDiffusion (community)
+
+**Paper:** *A Latent Space of Stochastic Diffusion Models for Zero-Shot Image Editing and Guidance* (Wu & De la Torre, ICCV 2023)
+
+**Source:** [humansensinglab/cycle-diffusion](https://github.com/humansensinglab/cycle-diffusion) — clone locally; evaluation uses configs under `config/experiments/` in that repository.
+
+**Quick start:**
+
+```python
+from examples.community.cycle_diffusion import resolve_cycle_diffusion_root, inject_cycle_diffusion_sys_path
+
+root = resolve_cycle_diffusion_root("/path/to/cycle-diffusion")
+inject_cycle_diffusion_sys_path(root)
+```
+
+```bash
+python -m examples.community.cycle_diffusion.train \
+  --cycle-diffusion-root /path/to/cycle-diffusion \
+  main.py --cfg config/experiments/translate_text2img256_stable_diffusion_stochastic_1.cfg \
+  --run_name demo --do_eval --output_dir output/demo
+```
+
+See [cycle_diffusion/README.md](cycle_diffusion/README.md) for environment setup, `CYCLE_DIFFUSION_ROOT`, and how this differs from the unrelated [CycleDiff](cyclediff/) integration.
 
 ---
 
