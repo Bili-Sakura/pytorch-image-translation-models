@@ -989,3 +989,57 @@ class TestCycleDiffIntegration:
         (tmp_path / "train_uncond_ldm_cycle.py").write_text("import sys\nsys.exit(0)\n")
         rc = main(["--cyclediff-root", str(tmp_path), "train_uncond_ldm_cycle.py"])
         assert rc == 0
+
+
+# ---------------------------------------------------------------------------
+# CycleDiffusion (Wu & De la Torre, ICCV 2023)
+# ---------------------------------------------------------------------------
+
+
+class TestCycleDiffusionIntegration:
+    """Tests for the humansensinglab/cycle-diffusion community bridge (local checkout)."""
+
+    def test_cycle_diffusion_imports(self):
+        from examples.community.cycle_diffusion import (
+            CYCLE_DIFFUSION_REPO_URL,
+            inject_cycle_diffusion_sys_path,
+            resolve_cycle_diffusion_root,
+        )
+
+        assert "humansensinglab/cycle-diffusion" in CYCLE_DIFFUSION_REPO_URL
+        assert callable(resolve_cycle_diffusion_root)
+        assert callable(inject_cycle_diffusion_sys_path)
+
+    def test_resolve_cycle_diffusion_explicit_missing_raises(self):
+        from examples.community.cycle_diffusion import resolve_cycle_diffusion_root
+
+        with pytest.raises(FileNotFoundError):
+            resolve_cycle_diffusion_root("/tmp/nonexistent-cycle-diffusion-checkout-xyz")
+
+    def test_resolve_and_inject_with_minimal_fake_tree(self, tmp_path):
+        from examples.community.cycle_diffusion import inject_cycle_diffusion_sys_path, resolve_cycle_diffusion_root
+
+        (tmp_path / "main.py").write_text("# marker\n")
+        (tmp_path / "trainer").mkdir()
+        (tmp_path / "trainer" / "trainer.py").write_text("# marker\n")
+        (tmp_path / "utils").mkdir()
+        (tmp_path / "utils" / "config_utils.py").write_text("# marker\n")
+        (tmp_path / "model").mkdir()
+        (tmp_path / "model" / "__init__.py").write_text("")
+        root = resolve_cycle_diffusion_root(tmp_path)
+        assert root == tmp_path.resolve()
+        inject_cycle_diffusion_sys_path(tmp_path)
+        assert str(tmp_path.resolve()) in sys.path
+
+    def test_train_main_runs_upstream_script_stub(self, tmp_path):
+        from examples.community.cycle_diffusion.train import main
+
+        (tmp_path / "main.py").write_text("import sys\nsys.exit(0)\n")
+        (tmp_path / "trainer").mkdir()
+        (tmp_path / "trainer" / "trainer.py").write_text("# marker\n")
+        (tmp_path / "utils").mkdir()
+        (tmp_path / "utils" / "config_utils.py").write_text("# marker\n")
+        (tmp_path / "model").mkdir()
+        (tmp_path / "model" / "__init__.py").write_text("")
+        rc = main(["--cycle-diffusion-root", str(tmp_path), "main.py"])
+        assert rc == 0
