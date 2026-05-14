@@ -871,3 +871,71 @@ class TestDiffusionRouterPipeline:
                 "/tmp/nonexistent-diffusionrouter.pt",
                 device="cpu",
             )
+
+
+# ---------------------------------------------------------------------------
+# EGSDE (Bili-Sakura/EGSDE-diffusers)
+# ---------------------------------------------------------------------------
+
+
+class TestEGSDEPipeline:
+    """Tests for the EGSDE community pipeline wrapper."""
+
+    def test_egsde_imports(self):
+        from examples.community.egsde import (
+            EGSDE_TASKS,
+            EGSDEPipeline,
+            EGSDEPipelineOutput,
+            load_egsde_community_pipeline,
+        )
+
+        assert "cat2dog" in EGSDE_TASKS
+        assert EGSDEPipeline is not None
+        assert EGSDEPipelineOutput is not None
+        assert callable(load_egsde_community_pipeline)
+
+    def test_prepare_source_batch_resize(self):
+        from examples.community.egsde.pipeline import _prepare_source_batch
+
+        x = torch.rand(1, 3, 64, 64)
+        y = _prepare_source_batch(x, image_size=128, device=torch.device("cpu"), dtype=torch.float32)
+        assert y.shape == (1, 3, 128, 128)
+        assert y.min() >= -1.0
+        assert y.max() <= 1.0
+
+    def test_normalize_state_dict_strips_module_prefix(self):
+        from examples.community.egsde.pipeline import _normalize_state_dict
+
+        d = {"module.w": torch.zeros(1)}
+        out = _normalize_state_dict(d)
+        assert list(out.keys()) == ["w"]
+
+    def test_ensure_egsde_path_invalid_raises(self, tmp_path):
+        from examples.community.egsde.pipeline import _ensure_egsde_path
+
+        with pytest.raises(FileNotFoundError):
+            _ensure_egsde_path(tmp_path / "not-egsde")
+
+    def test_load_egsde_without_task_requires_fields(self, tmp_path):
+        from examples.community.egsde import load_egsde_community_pipeline
+
+        fake = tmp_path / "EGSDE-diffusers"
+        (fake / "runners").mkdir(parents=True)
+        (fake / "guided_diffusion").mkdir(parents=True)
+        (fake / "runners" / "egsde.py").write_text("# stub\n")
+        (fake / "guided_diffusion" / "script_util.py").write_text("# stub\n")
+
+        with pytest.raises(ValueError, match="task"):
+            load_egsde_community_pipeline(fake, task=None, device="cpu")
+
+    def test_load_egsde_bad_task_raises(self, tmp_path):
+        from examples.community.egsde import load_egsde_community_pipeline
+
+        fake = tmp_path / "EGSDE-diffusers"
+        (fake / "runners").mkdir(parents=True)
+        (fake / "guided_diffusion").mkdir(parents=True)
+        (fake / "runners" / "egsde.py").write_text("# stub\n")
+        (fake / "guided_diffusion" / "script_util.py").write_text("# stub\n")
+
+        with pytest.raises(ValueError, match="Unknown EGSDE task"):
+            load_egsde_community_pipeline(fake, task="unknown_task", device="cpu")

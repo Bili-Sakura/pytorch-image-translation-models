@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **EGSDE community pipeline** (`examples/community/egsde/`): `load_egsde_community_pipeline` and `EGSDEPipeline` wrap a local checkout of [Bili-Sakura/EGSDE-diffusers](https://github.com/Bili-Sakura/EGSDE-diffusers) for NeurIPS 2022 energy-guided unpaired translation (cat2dog / wild2dog / male2female profiles or custom checkpoints).
 - **JiT backbone** (`src/models/dit/jit.py`): `JiTBackbone` and `JIT_CONFIGS` — Just image Transformer adapted for the same DDBM/bridge calling convention as `SiTBackbone` (timestep + optional `xT` concat). Based on [LTH14/JiT](https://github.com/LTH14/JiT).
 
 ## [0.5.1] - 2026-03-15
