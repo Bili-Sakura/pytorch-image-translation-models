@@ -34,6 +34,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`bbdm/`](bbdm/) | [Li et al., CVPR 2023](https://arxiv.org/abs/2205.07680) | BBDM for original xuekt98/BBDM-style checkpoints with OpenAI UNet key layout |
 | [`parallel_gan/`](parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical translation with hierarchical latent features via a two-stage approach (reconstruction + translation) |
 | [`e3diff/`](e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion Model for one-step SAR-to-Optical translation using a conditional U-Net (CPEN) and two-stage diffusion + GAN training |
+| [`egsde/`](egsde/) | [Zhao et al., NeurIPS 2022](https://arxiv.org/abs/2207.06635) | EGSDE unpaired image-to-image translation with energy-guided VP-SDEs; requires local [EGSDE-diffusers](https://github.com/Bili-Sakura/EGSDE-diffusers) checkout and pretrained weights |
 | [`openearthmap_sar/`](openearthmap_sar/) | [Park et al., ECCV 2020](https://arxiv.org/abs/2007.15651) | CUT models for SAR ↔ optical image translation with anti-aliased ResNet generator (opt2sar, sar2opt, seman2opt, seman2sar, etc.) |
 | [`sar2optical/`](sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation, adapted from yuuIind/SAR2Optical |
 | [`lddbm/`](../lddbm/) | [Bosch Research, NeurIPS 2025](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT) | LDDBM: Latent diffusion bridge for super-resolution (16→128); training in `examples/lddbm/` |
@@ -375,6 +376,31 @@ losses = trainer.train_step(sar_batch, optical_batch)
   pages={1-1},
   doi={10.1109/LGRS.2024.3506566}}
 ```
+
+---
+
+### EGSDE (Community)
+
+**Paper:** *EGSDE: Unpaired Image-to-Image Translation via Energy-Guided Stochastic Differential Equations* (Zhao et al., NeurIPS 2022)
+
+**Source:** [Bili-Sakura/EGSDE-diffusers](https://github.com/Bili-Sakura/EGSDE-diffusers) (clone locally; ships `guided_diffusion`, `profiles/`, and VP-EGSDE sampling).
+
+**Architecture:** Pretrained score model (ADM or DDPM) plus a domain-specific energy extractor (DSE) and a domain-independent pathway via learnable resizers. Inference follows the VP-EGSDE loop in the upstream `runners/egsde.py`.
+
+**Quick start:**
+
+```python
+from examples.community.egsde import load_egsde_community_pipeline
+
+pipe = load_egsde_community_pipeline(
+    "/path/to/EGSDE-diffusers",
+    task="cat2dog",
+    device="cuda",
+)
+out = pipe(source_image=image, output_type="pil")
+```
+
+See [egsde/README.md](egsde/README.md) for setup, custom checkpoint loading, and citation.
 
 ---
 
