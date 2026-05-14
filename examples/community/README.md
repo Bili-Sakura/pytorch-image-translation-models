@@ -42,6 +42,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
 | [`cyclediff/`](cyclediff/) | [Zou et al., IEEE TIP 2026](https://arxiv.org/abs/2508.06625) | CycleDiff cycle latent diffusion for unpaired translation; requires local [CycleDiff](https://github.com/ZouShilong1024/CycleDiff) checkout |
 | [`cycle_diffusion/`](cycle_diffusion/) | [Wu & De la Torre, ICCV 2023](https://arxiv.org/abs/2210.05559) | CycleDiffusion zero-shot editing with stochastic diffusion models; requires local [humansensinglab/cycle-diffusion](https://github.com/humansensinglab/cycle-diffusion) checkout |
+| [`sdedit/`](sdedit/) | [Meng et al., ICLR 2022](https://arxiv.org/abs/2108.01073) | SDEdit guided synthesis and editing with VP-SDEs; requires local [ermongroup/SDEdit](https://github.com/ermongroup/SDEdit) checkout |
 | [`diffuseit/`](diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
 | [`diffusionrouter/`](diffusionrouter/) | Universal Multi-Domain Translation via Diffusion Routers | Conditional diffusion translation with explicit multi-hop routing across domains |
 | [`alignflow/`](alignflow/) | [Grover et al., AAAI 2020](https://arxiv.org/abs/1905.12892) | CycleFlow & Flow2Flow: unpaired translation via normalizing flows with cycle-consistent learning from multiple domains |
@@ -170,6 +171,32 @@ python -m examples.community.cycle_diffusion.train \
 ```
 
 See [cycle_diffusion/README.md](cycle_diffusion/README.md) for environment setup, `CYCLE_DIFFUSION_ROOT`, and how this differs from the unrelated [CycleDiff](cyclediff/) integration.
+
+---
+
+### SDEdit (community)
+
+**Paper:** *SDEdit: Guided Image Synthesis and Editing with Stochastic Differential Equations* (Meng et al., ICLR 2022)
+
+**Source:** [ermongroup/SDEdit](https://github.com/ermongroup/SDEdit) — clone locally; stroke-based generation and editing use `main.py` with YAML configs under `configs/`.
+
+**Quick start:**
+
+```python
+from examples.community.sdedit import resolve_sdedit_root, inject_sdedit_sys_path
+
+root = resolve_sdedit_root("/path/to/SDEdit")
+inject_sdedit_sys_path(root)
+```
+
+```bash
+python -m examples.community.sdedit.train \
+  --sdedit-root /path/to/SDEdit \
+  main.py --exp ./runs/ --config bedroom.yml --sample -i images \
+  --npy_name lsun_bedroom1 --sample_step 3 --t 500 --ni
+```
+
+See [sdedit/README.md](sdedit/README.md) for environment setup, `SDEDIT_ROOT`, and citation.
 
 ---
 

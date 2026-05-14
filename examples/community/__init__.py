@@ -31,4 +31,5 @@ Available community pipelines:
 * ``diffusionrouter/`` – DiffusionRouter (kvmduc) universal multi-domain routing with conditional diffusion
 * ``syndiff/`` – SynDiff (Özbey et al., IEEE TMI 2023) – unsupervised medical image translation with adversarial diffusion
 * ``selfrdb/`` – SelfRDB (Arslan et al., Medical Image Analysis 2024) – self-consistent recursive diffusion bridge for medical synthesis
+* ``sdedit/`` – SDEdit (Meng et al., ICLR 2022) – guided image synthesis and editing with SDEs; requires local [ermongroup/SDEdit](https://github.com/ermongroup/SDEdit) checkout
 """
