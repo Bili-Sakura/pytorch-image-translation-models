@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **EGSDE community pipeline** (`examples/community/egsde/`): `load_egsde_community_pipeline` and `EGSDEPipeline` wrap a local checkout of [Bili-Sakura/EGSDE-diffusers](https://github.com/Bili-Sakura/EGSDE-diffusers) for NeurIPS 2022 energy-guided unpaired translation (cat2dog / wild2dog / male2female profiles or custom checkpoints).
 - **JiT backbone** (`src/models/dit/jit.py`): `JiTBackbone` and `JIT_CONFIGS` — Just image Transformer adapted for the same DDBM/bridge calling convention as `SiTBackbone` (timestep + optional `xT` concat). Based on [LTH14/JiT](https://github.com/LTH14/JiT).
 
+## [0.5.2] - 2026-05-20
+
+### Added
+- **SDEdit community bridge** (`examples/community/sdedit/`): helpers for integrating a local [ermongroup/SDEdit](https://github.com/ermongroup/SDEdit) checkout, plus training entry points.
+- **Dense Normalization** (`src/models/dense_normalization.py`): `DenseInstanceNorm` support for CUT/UNSB/StegoGAN models via `norm_type="dn"` for ultra-high-resolution translation.
+
 ## [0.5.1] - 2026-03-15
 
 ### Added
