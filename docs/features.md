@@ -11,6 +11,7 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 - **StarGAN** — `StarGANGenerator`, `StarGANDiscriminator` (single model for multi-domain translation, CVPR 2018)
 - **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net in `adm.py` for Image-to-Image Schrödinger Bridge)
 - **UNSB** — `UNSBGenerator`, `UNSBDiscriminator`, `UNSBEnergyNet` (time-conditional networks for Unpaired Neural Schrödinger Bridge, ICLR 2024)
+- **Dense Normalization** — `DenseInstanceNorm` for ultra-high-resolution translation in CUT/UNSB/StegoGAN (set `norm_type="dn"`)
 - **Local Diffusion** — `LocalDiffusionUNet`, `ConditionEncoder` (conditional denoising U-Net with branch-and-fuse for hallucination suppression, ECCV 2024 Oral)
 - **DiT backbones** — `SiTBackbone` (Scalable Interpolant Transformer), `JiTBackbone` (Just image Transformer with bottleneck patch embed and RoPE; LTH14/JiT) for diffusion bridges
 - **FCDM** — `FCDM`, `FCDMImageCond` (ConvNeXt-based diffusion backbone for class-conditional and image-conditioned generation, CVPR 2026)
@@ -88,3 +89,4 @@ Self-contained, single-file modules contributed by the community (inspired by [d
 | [`parallel_gan/`](../examples/community/parallel_gan/) | [Wang et al., TGRS 2022](https://ieeexplore.ieee.org/document/9864654) | SAR-to-Optical with hierarchical latent features |
 | [`e3diff/`](../examples/community/e3diff/) | [Qin et al., IEEE GRSL 2024](https://ieeexplore.ieee.org/document/10767752) | Efficient End-to-End Diffusion for one-step SAR-to-Optical |
 | [`sar2optical/`](../examples/community/sar2optical/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Pix2Pix cGAN SAR-to-Optical translation adapted from yuuIind/SAR2Optical |
+| [`sdedit/`](../examples/community/sdedit/) | [Meng et al., ICLR 2022](https://arxiv.org/abs/2108.01073) | SDEdit guided synthesis and editing with VP-SDEs; requires local [ermongroup/SDEdit](https://github.com/ermongroup/SDEdit) checkout |

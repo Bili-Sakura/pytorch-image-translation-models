@@ -30,7 +30,7 @@ class CUTConfig:
     n_layers_D : int
         Number of discriminator layers.
     normG : str
-        Generator normalisation: ``instance`` | ``batch``.
+        Generator normalisation: ``instance`` | ``batch`` | ``dn``.
     normD : str
         Discriminator normalisation.
     lambda_GAN : float
