@@ -37,6 +37,7 @@ from torch.nn import init
 from diffusers import ModelMixin
 from diffusers.configuration_utils import ConfigMixin, register_to_config
 
+from src.models.dense_normalization import DenseInstanceNorm
 
 # ---------------------------------------------------------------------------
 # Utility helpers
@@ -46,6 +47,8 @@ def _get_norm_layer(norm_type: str = "instance"):
     """Return a normalisation layer factory."""
     if norm_type == "batch":
         return functools.partial(nn.BatchNorm2d, affine=True, track_running_stats=True)
+    if norm_type == "dn":
+        return functools.partial(DenseInstanceNorm, affine=True)
     if norm_type == "instance":
         return functools.partial(nn.InstanceNorm2d, affine=False, track_running_stats=False)
     if norm_type == "none":
@@ -121,7 +124,7 @@ class CUTGenerator(ModelMixin, ConfigMixin):
     n_blocks : int
         Number of ResNet blocks (9 for ``resnet_9blocks``, 6 for ``resnet_6blocks``).
     norm_type : str
-        Normalisation type (``"instance"`` or ``"batch"``).
+        Normalisation type (``"instance"``, ``"batch"``, or ``"dn"``).
     use_dropout : bool
         Whether to use dropout in ResNet blocks.
     no_antialias : bool
@@ -265,7 +268,7 @@ class PatchGANDiscriminator(nn.Module):
     n_layers : int
         Number of convolutional layers.
     norm_type : str
-        Normalisation type.
+        Normalisation type (``"instance"``, ``"batch"``, or ``"dn"``).
     no_antialias : bool
         If ``True``, use strided convs instead of anti-aliased downsampling.
     init_type : str
