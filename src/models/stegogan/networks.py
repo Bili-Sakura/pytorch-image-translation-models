@@ -11,6 +11,7 @@ import functools
 import torch
 import torch.nn as nn
 
+from src.models.dense_normalization import DenseInstanceNorm
 
 class SoftClamp(nn.Module):
     """Differentiable soft-clamping to ``[0, 1]``.
@@ -160,10 +161,12 @@ def get_norm_layer(norm_type: str = "instance"):
     Parameters
     ----------
     norm_type : str
-        ``"batch"`` | ``"instance"`` | ``"none"``.
+        ``"batch"`` | ``"instance"`` | ``"dn"`` | ``"none"``.
     """
     if norm_type == "batch":
         return functools.partial(nn.BatchNorm2d, affine=True, track_running_stats=True)
+    if norm_type == "dn":
+        return functools.partial(DenseInstanceNorm, affine=True)
     if norm_type == "instance":
         return functools.partial(nn.InstanceNorm2d, affine=False, track_running_stats=False)
     if norm_type == "none":

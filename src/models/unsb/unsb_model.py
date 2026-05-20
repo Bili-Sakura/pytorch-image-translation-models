@@ -39,6 +39,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
 
+from src.models.dense_normalization import DenseInstanceNorm
 
 # ---------------------------------------------------------------------------
 # Utility helpers
@@ -48,6 +49,8 @@ def _get_norm_layer(norm_type: str = "instance"):
     """Return a normalisation layer factory."""
     if norm_type == "batch":
         return functools.partial(nn.BatchNorm2d, affine=True, track_running_stats=True)
+    if norm_type == "dn":
+        return functools.partial(DenseInstanceNorm, affine=True)
     if norm_type == "instance":
         return functools.partial(nn.InstanceNorm2d, affine=False, track_running_stats=False)
     if norm_type == "none":
@@ -358,7 +361,7 @@ class UNSBGenerator(nn.Module):
     n_mlp : int
         Number of MLP layers in the noise mapping network.
     norm_type : str
-        Normalisation type (``"instance"`` or ``"batch"``).
+        Normalisation type (``"instance"``, ``"batch"``, or ``"dn"``).
     use_dropout : bool
         Whether to use dropout in ResNet blocks.
     no_antialias : bool
@@ -555,7 +558,7 @@ class UNSBDiscriminator(nn.Module):
     n_layers : int
         Number of convolutional layers.
     norm_type : str
-        Normalisation type.
+        Normalisation type (``"instance"``, ``"batch"``, or ``"dn"``).
     init_type : str
         Weight initialisation method.
     init_gain : float
@@ -665,7 +668,7 @@ class UNSBEnergyNet(nn.Module):
     n_layers : int
         Number of convolutional layers.
     norm_type : str
-        Normalisation type.
+        Normalisation type (``"instance"``, ``"batch"``, or ``"dn"``).
     init_type : str
         Weight initialisation method.
     init_gain : float
