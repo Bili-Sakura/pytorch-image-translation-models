@@ -308,6 +308,18 @@ class TestPipelineImports:
         assert LBMPipeline is not None
         assert LBMPipelineOutput is not None
 
+    def test_import_cyclediff_pipeline(self):
+        from src.pipelines import (
+            CycleDiffPipeline,
+            CycleDiffPipelineOutput,
+            load_cyclediff_pipeline,
+            resolve_cyclediff_root,
+        )
+        assert CycleDiffPipeline is not None
+        assert CycleDiffPipelineOutput is not None
+        assert callable(load_cyclediff_pipeline)
+        assert callable(resolve_cyclediff_root)
+
 
 # ---------------------------------------------------------------------------
 # Top-level src import tests
@@ -331,7 +343,7 @@ class TestTopLevelExports:
         for name in [
             "BBDMPipeline", "BDBMPipeline", "BiBBDMPipeline", "CDTSDEPipeline",
             "DBIMPipeline", "DDBMPipeline", "DDIBPipeline", "I2SBPipeline",
-            "LBMPipeline",
+            "LBMPipeline", "CycleDiffPipeline",
         ]:
             assert hasattr(src, name), f"src.{name} not found"
 

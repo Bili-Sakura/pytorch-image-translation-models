@@ -949,27 +949,42 @@ class TestEGSDEPipeline:
 
 
 class TestCycleDiffIntegration:
-    """Tests for the CycleDiff community bridge (local checkout)."""
+    """Tests for CycleDiff (src pipeline + community shim)."""
 
-    def test_cyclediff_imports(self):
+    def test_cyclediff_src_imports(self):
+        from src.pipelines.cyclediff import (
+            CycleDiffPipeline,
+            inject_cyclediff_sys_path,
+            load_cyclediff_pipeline,
+            resolve_cyclediff_root,
+        )
+        from src.models.cyclediff import CYCLEDIFF_REPO_URL
+
+        assert CYCLEDIFF_REPO_URL.endswith("CycleDiff")
+        assert callable(resolve_cyclediff_root)
+        assert callable(inject_cyclediff_sys_path)
+        assert callable(load_cyclediff_pipeline)
+        assert CycleDiffPipeline is not None
+
+    def test_cyclediff_community_reexports(self):
         from examples.community.cyclediff import (
             CYCLEDIFF_REPO_URL,
+            CycleDiffPipeline,
             inject_cyclediff_sys_path,
             resolve_cyclediff_root,
         )
 
         assert CYCLEDIFF_REPO_URL.endswith("CycleDiff")
-        assert callable(resolve_cyclediff_root)
-        assert callable(inject_cyclediff_sys_path)
+        assert CycleDiffPipeline is not None
 
     def test_resolve_cyclediff_explicit_missing_raises(self):
-        from examples.community.cyclediff import resolve_cyclediff_root
+        from src.pipelines.cyclediff import resolve_cyclediff_root
 
         with pytest.raises(FileNotFoundError):
             resolve_cyclediff_root("/tmp/nonexistent-cyclediff-checkout-xyz")
 
     def test_resolve_and_inject_with_minimal_fake_tree(self, tmp_path):
-        from examples.community.cyclediff import inject_cyclediff_sys_path, resolve_cyclediff_root
+        from src.pipelines.cyclediff import inject_cyclediff_sys_path, resolve_cyclediff_root
 
         (tmp_path / "train_uncond_ldm_cycle.py").write_text("# marker\n")
         (tmp_path / "translation_uncond_ldm_cycle.py").write_text("# marker\n")
@@ -980,14 +995,43 @@ class TestCycleDiffIntegration:
         inject_cyclediff_sys_path(tmp_path)
         assert str(tmp_path.resolve()) in sys.path
 
-    def test_train_main_runs_upstream_script_stub(self, tmp_path):
+    def test_pipeline_from_pretrained_and_run_training(self, tmp_path):
+        from src.pipelines.cyclediff import CycleDiffPipeline
+
+        (tmp_path / "translation_uncond_ldm_cycle.py").write_text("# marker\n")
+        (tmp_path / "ddm").mkdir()
+        (tmp_path / "ddm" / "__init__.py").write_text("")
+        (tmp_path / "train_uncond_ldm_cycle.py").write_text("import sys\nsys.exit(0)\n")
+        pipe = CycleDiffPipeline.from_pretrained(cyclediff_root=tmp_path)
+        rc = pipe.run_training("dummy.yaml")
+        assert rc == 0
+
+    def test_examples_cyclediff_train_subcommand(self, tmp_path):
+        from examples.cyclediff.train import main
+
+        (tmp_path / "translation_uncond_ldm_cycle.py").write_text("# marker\n")
+        (tmp_path / "ddm").mkdir()
+        (tmp_path / "ddm" / "__init__.py").write_text("")
+        (tmp_path / "train_uncond_ldm_cycle.py").write_text("import sys\nsys.exit(0)\n")
+        rc = main(
+            [
+                "train",
+                "--cyclediff-root",
+                str(tmp_path),
+                "--cfg",
+                "configs/foo.yaml",
+            ]
+        )
+        assert rc == 0
+
+    def test_community_train_main_backward_compat(self, tmp_path):
         from examples.community.cyclediff.train import main
 
         (tmp_path / "translation_uncond_ldm_cycle.py").write_text("# marker\n")
         (tmp_path / "ddm").mkdir()
         (tmp_path / "ddm" / "__init__.py").write_text("")
         (tmp_path / "train_uncond_ldm_cycle.py").write_text("import sys\nsys.exit(0)\n")
-        rc = main(["--cyclediff-root", str(tmp_path), "train_uncond_ldm_cycle.py"])
+        rc = main(["--cyclediff-root", str(tmp_path), "train_uncond_ldm_cycle.py", "--cfg", "x.yaml"])
         assert rc == 0
 
 

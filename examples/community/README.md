@@ -132,19 +132,19 @@ out = pipe(source_image=image, num_inference_steps=250, output_type="pil")
 **Quick start:**
 
 ```python
-from examples.community.cyclediff import resolve_cyclediff_root, inject_cyclediff_sys_path
+from src.pipelines.cyclediff import load_cyclediff_pipeline
 
-root = resolve_cyclediff_root("/path/to/CycleDiff")
-inject_cyclediff_sys_path(root)
+pipe = load_cyclediff_pipeline(cyclediff_root="/path/to/CycleDiff")
+pipe.run_training(cfg="./configs/your_dataset/translation_C_disc_timestep_ode_2.yaml")
 ```
 
 ```bash
-python -m examples.community.cyclediff.train \
+python -m examples.cyclediff.train train \
   --cyclediff-root /path/to/CycleDiff \
-  train_uncond_ldm_cycle.py --cfg ./configs/your_dataset/translation_C_disc_timestep_ode_2.yaml
+  --cfg ./configs/your_dataset/translation_C_disc_timestep_ode_2.yaml
 ```
 
-See [cyclediff/README.md](cyclediff/README.md) for submodule setup, environment variable `CYCLEDIFF_ROOT`, and citation.
+Main API: `src/pipelines/cyclediff.py` and [examples/cyclediff/](../cyclediff/). Community [cyclediff/](cyclediff/) re-exports the same symbols.
 
 ---
 

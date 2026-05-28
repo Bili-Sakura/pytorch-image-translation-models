@@ -33,6 +33,8 @@ src/                                 # ← Core library (single source of truth)
 │       ├── blocks.py               # StarGANResidualBlock
 │       ├── generator.py            # StarGANGenerator
 │       └── discriminator.py        # StarGANDiscriminator
+│   └── cyclediff/
+│       └── __init__.py             # CycleDiff upstream metadata (Zou et al., TIP 2026)
 ├── schedulers/                      # One scheduler per method
 │   ├── i2sb.py                     # I2SBScheduler
 │   ├── ddbm.py                     # DDBMScheduler
@@ -61,6 +63,7 @@ src/                                 # ← Core library (single source of truth)
 │   └── pix2pixhd.py                # Pix2PixHDPipeline, load_pix2pixhd_pipeline
 │   └── stargan.py                  # StarGANPipeline, load_stargan_pipeline
 │   └── pix2pix.py                 # ImageTranslator (Pix2Pix single-pass)
+│   └── cyclediff.py               # CycleDiffPipeline (local upstream checkout)
 ├── data/
 │   ├── datasets.py                 # PairedImageDataset, UnpairedImageDataset
 │   └── transforms.py               # get_transforms, default_transforms
@@ -101,4 +104,7 @@ examples/                            # ← Training/inference scripts (import fr
 ├── stegogan/                        # StegoGAN unpaired translation (StegoGANTrainer)
 ├── stargan/                         # StarGAN multi-domain translation (StarGANTrainer)
 └── cut/                            # CUT contrastive unpaired translation (CUTTrainer)
+├── cyclediff/                       # CycleDiff (Zou et al., TIP 2026) via upstream clone
+│   ├── config.py                   # CycleDiffConfig
+│   └── train.py                    # CLI: train | translate | train-vae | train-ldm | run
 ```

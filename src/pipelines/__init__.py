@@ -32,6 +32,14 @@ from src.pipelines.lddbm import (
     load_lddbm_pipeline,
 )
 from src.pipelines.pix2pix import ImageTranslator
+from src.pipelines.cyclediff import (
+    CycleDiffPipeline,
+    CycleDiffPipelineOutput,
+    inject_cyclediff_sys_path,
+    load_cyclediff_pipeline,
+    resolve_cyclediff_root,
+    run_cyclediff_script,
+)
 
 __all__ = [
     "BBDMPipeline",
@@ -76,4 +84,10 @@ __all__ = [
     "LDDBMPipelineOutput",
     "load_lddbm_pipeline",
     "ImageTranslator",
+    "CycleDiffPipeline",
+    "CycleDiffPipelineOutput",
+    "inject_cyclediff_sys_path",
+    "load_cyclediff_pipeline",
+    "resolve_cyclediff_root",
+    "run_cyclediff_script",
 ]

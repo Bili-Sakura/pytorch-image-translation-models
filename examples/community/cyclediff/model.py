@@ -1,11 +1,8 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: CycleDiff (Zou et al., TIP 2026) — https://github.com/ZouShilong1024/CycleDiff
 
-"""Upstream CycleDiff code lives in a separate checkout; see README.md.
+"""Backward-compatible re-exports; prefer :mod:`src.models.cyclediff`."""
 
-This module only holds stable identifiers for documentation and imports.
-"""
-
-CYCLEDIFF_REPO_URL = "https://github.com/ZouShilong1024/CycleDiff"
+from src.models.cyclediff import CYCLEDIFF_REPO_URL
 
 __all__ = ["CYCLEDIFF_REPO_URL"]
