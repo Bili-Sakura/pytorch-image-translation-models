@@ -35,10 +35,7 @@ from src.pipelines.pix2pix import ImageTranslator
 from src.pipelines.cyclediff import (
     CycleDiffPipeline,
     CycleDiffPipelineOutput,
-    inject_cyclediff_sys_path,
     load_cyclediff_pipeline,
-    resolve_cyclediff_root,
-    run_cyclediff_script,
 )
 
 __all__ = [
@@ -86,8 +83,5 @@ __all__ = [
     "ImageTranslator",
     "CycleDiffPipeline",
     "CycleDiffPipelineOutput",
-    "inject_cyclediff_sys_path",
     "load_cyclediff_pipeline",
-    "resolve_cyclediff_root",
-    "run_cyclediff_script",
 ]

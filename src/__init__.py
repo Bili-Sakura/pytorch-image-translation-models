@@ -78,8 +78,6 @@ from src.pipelines import (
     CycleDiffPipeline,
     CycleDiffPipelineOutput,
     load_cyclediff_pipeline,
-    resolve_cyclediff_root,
-    inject_cyclediff_sys_path,
 )
 from src.schedulers import (
     BBDMScheduler,
@@ -218,8 +216,6 @@ __all__ = [
     "CycleDiffPipeline",
     "CycleDiffPipelineOutput",
     "load_cyclediff_pipeline",
-    "resolve_cyclediff_root",
-    "inject_cyclediff_sys_path",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",

@@ -1,20 +1,24 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: CycleDiff (Zou et al., TIP 2026) — https://github.com/ZouShilong1024/CycleDiff
 
-"""CycleDiff model identifiers and upstream repository metadata."""
+"""CycleDiff: cycle diffusion models for unpaired image-to-image translation."""
 
 CYCLEDIFF_REPO_URL = "https://github.com/ZouShilong1024/CycleDiff"
+CYCLEDIFF_PAPER_URL = "https://arxiv.org/abs/2508.06625"
 
-# Scripts expected at the root of a valid CycleDiff checkout.
-CYCLEDIFF_TRAIN_SCRIPT = "train_uncond_ldm_cycle.py"
-CYCLEDIFF_TRANSLATION_SCRIPT = "translation_uncond_ldm_cycle.py"
-CYCLEDIFF_VAE_TRAIN_SCRIPT = "train_vae.py"
-CYCLEDIFF_LDM_TRAIN_SCRIPT = "train_uncond_ldm.py"
+from src.models.cyclediff.config_loader import load_cfg_node, load_yaml_config
+from src.models.cyclediff.factory import build_all_models, build_latent_diffusion, load_checkpoint_weights
+from src.models.cyclediff.inference import is_a2b_task, translate_batch, translate_for_task
 
 __all__ = [
     "CYCLEDIFF_REPO_URL",
-    "CYCLEDIFF_TRAIN_SCRIPT",
-    "CYCLEDIFF_TRANSLATION_SCRIPT",
-    "CYCLEDIFF_VAE_TRAIN_SCRIPT",
-    "CYCLEDIFF_LDM_TRAIN_SCRIPT",
+    "CYCLEDIFF_PAPER_URL",
+    "load_cfg_node",
+    "load_yaml_config",
+    "build_all_models",
+    "build_latent_diffusion",
+    "load_checkpoint_weights",
+    "is_a2b_task",
+    "translate_batch",
+    "translate_for_task",
 ]

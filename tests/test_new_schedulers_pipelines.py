@@ -313,12 +313,10 @@ class TestPipelineImports:
             CycleDiffPipeline,
             CycleDiffPipelineOutput,
             load_cyclediff_pipeline,
-            resolve_cyclediff_root,
         )
         assert CycleDiffPipeline is not None
         assert CycleDiffPipelineOutput is not None
         assert callable(load_cyclediff_pipeline)
-        assert callable(resolve_cyclediff_root)
 
 
 # ---------------------------------------------------------------------------

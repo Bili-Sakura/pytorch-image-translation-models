@@ -1,20 +1,25 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: CycleDiff (Zou et al., TIP 2026) — https://github.com/ZouShilong1024/CycleDiff
 
-"""Configuration for CycleDiff training and translation via upstream scripts."""
+"""CycleDiff training and inference configuration."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
+
+
+def packaged_configs_dir() -> Path:
+    """Default YAML configs shipped under ``examples/cyclediff/configs``."""
+    return Path(__file__).resolve().parent / "configs"
 
 
 @dataclass
 class CycleDiffConfig:
-    """Paths and defaults for delegating to a local CycleDiff checkout."""
+    """Paths for CycleDiff training or translation."""
 
-    cyclediff_root: Optional[str] = None
-    train_cfg: str = "./configs/cat2dog/translation_C_disc_timestep_ode_2.yaml"
-    translation_cfg: str = "./configs/cat2dog/test_translation.yaml"
-    vae_cfg: Optional[str] = None
-    ldm_cfg: Optional[str] = None
+    cfg: str
+    ckpt_path: Optional[str] = None
+    device: str = "cuda"
+    results_folder: Optional[str] = None

@@ -40,7 +40,7 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`lddbm/`](../lddbm/) | [Bosch Research, NeurIPS 2025](https://github.com/boschresearch/Multimodal-Distribution-Translation-MDT) | LDDBM: Latent diffusion bridge for super-resolution (16→128); training in `examples/lddbm/` |
 | [`ddib/`](ddib/) | [Su et al., ICLR 2023](https://github.com/suxuann/ddib) | DDIB for OpenAI/guided_diffusion-style checkpoints; dual source/target UNets |
 | [`cdtsde/`](cdtsde/) | CDTSDE/PSCDE | ControlLDM for solar defect identification; convert raw .ckpt and one-stop inference |
-| [`cyclediff/`](cyclediff/) | [Zou et al., IEEE TIP 2026](https://arxiv.org/abs/2508.06625) | CycleDiff cycle latent diffusion for unpaired translation; requires local [CycleDiff](https://github.com/ZouShilong1024/CycleDiff) checkout |
+| [`cyclediff/`](cyclediff/) | [Zou et al., IEEE TIP 2026](https://arxiv.org/abs/2508.06625) | Moved — use [examples/cyclediff/](../cyclediff/) and `src/models/cyclediff/` |
 | [`cycle_diffusion/`](cycle_diffusion/) | [Wu & De la Torre, ICCV 2023](https://arxiv.org/abs/2210.05559) | CycleDiffusion zero-shot editing with stochastic diffusion models; requires local [humansensinglab/cycle-diffusion](https://github.com/humansensinglab/cycle-diffusion) checkout |
 | [`sdedit/`](sdedit/) | [Meng et al., ICLR 2022](https://arxiv.org/abs/2108.01073) | SDEdit guided synthesis and editing with VP-SDEs; requires local [ermongroup/SDEdit](https://github.com/ermongroup/SDEdit) checkout |
 | [`diffuseit/`](diffuseit/) | [Kwon & Ye, ICLR 2023](https://arxiv.org/abs/2209.15264) | Diffusion-based image translation with disentangled style/content (text- and image-guided) |
@@ -123,28 +123,9 @@ out = pipe(source_image=image, num_inference_steps=250, output_type="pil")
 
 ---
 
-### CycleDiff (Community)
+### CycleDiff
 
-**Paper:** *CycleDiff: Cycle Diffusion Models for Unpaired Image-to-image Translation* (Zou et al., IEEE TIP 2026)
-
-**Source:** [ZouShilong1024/CycleDiff](https://github.com/ZouShilong1024/CycleDiff) — clone locally; training and inference use the upstream YAML configs and scripts under that repository.
-
-**Quick start:**
-
-```python
-from src.pipelines.cyclediff import load_cyclediff_pipeline
-
-pipe = load_cyclediff_pipeline(cyclediff_root="/path/to/CycleDiff")
-pipe.run_training(cfg="./configs/your_dataset/translation_C_disc_timestep_ode_2.yaml")
-```
-
-```bash
-python -m examples.cyclediff.train train \
-  --cyclediff-root /path/to/CycleDiff \
-  --cfg ./configs/your_dataset/translation_C_disc_timestep_ode_2.yaml
-```
-
-Main API: `src/pipelines/cyclediff.py` and [examples/cyclediff/](../cyclediff/). Community [cyclediff/](cyclediff/) re-exports the same symbols.
+Fully vendored under `src/models/cyclediff/`. See [examples/cyclediff/README.md](../cyclediff/README.md).
 
 ---
 
