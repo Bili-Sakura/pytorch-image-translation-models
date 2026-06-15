@@ -510,6 +510,78 @@ class TestSAR2OpticalTrainer:
 
 
 # ---------------------------------------------------------------------------
+# CycleGAN (junyanz/pytorch-CycleGAN-and-pix2pix)
+# ---------------------------------------------------------------------------
+
+
+class TestCycleGANGenerator:
+    def test_output_shape_and_range(self):
+        from examples.community.cyclegan import create_generator
+
+        gen = create_generator(netG="resnet_6blocks", norm="instance")
+        x = torch.randn(2, 3, 64, 64)
+        out = gen(x)
+        assert out.shape == (2, 3, 64, 64)
+        assert out.min() >= -1.0
+        assert out.max() <= 1.0
+
+
+class TestCycleGANTrainer:
+    def test_train_step_keys(self):
+        from examples.community.cyclegan import CycleGANConfig, CycleGANTrainer
+
+        cfg = CycleGANConfig(resolution=64, lambda_identity=0.0, device="cpu")
+        trainer = CycleGANTrainer(cfg)
+        a = torch.rand(1, 3, 64, 64)
+        b = torch.rand(1, 3, 64, 64)
+        losses = trainer.train_step(a, b)
+        assert "loss_G" in losses
+        assert "loss_D_A" in losses
+        assert "loss_D_B" in losses
+
+
+class TestCycleGANPipeline:
+    def test_forward_a2b(self):
+        from examples.community.cyclegan import create_generator
+        from src.pipelines.cyclegan import CycleGANPipeline
+
+        gen = create_generator(netG="resnet_9blocks", norm="instance")
+        pipe = CycleGANPipeline(generator_a=gen)
+        x = torch.rand(1, 3, 64, 64) * 2 - 1
+        out = pipe(source_image=x, output_type="pt")
+        assert out.images.shape == (1, 3, 64, 64)
+
+
+# ---------------------------------------------------------------------------
+# pix2pix (junyanz/pytorch-CycleGAN-and-pix2pix)
+# ---------------------------------------------------------------------------
+
+
+class TestPix2PixCommunityGenerator:
+    def test_output_shape_and_range(self):
+        from examples.community.pix2pix import create_generator
+
+        gen = create_generator(netG="unet_256", norm="batch", use_dropout=True)
+        x = torch.randn(2, 3, 64, 64)
+        out = gen(x)
+        assert out.shape == (2, 3, 64, 64)
+        assert out.min() >= -1.0
+        assert out.max() <= 1.0
+
+
+class TestPix2PixCommunityPipeline:
+    def test_forward(self):
+        from examples.community.pix2pix import create_generator
+        from src.pipelines.pix2pix import Pix2PixPipeline
+
+        gen = create_generator(netG="unet_256", norm="batch")
+        pipe = Pix2PixPipeline(generator=gen)
+        x = torch.rand(1, 3, 64, 64) * 2 - 1
+        out = pipe(source_image=x, output_type="pt")
+        assert out.images.shape == (1, 3, 64, 64)
+
+
+# ---------------------------------------------------------------------------
 # DiffusionPipeline-based inference tests
 # ---------------------------------------------------------------------------
 
@@ -1097,3 +1169,342 @@ class TestSDEditIntegration:
         (tmp_path / "configs" / "bedroom.yml").write_text("data:\n  dataset: dummy\n")
         rc = main(["--sdedit-root", str(tmp_path), "main.py"])
         assert rc == 0
+
+
+class TestHnegSRCCommunity:
+    """Tests for the Hneg-SRC community pipeline."""
+
+    def test_imports(self):
+        from examples.community.hneg_src import (
+            HnegSRCConfig,
+            HnegSRCTrainer,
+            HnegSRCPipeline,
+            SRCLoss,
+            PatchHDCELoss,
+            load_hneg_src_pipeline,
+        )
+
+        assert callable(HnegSRCTrainer)
+        assert callable(load_hneg_src_pipeline)
+
+    def test_src_loss_forward(self):
+        from src.models.hneg_src import SRCLoss
+
+        crit = SRCLoss(num_patches=4, lambda_src=0.05)
+        feat_q = torch.randn(4, 64)
+        feat_k = torch.randn(4, 64)
+        loss, weight = crit(feat_q, feat_k, epoch=0)
+        assert loss.ndim == 0
+        assert weight.shape == (1, 4, 4)
+
+    def test_hdce_loss_forward(self):
+        from src.models.hneg_src import PatchHDCELoss
+
+        crit = PatchHDCELoss(batch_size=1, lambda_hdce=0.1)
+        feat_q = torch.randn(4, 64)
+        feat_k = torch.randn(4, 64)
+        weight = torch.ones(1, 4, 4)
+        loss = crit(feat_q, feat_k, weight)
+        assert loss.ndim == 0
+
+    def test_trainer_init(self):
+        from examples.hneg_src import HnegSRCConfig, HnegSRCTrainer
+
+        cfg = HnegSRCConfig(device="cpu", batch_size=1, num_patches=4, nce_layers="0,4")
+        trainer = HnegSRCTrainer(cfg)
+        assert trainer.netG is not None
+        assert len(trainer.src_criteria) == 2
+
+    def test_load_pipeline_missing_checkpoint(self, tmp_path):
+        from examples.community.hneg_src import load_hneg_src_pipeline
+
+        with pytest.raises(FileNotFoundError):
+            load_hneg_src_pipeline(tmp_path / "missing")
+
+    def test_hneg_src_pipeline_is_cut_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from src.models.cut import CUTGenerator
+        from src.pipelines.cut import CUTPipeline
+        from src.pipelines.cut import HnegSRCPipeline
+
+        gen = CUTGenerator(input_nc=3, output_nc=3, n_blocks=2)
+        pipe = HnegSRCPipeline(generator=gen)
+        assert isinstance(pipe, CUTPipeline)
+        assert issubclass(HnegSRCPipeline, DiffusionPipeline)
+
+
+class TestNEGCUTCommunity:
+    """Tests for the NEGCUT community pipeline."""
+
+    def test_imports(self):
+        from examples.community.negcut import (
+            NEGCUTConfig,
+            NEGCUTTrainer,
+            NEGCUTPipeline,
+            LearnedPatchNCELoss,
+            NegativeGenerator,
+            load_negcut_pipeline,
+        )
+
+        assert callable(NEGCUTTrainer)
+        assert callable(load_negcut_pipeline)
+
+    def test_learned_patch_nce_loss_forward(self):
+        from src.models.negcut import LearnedPatchNCELoss
+
+        crit = LearnedPatchNCELoss(batch_size=1, lambda_nce=1.0)
+        feat_q = torch.randn(4, 64)
+        feat_k = torch.randn(4, 64)
+        neg = torch.randn(4, 64)
+        loss = crit(feat_q, feat_k, neg)
+        assert loss.ndim == 0
+
+    def test_negative_generator_forward(self):
+        from src.models.negcut import NegativeGenerator
+
+        gen = NegativeGenerator(use_conv=False, num_patches=4, nc=32, z_dim=8)
+        feats = [torch.randn(2, 32, 8, 8)]
+        out = gen(feats, num_patches=4)
+        assert len(out) == 1
+        assert out[0].shape == (2 * 4, 32)
+
+    def test_trainer_init(self):
+        from examples.negcut import NEGCUTConfig, NEGCUTTrainer
+
+        cfg = NEGCUTConfig(device="cpu", batch_size=1, num_patches=4, nce_layers="0,4")
+        trainer = NEGCUTTrainer(cfg)
+        assert trainer.netG is not None
+        assert len(trainer.nce_criteria) == 2
+
+    def test_load_pipeline_missing_checkpoint(self, tmp_path):
+        from examples.community.negcut import load_negcut_pipeline
+
+        with pytest.raises(FileNotFoundError):
+            load_negcut_pipeline(tmp_path / "missing")
+
+    def test_negcut_pipeline_is_cut_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from src.models.cut import CUTGenerator
+        from src.pipelines.cut import CUTPipeline
+        from src.pipelines.cut import NEGCUTPipeline
+
+        gen = CUTGenerator(input_nc=3, output_nc=3, n_blocks=2)
+        pipe = NEGCUTPipeline(generator=gen)
+        assert isinstance(pipe, CUTPipeline)
+        assert issubclass(NEGCUTPipeline, DiffusionPipeline)
+
+
+class TestDecentCommunity:
+    """Tests for the Decent community pipeline."""
+
+    def test_imports(self):
+        from examples.community.decent import (
+            BNAFModel,
+            DecentConfig,
+            DecentPipeline,
+            DecentTrainer,
+            FlowConfig,
+            PatchDensityEstimator,
+            load_decent_pipeline,
+        )
+
+        assert callable(DecentTrainer)
+        assert callable(load_decent_pipeline)
+        assert callable(BNAFModel)
+
+    def test_bnaf_log_probs(self):
+        from src.models.decent import BNAFModel
+
+        flow = BNAFModel(8, n_flows=1, n_layers=0, hidden_dim=8)
+        x = torch.randn(4, 8)
+        log_probs = flow.log_probs(x)
+        assert log_probs.shape == (4,)
+
+    def test_density_estimator_lazy_init(self):
+        from src.models.decent import FlowConfig, PatchDensityEstimator
+
+        estimator = PatchDensityEstimator(FlowConfig(flow_type="bnaf", flow_blocks=1))
+        feats = [torch.randn(2, 16, 8, 8), torch.randn(2, 32, 4, 4)]
+        log_probs, feat_lens, patch_ids = estimator(feats, num_patches=4, detach=True)
+        assert len(log_probs) == 2
+        assert len(feat_lens) == 2
+
+    def test_density_changing_loss(self):
+        from src.models.decent import compute_density_changing_loss
+
+        log_a = [torch.randn(8), torch.randn(8)]
+        log_b = [torch.randn(8), torch.randn(8)]
+        feat_lens = [torch.tensor(16.0), torch.tensor(32.0)]
+        loss = compute_density_changing_loss(
+            log_a, log_b, feat_lens, batch_size=2, num_patches=4, var_all=False
+        )
+        assert loss.ndim == 0
+
+    def test_trainer_init(self):
+        from examples.decent import DecentConfig, DecentTrainer
+
+        cfg = DecentConfig(device="cpu", batch_size=1, num_patches=4, var_layers="0,4")
+        trainer = DecentTrainer(cfg)
+        assert trainer.netG is not None
+        assert trainer.netF_A is not None
+        assert len(trainer.var_layers) == 2
+
+    def test_load_pipeline_missing_checkpoint(self, tmp_path):
+        from examples.community.decent import load_decent_pipeline
+
+        with pytest.raises(FileNotFoundError):
+            load_decent_pipeline(tmp_path / "missing")
+
+    def test_decent_pipeline_is_cut_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from src.models.cut import CUTGenerator
+        from src.pipelines.cut import CUTPipeline
+        from src.pipelines.cut import DecentPipeline
+
+        gen = CUTGenerator(input_nc=3, output_nc=3, n_blocks=2)
+        pipe = DecentPipeline(generator=gen)
+        assert isinstance(pipe, CUTPipeline)
+        assert issubclass(DecentPipeline, DiffusionPipeline)
+
+
+class TestFLSeSimCommunity:
+    """Tests for the F-LSeSim community pipeline."""
+
+    def test_imports(self):
+        from examples.community.flsesim import (
+            FLSeSimConfig,
+            FLSeSimTrainer,
+            FLSeSimPipeline,
+            SpatialCorrelativeLoss,
+            VGG16FeatureExtractor,
+            load_flsesim_pipeline,
+        )
+
+        assert callable(FLSeSimTrainer)
+        assert callable(load_flsesim_pipeline)
+
+    def test_spatial_loss_forward(self):
+        from src.models.flsesim import SpatialCorrelativeLoss
+
+        crit = SpatialCorrelativeLoss(
+            patch_nums=4,
+            patch_size=8,
+            use_norm=True,
+            use_conv=False,
+        )
+        feat_src = torch.randn(2, 32, 16, 16)
+        feat_tgt = torch.randn(2, 32, 16, 16)
+        loss = crit.loss(feat_src, feat_tgt, None, layer=0)
+        assert loss.ndim == 0
+
+    def test_compute_spatial_correlative_loss(self):
+        from src.models.flsesim import (
+            SpatialCorrelativeLoss,
+            VGG16FeatureExtractor,
+            compute_spatial_correlative_loss,
+        )
+
+        net = VGG16FeatureExtractor()
+        crit = SpatialCorrelativeLoss(patch_nums=4, patch_size=8, use_conv=False)
+        src = torch.rand(1, 3, 64, 64)
+        tgt = torch.rand(1, 3, 64, 64)
+        loss = compute_spatial_correlative_loss(net, crit, src, tgt, None, [4, 7])
+        assert loss.ndim == 0
+
+    def test_trainer_init(self):
+        from examples.flsesim import FLSeSimConfig, FLSeSimTrainer
+
+        cfg = FLSeSimConfig(device="cpu", batch_size=1, patch_nums=4, patch_size=8)
+        trainer = FLSeSimTrainer(cfg)
+        assert trainer.netG is not None
+        assert len(trainer.attn_layers) == 3
+
+    def test_load_pipeline_missing_checkpoint(self, tmp_path):
+        from examples.community.flsesim import load_flsesim_pipeline
+
+        with pytest.raises(FileNotFoundError):
+            load_flsesim_pipeline(tmp_path / "missing")
+
+    def test_flsesim_pipeline_is_cut_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from src.models.cut import CUTGenerator
+        from src.pipelines.cut import CUTPipeline
+        from src.pipelines.cut import FLSeSimPipeline
+
+        gen = CUTGenerator(input_nc=3, output_nc=3, n_blocks=2)
+        pipe = FLSeSimPipeline(generator=gen)
+        assert isinstance(pipe, CUTPipeline)
+        assert issubclass(FLSeSimPipeline, DiffusionPipeline)
+
+
+class TestCycleGANTurboCommunity:
+    """Tests for CycleGAN-Turbo community pipeline."""
+
+    def test_imports(self):
+        from examples.community.cyclegan_turbo import (
+            CycleGANTurbo,
+            CycleGANTurboConfig,
+            CycleGANTurboPipeline,
+            CycleGANTurboTrainer,
+            load_cyclegan_turbo_pipeline,
+            PRETRAINED_CYCLEGAN_TURBO,
+        )
+
+        assert callable(load_cyclegan_turbo_pipeline)
+        assert "day_to_night" in PRETRAINED_CYCLEGAN_TURBO
+
+    def test_build_transform(self):
+        from src.models.img2img_turbo import build_transform
+
+        t = build_transform("resize_512x512")
+        assert callable(t)
+
+    def test_load_pipeline_requires_one_source(self):
+        from examples.community.cyclegan_turbo import load_cyclegan_turbo_pipeline
+
+        with pytest.raises(ValueError):
+            load_cyclegan_turbo_pipeline()
+
+    def test_pipeline_is_diffusion_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from src.pipelines.cyclegan_turbo import CycleGANTurboPipeline
+
+        assert issubclass(CycleGANTurboPipeline, DiffusionPipeline)
+
+
+class TestPix2PixTurboCommunity:
+    """Tests for pix2pix-turbo community pipeline."""
+
+    def test_imports(self):
+        from examples.community.pix2pix_turbo import (
+            Pix2PixTurbo,
+            Pix2PixTurboConfig,
+            Pix2PixTurboPipeline,
+            Pix2PixTurboTrainer,
+            load_pix2pix_turbo_pipeline,
+            PRETRAINED_PIX2PIX_TURBO,
+            canny_from_pil,
+        )
+
+        assert callable(load_pix2pix_turbo_pipeline)
+        assert callable(canny_from_pil)
+        assert "edge_to_image" in PRETRAINED_PIX2PIX_TURBO
+
+    def test_twin_conv(self):
+        from src.models.img2img_turbo import TwinConv
+        import torch.nn as nn
+
+        conv = TwinConv(nn.Conv2d(3, 3, 1), nn.Conv2d(3, 3, 1))
+        assert conv.r is None
+
+    def test_load_pipeline_requires_one_source(self):
+        from examples.community.pix2pix_turbo import load_pix2pix_turbo_pipeline
+
+        with pytest.raises(ValueError):
+            load_pix2pix_turbo_pipeline()
+
+    def test_pipeline_is_diffusion_pipeline(self):
+        from diffusers import DiffusionPipeline
+        from src.pipelines.pix2pix_turbo import Pix2PixTurboPipeline
+
+        assert issubclass(Pix2PixTurboPipeline, DiffusionPipeline)

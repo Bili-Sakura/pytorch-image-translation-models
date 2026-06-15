@@ -6,6 +6,14 @@
 Provides :class:`CUTPipeline` for running inference with a trained CUT
 generator, following the diffusers-style pipeline pattern established
 in :mod:`src.pipelines.ddbm`.
+
+Several CUT-based methods share the same single-pass inference path and
+re-export :class:`CUTPipeline` under method-specific names:
+
+- :class:`NEGCUTPipeline` — NEGCUT (Wang et al., ICCV 2021)
+- :class:`HnegSRCPipeline` — Hneg-SRC (Jung et al., CVPR 2022)
+- :class:`FLSeSimPipeline` — F-LSeSim (Zheng et al., CVPR 2021)
+- :class:`DecentPipeline` — Decent (Xie et al., NeurIPS 2022)
 """
 
 from dataclasses import dataclass
@@ -180,3 +188,30 @@ class CUTPipeline(DiffusionPipeline):
         images = images.clamp(0, 1)
         images = images.cpu().permute(0, 2, 3, 1).numpy()
         return images
+
+
+# CUT-based methods — training differs; inference is a single generator pass.
+NEGCUTPipeline = CUTPipeline
+NEGCUTPipelineOutput = CUTPipelineOutput
+
+HnegSRCPipeline = CUTPipeline
+HnegSRCPipelineOutput = CUTPipelineOutput
+
+FLSeSimPipeline = CUTPipeline
+FLSeSimPipelineOutput = CUTPipelineOutput
+
+DecentPipeline = CUTPipeline
+DecentPipelineOutput = CUTPipelineOutput
+
+__all__ = [
+    "CUTPipeline",
+    "CUTPipelineOutput",
+    "NEGCUTPipeline",
+    "NEGCUTPipelineOutput",
+    "HnegSRCPipeline",
+    "HnegSRCPipelineOutput",
+    "FLSeSimPipeline",
+    "FLSeSimPipelineOutput",
+    "DecentPipeline",
+    "DecentPipelineOutput",
+]

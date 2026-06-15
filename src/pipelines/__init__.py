@@ -11,7 +11,18 @@ from src.pipelines.ddib import DDIBPipeline, DDIBPipelineOutput
 from src.pipelines.i2sb import I2SBPipeline, I2SBPipelineOutput
 from src.pipelines.lbm import LBMPipeline, LBMPipelineOutput
 from src.pipelines.stegogan import StegoGANPipeline, StegoGANPipelineOutput
-from src.pipelines.cut import CUTPipeline, CUTPipelineOutput
+from src.pipelines.cut import (
+    CUTPipeline,
+    CUTPipelineOutput,
+    DecentPipeline,
+    DecentPipelineOutput,
+    FLSeSimPipeline,
+    FLSeSimPipelineOutput,
+    HnegSRCPipeline,
+    HnegSRCPipelineOutput,
+    NEGCUTPipeline,
+    NEGCUTPipelineOutput,
+)
 from src.pipelines.unsb import UNSBPipeline, UNSBPipelineOutput
 from src.pipelines.local_diffusion import LocalDiffusionPipeline, LocalDiffusionPipelineOutput
 from src.pipelines.pix2pixhd import (
@@ -31,7 +42,15 @@ from src.pipelines.lddbm import (
     LDDBMPipelineOutput,
     load_lddbm_pipeline,
 )
-from src.pipelines.pix2pix import ImageTranslator
+from src.pipelines.cyclegan import CycleGANPipeline, CycleGANPipelineOutput, load_cyclegan_pipeline
+from src.pipelines.cyclegan_turbo import CycleGANTurboPipeline, CycleGANTurboPipelineOutput
+from src.pipelines.pix2pix_turbo import Pix2PixTurboPipeline, Pix2PixTurboPipelineOutput
+from src.pipelines.pix2pix import (
+    ImageTranslator,
+    Pix2PixPipeline,
+    Pix2PixPipelineOutput,
+    load_pix2pix_pipeline,
+)
 
 __all__ = [
     "BBDMPipeline",
@@ -56,6 +75,18 @@ __all__ = [
     "StegoGANPipelineOutput",
     "CUTPipeline",
     "CUTPipelineOutput",
+    "DecentPipeline",
+    "DecentPipelineOutput",
+    "HnegSRCPipeline",
+    "HnegSRCPipelineOutput",
+    "NEGCUTPipeline",
+    "NEGCUTPipelineOutput",
+    "FLSeSimPipeline",
+    "FLSeSimPipelineOutput",
+    "CycleGANTurboPipeline",
+    "CycleGANTurboPipelineOutput",
+    "Pix2PixTurboPipeline",
+    "Pix2PixTurboPipelineOutput",
     "UNSBPipeline",
     "UNSBPipelineOutput",
     "LocalDiffusionPipeline",
@@ -76,4 +107,10 @@ __all__ = [
     "LDDBMPipelineOutput",
     "load_lddbm_pipeline",
     "ImageTranslator",
+    "Pix2PixPipeline",
+    "Pix2PixPipelineOutput",
+    "load_pix2pix_pipeline",
+    "CycleGANPipeline",
+    "CycleGANPipelineOutput",
+    "load_cyclegan_pipeline",
 ]

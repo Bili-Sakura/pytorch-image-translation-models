@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **CUT pipelines**: Consolidated `NEGCUTPipeline`, `HnegSRCPipeline`, `FLSeSimPipeline`, and `DecentPipeline` into `src/pipelines/cut.py` as aliases of `CUTPipeline` (inference is identical; training differs).
+
 ### Added
+- **CycleGAN** (`src/models/cyclegan_pix2pix/`, `examples/cyclegan/`, `examples/community/cyclegan/`): ICCV 2017 unpaired translation from [junyanz/pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) — `CycleGANGenerator`, `CycleGANTrainer`, `CycleGANPipeline`, and upstream `latest_net_G.pth` / `latest_net_G_A.pth` loading.
+- **pix2pix** (`src/models/cyclegan_pix2pix/`, `examples/community/pix2pix/`): CVPR 2017 paired translation from the same upstream repo — `Pix2PixGenerator`, `Pix2PixPipeline`, `load_pix2pix_pipeline`, and upstream pretrained checkpoint support.
+- **CycleGAN-Turbo & pix2pix-turbo** (`src/models/img2img_turbo/`, `src/pipelines/cyclegan_turbo.py`, `src/pipelines/pix2pix_turbo.py`, `examples/cyclegan_turbo/`, `examples/pix2pix_turbo/`, `examples/community/cyclegan_turbo/`, `examples/community/pix2pix_turbo/`): One-step SD-Turbo image translation from [GaParmar/img2img-turbo](https://github.com/GaParmar/img2img-turbo) — unpaired CycleGAN-Turbo and paired pix2pix-turbo models, inference pipelines, and training harnesses.
+- **F-LSeSim** (`src/models/flsesim/`, `examples/flsesim/`, `examples/community/flsesim/`): CVPR 2021 spatially-correlative loss for structure-preserving unpaired translation — `SpatialCorrelativeLoss`, VGG16 feature extractor, `FLSeSimTrainer`, and `FLSeSimPipeline` (single-pass inference via CUT ResNet generator).
+- **Decent** (`src/models/decent/`, `examples/decent/`, `examples/community/decent/`): NeurIPS 2022 unpaired translation with density-changing regularization — BNAF/MAF/NSF flow density estimators, `DecentTrainer`, and `DecentPipeline` (single-pass inference via CUT generator).
 - **EGSDE community pipeline** (`examples/community/egsde/`): `load_egsde_community_pipeline` and `EGSDEPipeline` wrap a local checkout of [Bili-Sakura/EGSDE-diffusers](https://github.com/Bili-Sakura/EGSDE-diffusers) for NeurIPS 2022 energy-guided unpaired translation (cat2dog / wild2dog / male2female profiles or custom checkpoints).
 - **JiT backbone** (`src/models/dit/jit.py`): `JiTBackbone` and `JIT_CONFIGS` — Just image Transformer adapted for the same DDBM/bridge calling convention as `SiTBackbone` (timestep + optional `xT` concat). Based on [LTH14/JiT](https://github.com/LTH14/JiT).
 

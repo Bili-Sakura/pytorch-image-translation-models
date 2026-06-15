@@ -48,6 +48,14 @@ from examples.community.parallel_gan import ParaGAN, Resrecon, ParallelGANTraine
 | [`alignflow/`](alignflow/) | [Grover et al., AAAI 2020](https://arxiv.org/abs/1905.12892) | CycleFlow & Flow2Flow: unpaired translation via normalizing flows with cycle-consistent learning from multiple domains |
 | [`syndiff/`](syndiff/) | [Özbey et al., IEEE TMI 2023](https://arxiv.org/abs/2207.08208) | Unsupervised medical image translation with adversarial diffusion models (T1↔T2, T1↔PD) |
 | [`selfrdb/`](selfrdb/) | [Arslan et al., Med. Image Anal. 2024](https://arxiv.org/abs/2405.06789) | Self-consistent recursive diffusion bridge for multi-modal medical image synthesis |
+| [`hneg_src/`](hneg_src/) | [Jung et al., CVPR 2022](https://arxiv.org/abs/2203.01532) | Hneg-SRC: patch-wise semantic relation contrastive learning extending CUT with SRC + HDCE losses |
+| [`negcut/`](negcut/) | [Wang et al., ICCV 2021](https://github.com/WeilunWang/NEGCUT) | NEGCUT: adversarial hard-negative generation for contrastive unpaired translation |
+| [`decent/`](decent/) | [Xie et al., NeurIPS 2022](https://github.com/Mid-Push/Decent) | Decent: unpaired translation with density-changing regularization via per-domain normalizing flows |
+| [`flsesim/`](flsesim/) | [Zheng et al., CVPR 2021](https://github.com/lyndonzheng/F-LSeSim) | F-LSeSim: spatially-correlative loss for structure-preserving unpaired translation |
+| [`cyclegan/`](cyclegan/) | [Zhu et al., ICCV 2017](https://arxiv.org/abs/1703.10593) | Classic CycleGAN unpaired translation; loads [junyanz/pytorch-CycleGAN-and-pix2pix](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) checkpoints |
+| [`pix2pix/`](pix2pix/) | [Isola et al., CVPR 2017](https://arxiv.org/abs/1611.07004) | Classic pix2pix paired translation; loads junyanz/pytorch-CycleGAN-and-pix2pix checkpoints |
+| [`cyclegan_turbo/`](cyclegan_turbo/) | [Parmar et al., 2024](https://arxiv.org/abs/2403.12036) | CycleGAN-Turbo: one-step unpaired SD-Turbo translation (day↔night, clear↔rainy) |
+| [`pix2pix_turbo/`](pix2pix_turbo/) | [Parmar et al., 2024](https://arxiv.org/abs/2403.12036) | pix2pix-turbo: one-step paired SD-Turbo translation (edge/sketch→image) |
 
 ---
 
@@ -338,6 +346,142 @@ pipe = load_selfrdb_community_pipeline(
 )
 out = pipe(source_image=source_tensor, output_type="pil")
 ```
+
+---
+
+### Hneg-SRC (Community)
+
+**Paper:** *Exploring Patch-wise Semantic Relation for Contrastive Learning in Image-to-Image Translation Tasks* (Jung, Kwon & Ye, CVPR 2022)
+
+**Source:** [jcy132/Hneg_SRC](https://github.com/jcy132/Hneg_SRC)
+
+**Architecture:** CUT ResNet generator with SRC (semantic relation JSD) and HDCE (relation-weighted hard-negative contrastive) losses. Core components in `src.models.hneg_src`; training in `examples/hneg_src/`.
+
+**Quick start:**
+
+```python
+from examples.community.hneg_src import HnegSRCConfig, HnegSRCTrainer, load_hneg_src_pipeline
+
+cfg = HnegSRCConfig(lambda_HDCE=0.1, lambda_SRC=0.05, use_curriculum=True)
+trainer = HnegSRCTrainer(cfg)
+trainer.train("data/trainA", "data/trainB")
+
+pipe = load_hneg_src_pipeline("./checkpoints/hneg_src/checkpoint-epoch-200", device="cuda")
+out = pipe(source_image=image, output_type="pil")
+```
+
+See [hneg_src/README.md](hneg_src/README.md) for recommended hyperparameters and citation.
+
+---
+
+### NEGCUT (Community)
+
+**Paper:** *Instance-wise Hard Negative Example Generation for Contrastive Learning in Unpaired Image-to-Image Translation* (Wang et al., ICCV 2021)
+
+**Source:** [WeilunWang/NEGCUT](https://github.com/WeilunWang/NEGCUT)
+
+**Architecture:** CUT ResNet generator with adversarial negative generator (`netN`) and learned PatchNCE loss. Core components in `src.models.negcut`; training in `examples/negcut/`.
+
+**Quick start:**
+
+```python
+from examples.community.negcut import NEGCUTConfig, NEGCUTTrainer, load_negcut_pipeline
+
+cfg = NEGCUTConfig(netN="neg_gen_momentum", lambda_MS_neg=1.0, nce_idt=True)
+trainer = NEGCUTTrainer(cfg)
+trainer.train("data/trainA", "data/trainB")
+
+pipe = load_negcut_pipeline("./checkpoints/negcut/checkpoint-epoch-200", device="cuda")
+out = pipe(source_image=image, output_type="pil")
+```
+
+See [negcut/README.md](negcut/README.md) for recommended hyperparameters and citation.
+
+---
+
+### Decent
+
+**Paper:** *Unsupervised Image-to-Image Translation with Density Changing Regularization* (Xie, Ho & Zhang, NeurIPS 2022)
+
+**Architecture:** CUT ResNet generator with per-domain normalizing-flow density estimators (BNAF/MAF/NSF) and density-changing variance loss. Core components in `src.models.decent`; training in `examples/decent/`.
+
+**Quick start:**
+
+```python
+from examples.community.decent import DecentConfig, DecentTrainer, load_decent_pipeline
+
+cfg = DecentConfig(lambda_var=0.01, flow_type="bnaf", flow_blocks=1)
+trainer = DecentTrainer(cfg)
+trainer.train("data/trainA", "data/trainB")
+
+pipe = load_decent_pipeline("./checkpoints/decent/checkpoint-epoch-200", device="cuda")
+out = pipe(source_image=image, output_type="pil")
+```
+
+See [decent/README.md](decent/README.md) for recommended hyperparameters and citation.
+
+---
+
+### F-LSeSim (Community)
+
+**Paper:** *The Spatially-Correlative Loss for Various Image Translation Tasks* (Zheng, Cham & Cai, CVPR 2021)
+
+**Source:** [lyndonzheng/F-LSeSim](https://github.com/lyndonzheng/F-LSeSim)
+
+**Architecture:** ResNet generator with PatchGAN discriminator and spatially-correlative loss on VGG16 features. Core components in `src.models.flsesim`; training in `examples/flsesim/`.
+
+**Quick start:**
+
+```python
+from examples.community.flsesim import FLSeSimConfig, FLSeSimTrainer, load_flsesim_pipeline
+
+cfg = FLSeSimConfig(lambda_spatial=10.0, attn_layers="4,7,9", patch_size=64, loss_mode="cos")
+trainer = FLSeSimTrainer(cfg)
+trainer.train("data/trainA", "data/trainB")
+
+pipe = load_flsesim_pipeline("./checkpoints/flsesim/checkpoint-epoch-200", device="cuda")
+out = pipe(source_image=image, output_type="pil")
+```
+
+See [flsesim/README.md](flsesim/README.md) for recommended hyperparameters and citation.
+
+---
+
+### CycleGAN-Turbo
+
+**Paper:** *One-Step Image Translation with Text-to-Image Models* (Parmar et al., 2024)
+
+**Architecture:** SD-Turbo UNet + VAE with LoRA adapters and skip connections; one-step unpaired translation with CLIP-guided domain prompts.
+
+**Quick start:**
+
+```python
+from examples.community.cyclegan_turbo import load_cyclegan_turbo_pipeline
+
+pipe = load_cyclegan_turbo_pipeline(pretrained_name="day_to_night", device="cuda")
+out = pipe(source_image=image, output_type="pil")
+```
+
+See [cyclegan_turbo/README.md](cyclegan_turbo/README.md) for training and citation.
+
+---
+
+### pix2pix-turbo
+
+**Paper:** *One-Step Image Translation with Text-to-Image Models* (Parmar et al., 2024)
+
+**Architecture:** SD-Turbo UNet + VAE with LoRA; one-step paired translation with text prompts (edge→image, sketch→image).
+
+**Quick start:**
+
+```python
+from examples.community.pix2pix_turbo import load_pix2pix_turbo_pipeline
+
+pipe = load_pix2pix_turbo_pipeline(pretrained_name="edge_to_image", device="cuda")
+out = pipe(source_image=image, prompt="a blue bird", output_type="pil")
+```
+
+See [pix2pix_turbo/README.md](pix2pix_turbo/README.md) for training and citation.
 
 ---
 

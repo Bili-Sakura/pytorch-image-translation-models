@@ -32,4 +32,11 @@ Available community pipelines:
 * ``syndiff/`` – SynDiff (Özbey et al., IEEE TMI 2023) – unsupervised medical image translation with adversarial diffusion
 * ``selfrdb/`` – SelfRDB (Arslan et al., Medical Image Analysis 2024) – self-consistent recursive diffusion bridge for medical synthesis
 * ``sdedit/`` – SDEdit (Meng et al., ICLR 2022) – guided image synthesis and editing with SDEs; requires local [ermongroup/SDEdit](https://github.com/ermongroup/SDEdit) checkout
+* ``hneg_src/`` – Hneg-SRC (Jung et al., CVPR 2022) – patch-wise semantic relation contrastive learning for unpaired translation
+* ``negcut/`` – NEGCUT (Wang et al., ICCV 2021) – adversarial hard-negative generation for contrastive unpaired translation
+* ``flsesim/`` – F-LSeSim (Zheng et al., CVPR 2021) – spatially-correlative loss for structure-preserving unpaired translation
+* ``cyclegan_turbo/`` – CycleGAN-Turbo (Parmar et al., 2024) – one-step unpaired SD-Turbo translation
+* ``pix2pix_turbo/`` – pix2pix-turbo (Parmar et al., 2024) – one-step paired SD-Turbo translation
+* ``cyclegan/`` – CycleGAN (Zhu et al., ICCV 2017) – classic unpaired translation from junyanz/pytorch-CycleGAN-and-pix2pix
+* ``pix2pix/`` – pix2pix (Isola et al., CVPR 2017) – classic paired translation from junyanz/pytorch-CycleGAN-and-pix2pix
 """

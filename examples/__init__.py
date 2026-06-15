@@ -24,12 +24,16 @@ Paired image-to-image (src pipelines)
 ``lbm/``       LBM (Latent Bridge Matching) training.
 ``local_diffusion/``   Local Diffusion training (ECCV 2024).
 ``pix2pix/``   Pix2Pix paired training.
+``pix2pix_turbo/``  pix2pix-turbo one-step paired SD-Turbo translation (Parmar et al., 2024).
 ``pix2pixhd/`` Pix2PixHD high-resolution paired training.
 ``stargan/``   StarGAN multi-domain training.
 
 Unpaired image-to-image
 -----------------------
 ``cut/``       CUT contrastive unpaired translation.
+``cyclegan_turbo/``  CycleGAN-Turbo one-step unpaired SD-Turbo translation (Parmar et al., 2024).
+``hneg_src/``  Hneg-SRC semantic-relation contrastive unpaired translation.
+``negcut/``    NEGCUT hard-negative contrastive unpaired translation.
 ``stegogan/``  StegoGAN non-bijective unpaired translation.
 ``unsb/``      UNSB (Unpaired Neural Schrödinger Bridge).
 

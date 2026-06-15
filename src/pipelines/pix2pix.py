@@ -1,18 +1,180 @@
-# Credits: Built on open-source libraries and papers acknowledged in README.md citations.
+# Credits: pix2pix (Isola et al., CVPR 2017) — https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
 
-"""Pix2Pix single-pass inference pipeline for basic GAN generators."""
+"""Pix2Pix single-pass inference pipelines."""
 
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
+from typing import List, Union
 
+import numpy as np
 import torch
 import torch.nn as nn
 from PIL import Image
 from torchvision import transforms
 
+from diffusers import DiffusionPipeline
+from diffusers.utils import BaseOutput, pt_to_pil
+
+from src.models.cyclegan_pix2pix import Pix2PixGenerator, create_generator
+
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class Pix2PixPipelineOutput(BaseOutput):
+    """Output class for pix2pix pipeline."""
+
+    images: Union[List[Image.Image], np.ndarray, torch.Tensor]
+
+
+class Pix2PixPipeline(DiffusionPipeline):
+    """Single-pass inference pipeline for pix2pix paired image translation."""
+
+    def __init__(self, generator: Pix2PixGenerator | nn.Module) -> None:
+        super().__init__()
+        self.register_modules(generator=generator)
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str | Path,
+        *,
+        subfolder: str = "generator",
+        device: str | torch.device = "cpu",
+        torch_dtype: torch.dtype | None = None,
+        **kwargs,
+    ) -> "Pix2PixPipeline":
+        """Load pix2pix pipeline from HF-style generator checkpoint."""
+        generator = Pix2PixGenerator.from_pretrained(
+            pretrained_model_name_or_path,
+            subfolder=subfolder,
+            **kwargs,
+        )
+        generator = generator.eval().to(device=device)
+        if torch_dtype is not None:
+            generator = generator.to(dtype=torch_dtype)
+        return cls(generator=generator)
+
+    @property
+    def device(self) -> torch.device:
+        return next(self.generator.parameters()).device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return next(self.generator.parameters()).dtype
+
+    def prepare_inputs(
+        self,
+        image: Union[torch.Tensor, Image.Image, List[Image.Image]],
+        device: torch.device,
+        dtype: torch.dtype,
+    ) -> torch.Tensor:
+        if isinstance(image, Image.Image):
+            image = [image]
+
+        if isinstance(image, list) and isinstance(image[0], Image.Image):
+            images = []
+            for img in image:
+                img_array = np.array(img, dtype=np.float32)
+                if img_array.max() > 1.0:
+                    img_array = img_array / 255.0
+                if img_array.ndim == 2:
+                    img_array = img_array[:, :, np.newaxis]
+                img_tensor = torch.from_numpy(img_array).permute(2, 0, 1)
+                images.append(img_tensor)
+            image = torch.stack(images)
+
+        if isinstance(image, np.ndarray):
+            image = torch.from_numpy(image)
+
+        if image.min() >= 0 and image.max() <= 1.0:
+            image = image * 2 - 1
+        elif image.max() > 1.0:
+            image = image / 255.0 * 2 - 1
+
+        return image.to(device=device, dtype=dtype)
+
+    @torch.no_grad()
+    def __call__(
+        self,
+        source_image: Union[torch.Tensor, Image.Image, List[Image.Image]],
+        output_type: str = "pil",
+        return_dict: bool = True,
+    ) -> Union[Pix2PixPipelineOutput, tuple]:
+        device = self.device
+        dtype = self.dtype
+        x = self.prepare_inputs(source_image, device, dtype)
+        fake = self.generator(x).clamp(-1, 1)
+
+        if output_type == "pil":
+            images = pt_to_pil(fake)
+        elif output_type == "np":
+            images = self._convert_to_numpy(fake)
+        else:
+            images = fake
+
+        if not return_dict:
+            return (images,)
+        return Pix2PixPipelineOutput(images=images)
+
+    @staticmethod
+    def _convert_to_numpy(images: torch.Tensor) -> np.ndarray:
+        images = (images + 1) / 2
+        images = images.clamp(0, 1)
+        return images.cpu().permute(0, 2, 3, 1).numpy()
+
+
+def load_pix2pix_pipeline(
+    checkpoint_dir: Union[str, Path],
+    *,
+    netG: str = "unet_256",
+    norm: str = "batch",
+    input_nc: int = 3,
+    output_nc: int = 3,
+    ngf: int = 64,
+    no_dropout: bool = False,
+    device: str | torch.device = "cpu",
+    torch_dtype: torch.dtype | None = None,
+) -> Pix2PixPipeline:
+    """Load pix2pix pipeline from HF checkpoint or upstream ``latest_net_G.pth``."""
+    from src.models.cyclegan_pix2pix import load_upstream_generator_state
+
+    checkpoint_dir = Path(checkpoint_dir)
+    if not checkpoint_dir.exists():
+        raise FileNotFoundError(f"Checkpoint directory not found: {checkpoint_dir}")
+
+    gen_dir = checkpoint_dir / "generator"
+    if gen_dir.exists() and (gen_dir / "config.json").exists():
+        return Pix2PixPipeline.from_pretrained(
+            checkpoint_dir,
+            device=device,
+            torch_dtype=torch_dtype,
+        )
+
+    generator = create_generator(
+        input_nc=input_nc,
+        output_nc=output_nc,
+        ngf=ngf,
+        netG=netG,
+        norm=norm,
+        use_dropout=not no_dropout,
+    )
+
+    ckpt_path = checkpoint_dir / "latest_net_G.pth"
+    if not ckpt_path.exists():
+        raise FileNotFoundError(
+            f"No pix2pix generator checkpoint found in {checkpoint_dir}. "
+            "Expected generator/ or latest_net_G.pth"
+        )
+    load_upstream_generator_state(generator, ckpt_path)
+
+    generator = generator.eval().to(device=device)
+    if torch_dtype is not None:
+        generator = generator.to(dtype=torch_dtype)
+    return Pix2PixPipeline(generator=generator)
 
 
 class ImageTranslator:
@@ -196,3 +358,11 @@ class ImageTranslator:
             tensor = tensor * 0.5 + 0.5  # [-1, 1] -> [0, 1]
         tensor = tensor.clamp(0, 1)
         return transforms.ToPILImage()(tensor)
+
+
+__all__ = [
+    "Pix2PixPipeline",
+    "Pix2PixPipelineOutput",
+    "load_pix2pix_pipeline",
+    "ImageTranslator",
+]

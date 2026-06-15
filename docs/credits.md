@@ -9,6 +9,8 @@
 | [StarGAN](https://arxiv.org/abs/1711.09020) — Unified Generative Adversarial Networks for Multi-Domain Image-to-Image Translation | CVPR 2018 | [yunjey/stargan](https://github.com/yunjey/stargan) |
 | [pix2pixHD](https://arxiv.org/abs/1711.11585) — High-Resolution Image Synthesis and Semantic Manipulation with Conditional GANs | CVPR 2018 | [NVIDIA/pix2pixHD](https://github.com/NVIDIA/pix2pixHD) |
 | [CUT](https://link.springer.com/chapter/10.1007/978-3-030-58545-7_19) — Contrastive Unpaired Translation | ECCV 2020 | [taesungp/contrastive-unpaired-translation](https://github.com/taesungp/contrastive-unpaired-translation) |
+| [Hneg-SRC](https://arxiv.org/abs/2203.01532) — Exploring Patch-wise Semantic Relation for Contrastive Learning in Image-to-Image Translation | CVPR 2022 | [jcy132/Hneg_SRC](https://github.com/jcy132/Hneg_SRC) |
+| [NEGCUT](https://github.com/WeilunWang/NEGCUT) — Instance-wise Hard Negative Example Generation for Contrastive Learning in Unpaired Image-to-Image Translation | ICCV 2021 | [WeilunWang/NEGCUT](https://github.com/WeilunWang/NEGCUT) |
 | [EDM](https://arxiv.org/abs/2206.00364) — Elucidating the Design Space of Diffusion-Based Generative Models | NeurIPS 2022 | [NVlabs/edm](https://github.com/NVlabs/edm) |
 | [Parallel-GAN](https://ieeexplore.ieee.org/document/9864654) — SAR-to-Optical Image Translation with Hierarchical Latent Features | TGRS 2022 | [ZZG-Z/Parallel-GAN](https://github.com/ZZG-Z/Parallel-GAN) |
 | [BBDM](http://openaccess.thecvf.com/content/CVPR2023/papers/Li_BBDM_Image-to-Image_Translation_With_Brownian_Bridge_Diffusion_Models_CVPR_2023_paper.pdf) — Image-to-Image Translation with Brownian Bridge Diffusion Models | CVPR 2023 | [xuekt98/BBDM](https://github.com/xuekt98/BBDM) |
