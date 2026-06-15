@@ -102,6 +102,15 @@ from src.models.lddbm import (
     create_decoder,
     create_encoder,
 )
+from src.models.diffusionrouter import (
+    DIFFUSIONROUTER_CLASS_NAMES,
+    DIFFUSIONROUTER_DEFAULT_CHAIN,
+    DiffusionRouterConfig,
+    auto_route,
+    compose_route,
+    parse_class,
+    parse_via_seq,
+)
 
 __all__ = [
     "UNetGenerator",
@@ -188,4 +197,11 @@ __all__ = [
     "init_weights",
     "load_upstream_generator_state",
     "GANLoss",
+    "DIFFUSIONROUTER_CLASS_NAMES",
+    "DIFFUSIONROUTER_DEFAULT_CHAIN",
+    "DiffusionRouterConfig",
+    "auto_route",
+    "compose_route",
+    "parse_class",
+    "parse_via_seq",
 ]

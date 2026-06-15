@@ -75,6 +75,9 @@ from src.pipelines import (
     FCDMPipeline,
     FCDMPipelineOutput,
     FCDMImageCondPipeline,
+    DiffusionRouterPipeline,
+    DiffusionRouterPipelineOutput,
+    load_diffusionrouter_pipeline,
 )
 from src.schedulers import (
     BBDMScheduler,
@@ -210,6 +213,9 @@ __all__ = [
     "FCDMPipeline",
     "FCDMPipelineOutput",
     "FCDMImageCondPipeline",
+    "DiffusionRouterPipeline",
+    "DiffusionRouterPipelineOutput",
+    "load_diffusionrouter_pipeline",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",

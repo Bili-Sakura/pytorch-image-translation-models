@@ -250,13 +250,19 @@ out = pipe(source_image=img, target_image=style_ref, use_colormatch=True, output
 **Quick start:**
 
 ```python
-from examples.community.diffusionrouter import load_diffusionrouter_community_pipeline
+# Core API (recommended)
+from src.pipelines.diffusionrouter import load_diffusionrouter_pipeline
 
-pipe = load_diffusionrouter_community_pipeline(
+pipe = load_diffusionrouter_pipeline(
     checkpoint_path="/path/to/model.pt",
     diffusionrouter_src_path="/path/to/DiffusionRouter",
     device="cuda",
 )
+
+# Or via community alias
+from examples.community.diffusionrouter import load_diffusionrouter_community_pipeline
+pipe = load_diffusionrouter_community_pipeline(...)
+
 out = pipe(
     source_image=image,
     context_class=1,   # source domain

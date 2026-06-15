@@ -17,13 +17,18 @@ git clone https://github.com/kvmduc/DiffusionRouter.git
 ## Quick start
 
 ```python
-from examples.community.diffusionrouter import load_diffusionrouter_community_pipeline
+# Core API (recommended)
+from src.pipelines.diffusionrouter import load_diffusionrouter_pipeline
 
-pipe = load_diffusionrouter_community_pipeline(
+pipe = load_diffusionrouter_pipeline(
     checkpoint_path="/path/to/model.pt",
     diffusionrouter_src_path="/path/to/DiffusionRouter",
     device="cuda",
 )
+
+# Community alias
+from examples.community.diffusionrouter import load_diffusionrouter_community_pipeline
+pipe = load_diffusionrouter_community_pipeline(...)
 
 # COCO class IDs: 0=color, 1=edge, 2=gray, 3=depth
 out = pipe(
@@ -39,4 +44,4 @@ out = pipe(
 
 - The loader expects a `.pt` checkpoint from DiffusionRouter training/distillation.
 - Routing follows the default chain `gray(2) ↔ color(0) ↔ edge(1) ↔ depth(3)` when `via_seq="auto"`.
-
+- Training uses upstream scripts — see `train.py` and `examples/diffusionrouter/train.py`.

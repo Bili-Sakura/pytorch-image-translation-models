@@ -1,9 +1,9 @@
 # Copyright (c) 2026 EarthBridge Team.
 # Credits: DiffusionRouter (kvmduc) - https://github.com/kvmduc/DiffusionRouter
 
-"""Re-export DiffusionRouter routing utilities from core ``src``."""
+"""DiffusionRouter routing utilities and configuration."""
 
-from src.models.diffusionrouter import (
+from src.models.diffusionrouter.routing import (
     DIFFUSIONROUTER_CLASS_NAMES,
     DIFFUSIONROUTER_DEFAULT_CHAIN,
     DiffusionRouterConfig,

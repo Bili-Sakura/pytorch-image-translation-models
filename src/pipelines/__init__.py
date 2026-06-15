@@ -51,6 +51,11 @@ from src.pipelines.pix2pix import (
     Pix2PixPipelineOutput,
     load_pix2pix_pipeline,
 )
+from src.pipelines.diffusionrouter import (
+    DiffusionRouterPipeline,
+    DiffusionRouterPipelineOutput,
+    load_diffusionrouter_pipeline,
+)
 
 __all__ = [
     "BBDMPipeline",
@@ -113,4 +118,7 @@ __all__ = [
     "CycleGANPipeline",
     "CycleGANPipelineOutput",
     "load_cyclegan_pipeline",
+    "DiffusionRouterPipeline",
+    "DiffusionRouterPipelineOutput",
+    "load_diffusionrouter_pipeline",
 ]

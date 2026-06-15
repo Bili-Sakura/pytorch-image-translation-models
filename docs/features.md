@@ -15,6 +15,7 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 - **Local Diffusion** — `LocalDiffusionUNet`, `ConditionEncoder` (conditional denoising U-Net with branch-and-fuse for hallucination suppression, ECCV 2024 Oral)
 - **DiT backbones** — `SiTBackbone` (Scalable Interpolant Transformer), `JiTBackbone` (Just image Transformer with bottleneck patch embed and RoPE; LTH14/JiT) for diffusion bridges
 - **FCDM** — `FCDM`, `FCDMImageCond` (ConvNeXt-based diffusion backbone for class-conditional and image-conditioned generation, CVPR 2026)
+- **DiffusionRouter** — `DiffusionRouterConfig`, routing helpers (`compose_route`, `parse_class`) for multi-domain conditional diffusion translation
 
 ## Schedulers
 
@@ -53,6 +54,7 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 | **StarGANPipeline** | Native StarGAN single-pass multi-domain translation with label conditioning |
 | **FCDMPipeline** | Class-conditional FCDM latent diffusion (DDPM/DDIM) with optional VAE decode and CFG |
 | **FCDMImageCondPipeline** | Image-conditioned FCDM for translation (source latent → target) |
+| **DiffusionRouterPipeline** | Multi-domain conditional diffusion with explicit multi-hop routing ([kvmduc/DiffusionRouter](https://github.com/kvmduc/DiffusionRouter); requires local `guided_diffusion` checkout) |
 
 All pipelines support `"pt"`, `"pil"`, and `"np"` output types.
 

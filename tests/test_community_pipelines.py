@@ -917,9 +917,9 @@ class TestDiffuseITPipeline:
 
 
 class TestDiffusionRouterPipeline:
-    """Tests for the DiffusionRouter community pipeline."""
+    """Tests for the DiffusionRouter pipeline."""
 
-    def test_diffusionrouter_imports(self):
+    def test_diffusionrouter_community_imports(self):
         from examples.community.diffusionrouter import (
             DIFFUSIONROUTER_CLASS_NAMES,
             DIFFUSIONROUTER_DEFAULT_CHAIN,
@@ -936,12 +936,34 @@ class TestDiffusionRouterPipeline:
         assert DiffusionRouterPipelineOutput is not None
         assert callable(load_diffusionrouter_community_pipeline)
 
+    def test_diffusionrouter_src_imports(self):
+        from src.pipelines.diffusionrouter import (
+            DiffusionRouterPipeline,
+            DiffusionRouterPipelineOutput,
+            load_diffusionrouter_pipeline,
+        )
+        from src.models.diffusionrouter import DiffusionRouterConfig, compose_route
+
+        assert DiffusionRouterPipeline is not None
+        assert DiffusionRouterPipelineOutput is not None
+        assert callable(load_diffusionrouter_pipeline)
+        assert compose_route(2, 3, "auto", class_names={0: "color", 1: "edge", 2: "gray", 3: "depth"}, chain=(2, 0, 1, 3)) == [2, 0, 1, 3]
+
+    def test_diffusionrouter_examples_imports(self):
+        from examples.diffusionrouter import (
+            DiffusionRouterPipeline,
+            load_diffusionrouter_pipeline,
+        )
+
+        assert DiffusionRouterPipeline is not None
+        assert callable(load_diffusionrouter_pipeline)
+
     def test_load_diffusionrouter_nonexistent_checkpoint_raises(self):
-        """load_diffusionrouter_community_pipeline raises when checkpoint is missing."""
-        from examples.community.diffusionrouter import load_diffusionrouter_community_pipeline
+        """load_diffusionrouter_pipeline raises when checkpoint is missing."""
+        from src.pipelines.diffusionrouter import load_diffusionrouter_pipeline
 
         with pytest.raises(FileNotFoundError):
-            load_diffusionrouter_community_pipeline(
+            load_diffusionrouter_pipeline(
                 "/tmp/nonexistent-diffusionrouter.pt",
                 device="cpu",
             )
