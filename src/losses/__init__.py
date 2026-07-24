@@ -4,11 +4,14 @@
 
 from src.losses.adversarial import GANLoss
 from src.losses.diffusion import DiffusionLoss, cosine_interpolated_logsnr, get_diffusion_loss
+from src.losses.feature_matching import FeatureMatchingLoss, GaussianKLLoss
 from src.losses.perceptual import PerceptualLoss
 
 __all__ = [
     "GANLoss",
     "PerceptualLoss",
+    "FeatureMatchingLoss",
+    "GaussianKLLoss",
     "DiffusionLoss",
     "cosine_interpolated_logsnr",
     "get_diffusion_loss",

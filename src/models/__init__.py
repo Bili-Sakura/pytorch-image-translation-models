@@ -86,6 +86,15 @@ from src.models.local_diffusion import (
     ConditionEncoder,
 )
 from src.models.pix2pixhd import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
+from src.models.spade import (
+    SPADE,
+    SPADEGenerator,
+    SPADEMultiscaleDiscriminator,
+    SPADENLayerDiscriminator,
+    SPADEStyleEncoder,
+    SPADEResnetBlock,
+    compute_latent_spatial_size,
+)
 from src.models.stargan import StarGANGenerator, StarGANDiscriminator, StarGANResidualBlock
 from src.models.fcdm import (
     FCDM,
@@ -175,6 +184,13 @@ __all__ = [
     "ConditionEncoder",
     "Pix2PixHDGenerator",
     "Pix2PixHDGlobalGenerator",
+    "SPADE",
+    "SPADEGenerator",
+    "SPADEMultiscaleDiscriminator",
+    "SPADENLayerDiscriminator",
+    "SPADEStyleEncoder",
+    "SPADEResnetBlock",
+    "compute_latent_spatial_size",
     "StarGANGenerator",
     "StarGANDiscriminator",
     "StarGANResidualBlock",

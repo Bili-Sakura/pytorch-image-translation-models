@@ -34,6 +34,7 @@ from src.models import FCDM, FCDM_MODELS, FCDMImageCond, FCDM_S, FCDM_B, FCDM_L,
 from src.models import UNSBGenerator, UNSBDiscriminator, UNSBEnergyNet
 from src.models import LocalDiffusionUNet, ConditionEncoder
 from src.models import Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
+from src.models import SPADEGenerator, SPADEMultiscaleDiscriminator, SPADEStyleEncoder
 from src.models import StarGANGenerator, StarGANDiscriminator, StarGANResidualBlock
 from src.pipelines import (
     BBDMPipeline,
@@ -66,6 +67,9 @@ from src.pipelines import (
     Pix2PixHDPipeline,
     Pix2PixHDPipelineOutput,
     load_pix2pixhd_pipeline,
+    SPADEPipeline,
+    SPADEPipelineOutput,
+    load_spade_pipeline,
     StarGANPipeline,
     StarGANPipelineOutput,
     load_stargan_pipeline,
@@ -129,6 +133,9 @@ __all__ = [
     "ConditionEncoder",
     "Pix2PixHDGenerator",
     "Pix2PixHDGlobalGenerator",
+    "SPADEGenerator",
+    "SPADEMultiscaleDiscriminator",
+    "SPADEStyleEncoder",
     "StarGANGenerator",
     "StarGANDiscriminator",
     "StarGANResidualBlock",
@@ -204,6 +211,9 @@ __all__ = [
     "Pix2PixHDPipeline",
     "Pix2PixHDPipelineOutput",
     "load_pix2pixhd_pipeline",
+    "SPADEPipeline",
+    "SPADEPipelineOutput",
+    "load_spade_pipeline",
     "StarGANPipeline",
     "StarGANPipelineOutput",
     "load_stargan_pipeline",

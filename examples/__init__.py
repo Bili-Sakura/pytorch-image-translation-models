@@ -26,6 +26,7 @@ Paired image-to-image (src pipelines)
 ``pix2pix/``   Pix2Pix paired training.
 ``pix2pix_turbo/``  pix2pix-turbo one-step paired SD-Turbo translation (Parmar et al., 2024).
 ``pix2pixhd/`` Pix2PixHD high-resolution paired training.
+``spade/``     SPADE semantic image synthesis (label map -> image).
 ``stargan/``   StarGAN multi-domain training.
 
 Unpaired image-to-image
