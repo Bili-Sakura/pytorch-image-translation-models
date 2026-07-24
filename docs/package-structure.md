@@ -10,6 +10,12 @@ src/                                 # ← Core library (single source of truth)
 │   ├── pix2pixhd/
 │   │   ├── blocks.py                # _ResnetBlock
 │   │   └── generator.py             # Pix2PixHDGenerator, Pix2PixHDGlobalGenerator
+│   ├── spade/
+│   │   ├── normalization.py         # SPADE
+│   │   ├── blocks.py                # SPADEResnetBlock
+│   │   ├── generator.py             # SPADEGenerator
+│   │   ├── discriminator.py         # SPADEMultiscaleDiscriminator
+│   │   └── encoder.py               # SPADEStyleEncoder
 │   ├── discriminators/
 │   │   └── patchgan.py              # PatchGANDiscriminator
 │   ├── unet/
@@ -59,6 +65,7 @@ src/                                 # ← Core library (single source of truth)
 │   └── unsb.py                     # UNSBPipeline
 │   └── local_diffusion.py          # LocalDiffusionPipeline
 │   └── pix2pixhd.py                # Pix2PixHDPipeline, load_pix2pixhd_pipeline
+│   └── spade.py                    # SPADEPipeline, load_spade_pipeline
 │   └── stargan.py                  # StarGANPipeline, load_stargan_pipeline
 │   └── pix2pix.py                 # ImageTranslator (Pix2Pix single-pass)
 ├── data/

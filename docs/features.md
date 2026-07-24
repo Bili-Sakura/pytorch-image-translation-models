@@ -8,6 +8,7 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 - **GAN discriminators** — `PatchGANDiscriminator` (Markovian patch-level classifier)
 - **StegoGAN** — `ResnetMaskV1Generator`, `ResnetMaskV3Generator`, `NetMatchability` (steganographic masking for non-bijective translation, CVPR 2024)
 - **pix2pixHD** — `Pix2PixHDGenerator`, `Pix2PixHDGlobalGenerator` (high-resolution conditional GAN baseline, CVPR 2018)
+- **SPADE** — `SPADEGenerator`, `SPADEMultiscaleDiscriminator`, `SPADEStyleEncoder` (semantic image synthesis with spatially-adaptive normalization, CVPR 2019)
 - **StarGAN** — `StarGANGenerator`, `StarGANDiscriminator` (single model for multi-domain translation, CVPR 2018)
 - **Diffusion bridge** — `I2SBUNet` (ADM-style U-Net in `adm.py` for Image-to-Image Schrödinger Bridge)
 - **UNSB** — `UNSBGenerator`, `UNSBDiscriminator`, `UNSBEnergyNet` (time-conditional networks for Unpaired Neural Schrödinger Bridge, ICLR 2024)
@@ -51,6 +52,7 @@ Examples and pipeline snippets in docs default to `device="cuda"` unless explici
 | **UNSBPipeline** | Multi-step Schrödinger Bridge with adversarial + contrastive losses |
 | **LocalDiffusionPipeline** | Branch-and-fuse diffusion for hallucination-aware image translation |
 | **Pix2PixHDPipeline** | Native pix2pixHD single-pass generator inference with checkpoint loader |
+| **SPADEPipeline** | Native SPADE semantic image synthesis with checkpoint loader |
 | **StarGANPipeline** | Native StarGAN single-pass multi-domain translation with label conditioning |
 | **FCDMPipeline** | Class-conditional FCDM latent diffusion (DDPM/DDIM) with optional VAE decode and CFG |
 | **FCDMImageCondPipeline** | Image-conditioned FCDM for translation (source latent → target) |

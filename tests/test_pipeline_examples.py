@@ -416,6 +416,75 @@ class TestPix2PixHDBaseline:
 
 
 # ---------------------------------------------------------------------------
+# SPADE baseline tests
+# ---------------------------------------------------------------------------
+
+
+class TestSPADEBaseline:
+    @pytest.fixture
+    def pipeline(self):
+        from src.models.spade import SPADEGenerator
+        from src.pipelines.spade import SPADEPipeline
+
+        gen = SPADEGenerator(label_nc=8, output_nc=3, ngf=16, crop_size=64, num_upsampling_layers="normal")
+        return SPADEPipeline(generator=gen)
+
+    def test_generator_output_shape(self):
+        from src.models.spade import SPADEGenerator
+
+        gen = SPADEGenerator(label_nc=8, output_nc=3, ngf=16, crop_size=64, num_upsampling_layers="normal")
+        seg = torch.randn(1, 8, 64, 64)
+        out = gen(seg)
+        assert out.shape == (1, 3, 64, 64)
+        assert out.min() >= -1.0
+        assert out.max() <= 1.0
+
+    def test_discriminator_output(self):
+        from src.models.spade import SPADEMultiscaleDiscriminator
+
+        disc = SPADEMultiscaleDiscriminator(label_nc=8, output_nc=3, ndf=16, n_layers=3, num_D=2)
+        seg = torch.randn(2, 8, 64, 64)
+        img = torch.randn(2, 3, 64, 64)
+        outputs = disc(seg, img)
+        assert len(outputs) == 2
+        assert isinstance(outputs[0], list)
+
+    def test_pipeline_pt_output(self, pipeline):
+        from src.pipelines.spade import SPADEPipelineOutput
+
+        seg = torch.randn(1, 8, 64, 64)
+        out = pipeline(segmap=seg, output_type="pt")
+        assert isinstance(out, SPADEPipelineOutput)
+        assert isinstance(out.images, torch.Tensor)
+        assert out.images.shape == (1, 3, 64, 64)
+
+    def test_pipeline_np_output(self, pipeline):
+        seg = torch.randn(1, 8, 64, 64)
+        out = pipeline(segmap=seg, output_type="np")
+        assert isinstance(out.images, np.ndarray)
+        assert out.images.shape == (1, 64, 64, 3)
+
+    def test_vae_mode(self):
+        from src.models.spade import SPADEGenerator, SPADEStyleEncoder
+
+        gen = SPADEGenerator(
+            label_nc=8,
+            output_nc=3,
+            ngf=16,
+            crop_size=64,
+            use_vae=True,
+            z_dim=32,
+        )
+        encoder = SPADEStyleEncoder(input_nc=3, ngf=16, z_dim=32, crop_size=64)
+        seg = torch.randn(1, 8, 64, 64)
+        img = torch.randn(1, 3, 64, 64)
+        mu, logvar, z = encoder(img)
+        out = gen(seg, z=z)
+        assert mu.shape == (1, 32)
+        assert out.shape == (1, 3, 64, 64)
+
+
+# ---------------------------------------------------------------------------
 # StarGAN baseline tests
 # ---------------------------------------------------------------------------
 

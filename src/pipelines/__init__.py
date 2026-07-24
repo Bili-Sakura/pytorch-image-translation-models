@@ -30,6 +30,11 @@ from src.pipelines.pix2pixhd import (
     Pix2PixHDPipelineOutput,
     load_pix2pixhd_pipeline,
 )
+from src.pipelines.spade import (
+    SPADEPipeline,
+    SPADEPipelineOutput,
+    load_spade_pipeline,
+)
 from src.pipelines.stargan import StarGANPipeline, StarGANPipelineOutput, load_stargan_pipeline
 from src.pipelines.ecsi import ECSIPipeline, ECSIPipelineOutput, load_ecsi_pipeline
 from src.pipelines.fcdm import (
@@ -99,6 +104,9 @@ __all__ = [
     "Pix2PixHDPipeline",
     "Pix2PixHDPipelineOutput",
     "load_pix2pixhd_pipeline",
+    "SPADEPipeline",
+    "SPADEPipelineOutput",
+    "load_spade_pipeline",
     "StarGANPipeline",
     "StarGANPipelineOutput",
     "load_stargan_pipeline",

@@ -12,6 +12,7 @@ All checkpoints include `config.yaml` with the full training configuration and c
 | `I2SB` | `unet/config.json`, `unet/diffusion_pytorch_model.safetensors`, optional `scheduler_config.json` (or `scheduler/scheduler_config.json`) |
 | `CUT` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors`, `discriminator/diffusion_pytorch_model.safetensors`, `feature_network/diffusion_pytorch_model.safetensors`, optional `training_state.pt` (optimizers, epoch, global_step for resume) |
 | `Pix2PixHD` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors`, `discriminator/diffusion_pytorch_model.safetensors`, optional `training_state.pt` (optimizers, epoch, global_step for resume) |
+| `SPADE` | `generator/config.json`, `generator/diffusion_pytorch_model.safetensors`, `discriminator/diffusion_pytorch_model.safetensors`, optional `style_encoder/` (VAE mode), optional `training_state.pt` (optimizers, epoch, global_step for resume) |
 | `UNSB` | `generator/model.safetensors`, `discriminator/model.safetensors`, `energy_net/model.safetensors`, `feature_network/model.safetensors`, optional `training_state.pt` (optimizers, epoch, global_step for resume) |
 | `StegoGAN` | `generator_A/config.json`, `generator_A/diffusion_pytorch_model.safetensors`, `generator_B/config.json`, `generator_B/diffusion_pytorch_model.safetensors` |
 | `LocalDiffusion` | `model/model.safetensors`, optional `training_state.pt` (optimizer, epoch, global_step for resume) |
