@@ -56,6 +56,7 @@ from src.pipelines.diffusionrouter import (
     DiffusionRouterPipelineOutput,
     load_diffusionrouter_pipeline,
 )
+from src.pipelines.spade import SPADEPipeline, SPADEPipelineOutput, load_spade_pipeline
 
 __all__ = [
     "BBDMPipeline",
@@ -121,4 +122,7 @@ __all__ = [
     "DiffusionRouterPipeline",
     "DiffusionRouterPipelineOutput",
     "load_diffusionrouter_pipeline",
+    "SPADEPipeline",
+    "SPADEPipelineOutput",
+    "load_spade_pipeline",
 ]
