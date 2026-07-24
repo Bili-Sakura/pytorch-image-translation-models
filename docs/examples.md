@@ -74,6 +74,24 @@ target_labels = torch.tensor([[1, 0, 0, 1, 0]], dtype=torch.float32)  # domain a
 result = pipeline(source_image=source, target_labels=target_labels, output_type="pt")
 ```
 
+## SPADE (Imaginaire integration)
+
+```python
+from src.pipelines.spade import load_spade_pipeline
+
+pipe = load_spade_pipeline(
+    config_path="/path/to/spade/config.yaml",
+    checkpoint_path="/path/to/spade/checkpoint.pt",
+    imaginaire_src_path="/path/to/imaginaire",
+)
+
+result = pipe(
+    output_dir="projects/spade/output/cocostuff",
+    single_gpu=True,
+)
+print(result.output_dir)
+```
+
 ## Diffusion bridge translation (I2SB)
 
 ```python

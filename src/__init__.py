@@ -78,6 +78,9 @@ from src.pipelines import (
     DiffusionRouterPipeline,
     DiffusionRouterPipelineOutput,
     load_diffusionrouter_pipeline,
+    SPADEPipeline,
+    SPADEPipelineOutput,
+    load_spade_pipeline,
 )
 from src.schedulers import (
     BBDMScheduler,
@@ -216,6 +219,9 @@ __all__ = [
     "DiffusionRouterPipeline",
     "DiffusionRouterPipelineOutput",
     "load_diffusionrouter_pipeline",
+    "SPADEPipeline",
+    "SPADEPipelineOutput",
+    "load_spade_pipeline",
     # Data
     "PairedImageDataset",
     "UnpairedImageDataset",
